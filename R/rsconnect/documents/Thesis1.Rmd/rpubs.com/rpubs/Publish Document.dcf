@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/419229/4bde8522398c46f7ba503664b361fb77
+bundleId: https://api.rpubs.com/api/v1/document/419229/4bde8522398c46f7ba503664b361fb77
+url: http://rpubs.com/PsycheShaman/419229
+when: 1536832664.07502
