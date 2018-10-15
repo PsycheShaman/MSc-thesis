@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<alien>
+  <collection name="collection">
+    <event name="1">
+      <file name="AliESDs.root" aclId="" broken="0" ctime="2017-09-02 01:15:10" dir="382535779" entryId="382535862" expiretime="" gowner="alidaq" guid="38661158-8F6B-11E7-A6B1-7387F74BF627" guidtime="11E78F6B" jobid="970386220" lfn="/alice/data/2017/LHC17l/000277312/muon_calo_pass1/17000277312019.100/AliESDs.root" md5="4e1adc20474aee40f18269a97f04b12c" owner="alidaq" perm="755" replicated="0" size="47496024" turl="alien:///alice/data/2017/LHC17l/000277312/muon_calo_pass1/17000277312019.100/AliESDs.root" type="f" />
+    </event>
+    <info command="[/alice/data/2016/LHC16q/000265377/pass1_CENT_wSDD/16000265377039.901/]: find -z -x collection -l 1 -o 0 /alice/data/2017/LHC17l/000277312 pass1/*/*ESDs.root" creator="admin" date="Tue Sep 18 04:48:54 CEST 2018" timestamp="1537238934" />
+  </collection>
+</alien>
+
