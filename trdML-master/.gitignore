@@ -1,5 +1,0 @@
-*.root
-*_cxx*
-./Fails/
-./output201*/*
-./clean/*
