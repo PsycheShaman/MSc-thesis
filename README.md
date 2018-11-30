@@ -9,3 +9,13 @@
 **Student:** CG Viljoen
 
 **Supervisor:** Dr Thomas Dietel
+
+## Thesis write-up is being updated at:
+
+https://docs.google.com/document/d/1QEGfJ0GzQhVrjRSAQWu5zhMu96v2V5OrJzU9mEfgIcw/edit
+
+## Some Exploratory data analysis lives here:
+
+http://rpubs.com/PsycheShaman/442670
+
+http://rpubs.com/PsycheShaman/initThesis
