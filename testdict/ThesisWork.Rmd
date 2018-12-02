@@ -62,6 +62,9 @@ image(an.image)
 
 ```{r}
 filled.contour(an.image,color.palette = heat.colors)
+
+filled.contour(x=1:11,y=1:24,z=unlist(an.image),color.palette = heat.colors,levels=0:30)
+
 ```
 
 ##Plotting a detector pad's energy deposit, next to the transpose of the same matrix
@@ -76,9 +79,10 @@ for(i in 1:L){
   a <- test.dict[[i]]$layer0
   
   if(is.null(a)==F & is.null(ncol(a))==F & is.null(nrow(a))==F){
-    
-      image(t(a))
-      image(a)
+
+      image(x=1:11,y=1:24,a)
+      a <- t(a)
+      image(x=1:24,y=1:11,a)
       # filled.contour(a,color.palette = heat.colors,plot.title = title(paste0("Event: ",test.dict[[i]]$Event," TrackID: ",test.dict[[i]]$V0TrackID," PDG Code:",
       #                                                                  test.dict[[i]]$pdgCode)))
     
@@ -378,9 +382,25 @@ plot_ly(dat,x=~x,y=~y,z=~z) %>% add_markers() %>%
 
 
 ```{r}
+require(plotly)
 
+z <- unlist(e[1,])
+y <- rep(1:24,11)
+x <- rep(1:11,24)
+dat <- cbind(x,y,z)
+
+dat <- data.frame(dat)
+names(dat) <- c("x","y","z")
+
+linmod <- lm(z~x+y+x:y,dat)
+
+l <- predict(linmod,dat)
+
+l <- matrix(l,nrow=24,byrow = T)
+
+plot_ly(dat,x=~x,y=~y,z=~z) %>% add_markers() %>%
+  add_surface(z=~l)
 ```
-
 
 
 

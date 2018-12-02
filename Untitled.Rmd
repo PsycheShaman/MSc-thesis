@@ -1,0 +1,125 @@
+---
+title: "Thesis EDA 2"
+author: "Gerhard Viljoen"
+date: "12/1/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list=ls())
+#setwd("~/Thesis data/data")
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="~/Thesis data/data", pattern="*json", full.names=T, recursive=FALSE)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+```
+
+```{r}
+# events <- numeric(271)
+# 
+# L <- length(j)
+# 
+# for(i in 1:L){
+# 
+#   event <- j[[i]]$Event
+#   TrackID <- j[[i]]$V0TrackID
+#   track <- j[[i]]$track
+# 
+#   detector <- j[[i]]$det0
+#   layer <- unlist(j[[i]]$layer0)
+#   column <- j[[i]]$col0
+#   row <- j[[i]]$row0
+#   pdg <- j[[i]]$pdgCode
+# 
+# 
+#   a <- c(event, TrackID, track,detector,layer,column,row,pdg)
+# if(length(a)==271){
+# print(as.character(100*nrow(events)/L))
+# events <- rbind(events,a)
+# }
+# 
+# 
+# }
+
+```
+
+```{r}
+# rm(f)
+# rm(j)
+# 
+# n <- c("event","trackID","track","detector",paste0(rep("layer",264),1:264),"column","row","pdg")
+# 
+# events <- data.frame(events)
+# 
+# names(events) <- n
+# 
+# events <- events[-1,]
+# 
+# row.names(events) <- NULL
+# 
+# write.csv(events,"/Users/gerhard/Thesis data/full_event_records1.csv")
+
+rm(list=ls())
+dat <- read.csv("/Users/gerhard/Thesis data/full_event_records1.csv")
+
+dat <- dat[,-1]
+
+dat <- unique(dat)
+```
+
+```{r}
+pad.hits <- nrow(dat)
+unique.tracks <- unique(dat$track)
+unique.events <- unique(dat$event)
+unique.v0.trackID <- unique(dat$trackID)
+```
+
+
+```{r}
+require(dplyr)
+require(knitr)
+
+ordered <- dat %>%
+  group_by(event,trackID,track) %>%
+  arrange(event,trackID,track)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
