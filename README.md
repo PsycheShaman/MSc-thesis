@@ -12,9 +12,17 @@
 
 ## Some Exploratory data analysis lives here:
 
-http://rpubs.com/PsycheShaman/442670
+### Initial Deep Learning EDA:
 
 http://rpubs.com/PsycheShaman/initThesis
+
+### Exploratory Data Analysis of a subset of TRD Detector Pad Data:
+
+http://rpubs.com/PsycheShaman/442670
+
+### Calculation of Pad Response Function (in progress):
+
+http://rpubs.com/PsycheShaman/pad_response_function
 
 # Current Thesis Draft lives here:
 https://docs.google.com/document/d/1hObRn3Hdpw62AnmTrFjp70P_UdV0ntQOk6IIW8ZjjIQ/edit?usp=sharing
