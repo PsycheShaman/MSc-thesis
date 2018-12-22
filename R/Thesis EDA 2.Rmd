@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 rm(list=ls())
-#setwd("~/Thesis data/data")
+
 require(jsonlite)
 require(readtext)
 
@@ -19,7 +19,7 @@ require(readtext)
 pdg.elec <- c(11,-11)
 pdg.pion <- c(-211,211)
 
-files <- list.files(path="~/Thesis data/data", pattern="*json", full.names=T, recursive=FALSE)
+files <- list.files(path="~/Thesis data/SemiFullData", pattern="*json", full.names=T, recursive=FALSE)
 
 j <- fromJSON(files[1])
 
@@ -28,6 +28,12 @@ for(i in 2:length(files)){
   f <- fromJSON(files[i])
   j <- c(j,f)
 }
+
+length(j)
+
+save.image()
+
+load(".rdata")
 ```
 
 ```{r}
@@ -56,6 +62,8 @@ for(i in 2:length(files)){
 # 
 # 
 # }
+
+save(events,file="events.rdata")
 
 ```
 
