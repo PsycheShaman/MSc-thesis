@@ -1,0 +1,354 @@
+---
+title: "Particle Identification ML"
+author: "Gerhard Viljoen"
+date: "12/22/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Read in all the json files, created from python dictionaries
+
+```{r}
+# rm(list=ls())
+# 
+# require(jsonlite)
+# require(readtext)
+# 
+# #PDG codes
+# pdg.elec <- c(11,-11)
+# pdg.pion <- c(-211,211)
+# 
+# files <- list.files(path="~/Thesis data/SemiFullData", pattern="*json", full.names=T, recursive=FALSE)
+# 
+# j <- fromJSON(files[1])
+# 
+# for(i in 2:length(files)){
+# 
+#   f <- fromJSON(files[i])
+#   j <- c(j,f)
+# }
+# 
+# length(j)
+# 
+# save(j,file="~/Thesis data/SemiFullData/fulljson.rdata")
+```
+
+#Threshold pad data
+
+Load full json record of all extracted events:
+
+```{r}
+# rm(list=ls())
+load("~/Thesis data/SemiFullData/fulljson.rdata")
+```
+
+Extract pad data
+
+```{r}
+
+#pads <- sapply(j,`[[`,"layer0")
+
+```
+
+Replace all pads that have data, with only those bin-rows which are all non-zero
+
+```{r}
+#no.zero.row.pads <- list()
+# 
+# for(i in 1:length(pads)){
+#   if(is.null(pads[[i]])){
+#     no.zero.row.pads[[i]] <- NULL
+#   }else if(typeof(pads[[i]])=="list"){
+#     no.zero.row.pads[[i]] <- NULL
+#   }else{
+#   this.pad <- as.matrix(pads[[i]])
+#   r <- rowSums(this.pad)
+#   r <- which(r==0)
+#   
+#   if(length(r)==11){
+#     this.pad <- NULL
+#   }else{
+#     this.pad <- this.pad[-r,]
+#   }
+#   
+#   
+#   
+#   no.zero.row.pads[[i]] <- this.pad
+#   }
+# }
+# 
+# save(no.zero.row.pads,file="~/Thesis data/SemiFullData/no_zero_row_pads.rdata")
+```
+
+
+Create look-up tables to find pad data for both electrons and pions, and add an indicator column for which entries have no pad data.
+
+Also create an indicator of which tracks' trackIDs are 0, since this may indicate that an error has occurred
+
+
+```{r}
+# tracks <- sapply(j, `[[`,"track")
+# tracks <- as.numeric(tracks)
+# 
+# 
+# pdg <- sapply(j, `[[`,"pdgCode")
+# pdg <- as.numeric(pdg)
+# 
+# exclude <- rep(0,length(no.zero.row.pads))
+# 
+# for(i in 1:length(no.zero.row.pads)){
+#   if(is.null(no.zero.row.pads[[i]])){
+#     exclude[i] <- 1
+#   }
+# }
+# 
+# exclude2 <- rep(0,length(no.zero.row.pads))
+# 
+# for(i in 1:length(tracks)){
+#   if(tracks[i]==0){
+#     exclude2[i] <- 1
+#   }
+# }
+# 
+# 
+# look.up.table <- data.frame(cbind(pdg,1:length(pdg),exclude,exclude2))
+# names(look.up.table) <- c("pdg","index","exclude.null.pads","exclude.track.id.0")
+```
+
+```{r}
+# require(dplyr)
+# pdg.elec <- c(11,-11)
+# pdg.pion <- c(211,-211)
+# electrons <- look.up.table[which(look.up.table$pdg %in% pdg.elec),]
+# pions <- look.up.table[which(look.up.table$pdg %in% pdg.pion),]
+# 
+# electrons <- unique(electrons)
+# pions <- unique(pions)
+# 
+# electrons <- electrons %>%
+#   subset(exclude.null.pads==0) %>%
+#   subset(exclude.track.id.0==0)
+# 
+# pions <- pions %>%
+#   subset(exclude.null.pads==0)  %>%
+#   subset(exclude.track.id.0==0)
+# 
+# electrons <- as.data.frame(electrons)
+# pions <- as.data.frame(pions)
+# 
+# electrons <- electrons$index
+# pions <- pions$index
+
+```
+
+Clear up some memory
+
+```{r}
+
+# rm(look.up.table)
+# rm(j)
+# rm(exclude)
+# rm(exclude2)
+# rm(tracks)
+# rm(r)
+# rm(this.pad)
+# rm(i)
+# rm(pdg)
+
+# save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
+# save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
+# save(pads,file="~/Thesis data/SemiFullData/pads.rdata")
+```
+
+#Descriptive statistics
+
+Get total energy deposition per pad, for pions and electrons, respectively:
+
+```{r}
+# electron.pad.sum <- c()
+#   
+# for(i in electrons){
+#   this.pad.sum <- sum(as.numeric(pads[[i]]))
+#   electron.pad.sum <- c(electron.pad.sum,this.pad.sum)
+# }
+# 
+# pion.pad.sum <- c()
+# 
+# for(i in pions){
+#   this.pad.sum <- sum(as.numeric(pads[[i]]))
+#   pion.pad.sum <- c(pion.pad.sum,this.pad.sum)
+# }
+
+```
+
+```{r}
+# electrons <- data.frame(cbind(electrons,electron.pad.sum))
+# pions <- data.frame(cbind(pions,pion.pad.sum))
+# 
+# names(electrons) <- c("index","total.charge.deposit")
+# names(pions) <- c("index","total.charge.deposit")
+```
+
+Get 5 number summary statistics, for each pad where 0-sum bin-rows have been removed.
+
+
+```{r}
+# electron.pad.summary <- numeric(6)
+# 
+# for(i in electrons$index){
+#   this.pad <- summary(as.numeric(no.zero.row.pads[[i]]))
+#   electron.pad.summary <- rbind(electron.pad.summary,this.pad)
+# }
+# 
+# electron.pad.summary <- as.data.frame(electron.pad.summary)
+# names(electron.pad.summary) <- c("Min","1Q","Median","Mean","3Q","Max")
+# 
+# pion.pad.summary <- numeric(6)
+# 
+# for(i in pions$index){
+#   this.pad <- summary(as.numeric(no.zero.row.pads[[i]]))
+#   pion.pad.summary <- rbind(pion.pad.summary,this.pad)
+# }
+# 
+# pion.pad.summary <- as.data.frame(pion.pad.summary)
+# names(pion.pad.summary) <- c("Min","1Q","Median","Mean","3Q","Max")
+```
+
+Clean up memory:
+
+```{r}
+# electron.pad.summary <- electron.pad.summary[-1,]
+# pion.pad.summary <- pion.pad.summary[-1,]
+# 
+# electrons <- data.frame(cbind(electrons,electron.pad.summary))
+# pions <- data.frame(cbind(pions,pion.pad.summary))
+# 
+# rm(pion.pad.summary)
+# rm(electron.pad.summary)
+# rm(electron.pad.sum)
+# rm(pion.pad.sum)
+# 
+# 
+# save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
+# save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
+```
+
+Get the number of non-zero bin-rows per detector pad, for electrons and pions:
+
+```{r}
+# electron.timebins <- c()
+# 
+# for(i in electrons$index){
+# 
+#   if(is.null(nrow(no.zero.row.pads[[i]]))){
+#     this.num.bin <- 0
+#   }else{
+#     this.num.bin <- nrow(no.zero.row.pads[[i]])
+#   }
+# 
+# 
+#   electron.timebins <- c(electron.timebins,this.num.bin)
+# 
+# }
+# 
+# pion.timebins <- c()
+# 
+# for(i in pions$index){
+# 
+#     if(is.null(nrow(no.zero.row.pads[[i]]))){
+#     this.num.bin <- 0
+#   }else{
+#   this.num.bin <- nrow(no.zero.row.pads[[i]])
+#   
+# 
+#   }
+#   
+#   pion.timebins <- c(pion.timebins,this.num.bin)
+# }
+# 
+# 
+# electrons$num.bins <- electron.timebins
+# pions$num.bins <- pion.timebins
+# 
+# save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
+# save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
+```
+
+Get the column means for each pad, where non-zero time-bins have been removed:
+
+```{r}
+electron.compressed.bins <- numeric(24)
+
+for(i in electrons$index){
+  
+  if(is.null(colSums(no.zero.row.pads[[i]]))){
+    this.entry <- as.numeric(no.zero.row.pads[[i]])
+  }else{
+  
+this.entry <- colSums(no.zero.row.pads[[i]])
+
+
+  }
+  
+  electron.compressed.bins <- rbind(electron.compressed.bins,this.entry)
+}
+
+pion.compressed.bins <- c()
+
+for(i in pions$index){
+  
+    if(is.null(colSums(no.zero.row.pads[[i]]))){
+    this.entry <- as.numeric(no.zero.row.pads[[i]])
+  }else{
+  
+  this.entry <- colSums(no.zero.row.pads[[i]])
+  
+  }
+  pion.compressed.bins <- rbind(pion.compressed.bins,this.entry)
+}
+```
+
+
+Plot some of these values, to get a feel for the distribtions:
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
