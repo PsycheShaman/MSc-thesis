@@ -364,6 +364,8 @@ Scale data
 # dat[,2:33] <- scale(dat[,2:33])
 # save(dat,file="~/Thesis data/SemiFullData/scaled_data.rdata")
 # 
+
+# load("~/Thesis data/SemiFullData/scaled_data.rdata")
 # i <- dat$index
 # rm(dat)
 ```
@@ -371,19 +373,77 @@ Scale data
 Unroll pad data into a vector for each entry:
 
 ```{r}
-pad.data <- matrix(nrow=length(pads),ncol=11*24)
+# pad.data <- matrix(nrow=length(pads),ncol=11*24)
+# 
+# for(j in i){
+#   pad.data[j,] <- as.numeric(pads[[j]])
+# }
+# 
+# pad.data <- pad.data[i,]
+# 
+# pad.data <- scale(pad.data)
+# 
+# rm(pads)
+# rm(j)
+# rm(i)
 
-for(i in i){
-  pad.data[i,] <- as.numeric(pads[[i]])
-}
+# load("~/Thesis data/SemiFullData/scaled_data.rdata")
+# 
+# dat <- data.frame(cbind(dat,pad.data))
+# 
+# dat <- dat[,c(1,34,2:33,35:298)]
+```
+
+```{r}
+# rm(pad.data)
+# require(knitr)
+# save(dat,file="~/Thesis data/SemiFullData/final_data.rdata")
+rm(list=ls())
+load("~/Thesis data/SemiFullData/final_data.rdata")
+na.omit(dat)
+kable(head(dat,100))
+```
+
+```{r}
+# any(is.na(dat))
+# dat <- na.omit(dat)
+# 
+# rownames(dat) <- NULL
+# 
+# index <- dat$index
+# 
+# dat <- dat[,-1]
+# 
+# dat$id <- as.character(dat$id)
+# 
+# dat$electron <- ifelse(dat$id=="electron",1,0)
+# 
+# id <- dat$id
+# 
+# dat <- dat[,-1]
+```
+
+```{r}
+id.index <- data.frame(cbind(id,index))
+
+require(dplyr)
+
+electron.id <- id.index[id.index$id=="electron",]
+
+pion.id <- id.index[id.index$id=="pion",]
+
+electron.train <- base::sample(electron.id$index)
+
+
 ```
 
 
+#Particle Identification:
 
-Plot some of these values, to get a feel for the distribtions:
+Simple linear regression:
 
 ```{r}
-
+linmod1 <- lm(electron~.,data=dat)
 ```
 
 
