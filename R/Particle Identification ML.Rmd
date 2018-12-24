@@ -277,39 +277,107 @@ Get the number of non-zero bin-rows per detector pad, for electrons and pions:
 # save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
 ```
 
+Clean up memory
+
+```{r}
+# rm(electron.timebins)
+# rm(pion.timebins)
+```
+
+
 Get the column means for each pad, where non-zero time-bins have been removed:
 
 ```{r}
-electron.compressed.bins <- numeric(24)
+# electron.compressed.bins <- numeric(24)
+# 
+# for(i in electrons$index){
+#   
+#   if(is.null(dim(no.zero.row.pads[[i]]))){
+#     this.entry <- as.numeric(no.zero.row.pads[[i]])
+#   }else{
+#   
+# this.entry <- as.numeric(colSums(no.zero.row.pads[[i]]))
+# 
+# 
+#   }
+#   
+#   electron.compressed.bins <- rbind(electron.compressed.bins,this.entry)
+# }
+# 
+# pion.compressed.bins <- c()
+# 
+# for(i in pions$index){
+#   
+#     if(is.null(dim(no.zero.row.pads[[i]]))){
+#     this.entry <- as.numeric(no.zero.row.pads[[i]])
+#   }else{
+#   
+#   this.entry <- as.numeric(colSums(no.zero.row.pads[[i]]))
+#   
+#   }
+#   pion.compressed.bins <- rbind(pion.compressed.bins,this.entry)
+# }
+# 
+# electron.compressed.bins <- electron.compressed.bins[-1,]
+# 
+# pion.compressed.bins <- pion.compressed.bins[-1,]
+# 
+# electron.compressed.bins <- as.data.frame(electron.compressed.bins)
+# pion.compressed.bins <- as.data.frame(pion.compressed.bins)
+# 
+# names <- paste0("c",1:24)
+# 
+# names(electron.compressed.bins) <- names
+# names(pion.compressed.bins) <- names
+# 
+# electrons <- data.frame(cbind(electrons,electron.compressed.bins))
+# pions <- data.frame(cbind(pions,pion.compressed.bins))
+# 
+# save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
+# save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
+# 
+# electrons$id <- "electron"
+# pions$id <- "pion"
+# 
+# electrons$id <- as.factor(electrons$id)
+# pions$id <- as.factor(pions$id)
+```
 
-for(i in electrons$index){
-  
-  if(is.null(colSums(no.zero.row.pads[[i]]))){
-    this.entry <- as.numeric(no.zero.row.pads[[i]])
-  }else{
-  
-this.entry <- colSums(no.zero.row.pads[[i]])
+Clear up memory
 
+```{r}
+# rm(pion.compressed.bins)
+# rm(electron.compressed.bins)
+```
 
-  }
-  
-  electron.compressed.bins <- rbind(electron.compressed.bins,this.entry)
-}
+```{r}
+# dat <- data.frame(rbind(electrons,pions))
+# rm(electrons)
+# rm(pions)
+#rm(no.zero.row.pads)
+# save(dat,file="~/Thesis data/SemiFullData/unscaled_data.rdata")
+```
 
-pion.compressed.bins <- c()
+Scale data
 
-for(i in pions$index){
-  
-    if(is.null(colSums(no.zero.row.pads[[i]]))){
-    this.entry <- as.numeric(no.zero.row.pads[[i]])
-  }else{
-  
-  this.entry <- colSums(no.zero.row.pads[[i]])
-  
-  }
-  pion.compressed.bins <- rbind(pion.compressed.bins,this.entry)
+```{r}
+# dat[,2:33] <- scale(dat[,2:33])
+# save(dat,file="~/Thesis data/SemiFullData/scaled_data.rdata")
+# 
+# i <- dat$index
+# rm(dat)
+```
+
+Unroll pad data into a vector for each entry:
+
+```{r}
+pad.data <- matrix(nrow=length(pads),ncol=11*24)
+
+for(i in i){
+  pad.data[i,] <- as.numeric(pads[[i]])
 }
 ```
+
 
 
 Plot some of these values, to get a feel for the distribtions:
