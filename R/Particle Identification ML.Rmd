@@ -373,41 +373,11 @@ Scale data
 Unroll pad data into a vector for each entry:
 
 ```{r}
-# pad.data <- matrix(nrow=length(pads),ncol=11*24)
-# 
-# for(j in i){
-#   pad.data[j,] <- as.numeric(pads[[j]])
-# }
-# 
-# pad.data <- pad.data[i,]
-# 
-# pad.data <- scale(pad.data)
-# 
-# rm(pads)
-# rm(j)
-# rm(i)
-
-# load("~/Thesis data/SemiFullData/scaled_data.rdata")
-# 
-# dat <- data.frame(cbind(dat,pad.data))
-# 
-# dat <- dat[,c(1,34,2:33,35:298)]
+load("~/Thesis data/SemiFullData/scaled_data.rdata")
+dat <- na.omit(dat)
 ```
 
 ```{r}
-# rm(pad.data)
-# require(knitr)
-# save(dat,file="~/Thesis data/SemiFullData/final_data.rdata")
-rm(list=ls())
-load("~/Thesis data/SemiFullData/final_data.rdata")
-na.omit(dat)
-kable(head(dat,100))
-```
-
-```{r}
-# any(is.na(dat))
-# dat <- na.omit(dat)
-# 
 # rownames(dat) <- NULL
 # 
 # index <- dat$index
@@ -423,27 +393,94 @@ kable(head(dat,100))
 # dat <- dat[,-1]
 ```
 
+Get a equal sample of electrons and pions (50 000 each):
+
 ```{r}
-id.index <- data.frame(cbind(id,index))
+# id.index <- data.frame(cbind(id,index))
+# 
+# require(dplyr)
+# 
+# electron.id <- id.index[id.index$id=="electron",]
+# 
+# pion.id <- id.index[id.index$id=="pion",]
+# 
+# electron.train <- base::sample(electron.id$index,50000,replace = F)
+# pion.train <- base::sample(pion.id$index, 50000,replace=F)
+# 
+# rm(electron.id)
+# rm(pion.id)
+# rm(id.index)
+# 
+# electron.train <- as.numeric(as.character(electron.train))
+# pion.train <- as.numeric(as.character(pion.train))
+```
 
-require(dplyr)
+Since particles pass through pads at different angles, and at different coordinates within a pad, the exact column/ row in the matrix representation of a detector trace is not important.
 
-electron.id <- id.index[id.index$id=="electron",]
+To this end, the actual pad data ("images") will not be included in the feature set used for vanilla feed-forward neural networks, to get an early estimation of particle ID based on summary statistics.
 
-pion.id <- id.index[id.index$id=="pion",]
+At a later stage, kernels/ masks will be employed in a convolutional neural network setup, to detect features in the detector "images" that are diagnostic of the "electron"/ "pion" ID.
 
-electron.train <- base::sample(electron.id$index)
+Furthermore, the 24 column sums can only be informative insomuch as they are averaged across all columns, since the positional information is not relevant to the PID process:
 
+```{r}
+# dat <- data.frame(cbind(index,dat))
+# 
+# c <- dat[,9:32]
+# 
+# c <- rowMeans(c)
+# 
+# dat <- dat[,c(1:8,33,34)]
+# 
+# dat <- data.frame(cbind(c,dat))
+# 
+# dat <- dat[,-10]
+# 
+# save(dat,file="~/Thesis data/SemiFullData/final_data.rdata")
+# rm(c)
+# 
+# train.id <- c(electron.train,pion.train)
+# 
+# train <- dat %>%
+#   subset(index %in% train.id)
+# 
+# test <- dat %>%
+#   subset(! index %in% train.id)
+# 
+# save(train,file="~/Thesis data/SemiFullData/train1.rdata")
+# save(test,file="~/Thesis data/SemiFullData/test1.rdata")
+# rm(dat)
+# rm(electron.train)
+# rm(pion.train)
+# rm(id)
+# rm(index)
+# rm(train.id)
+```
 
+Separate out index from data:
+
+```{r}
+# test.id.index <- test[,c(2,10)]
+# train.id.index <- train[,c(2,10)]
+# 
+# test <- test[,-2]
+# train <- train[,-2]
 ```
 
 
 #Particle Identification:
 
+##Naive Bayes:
+
+```{r}
+
+```
+
+
 Simple linear regression:
 
 ```{r}
-linmod1 <- lm(electron~.,data=dat)
+linmod1 <- lm(electron~.,data=dat[9:32])
 ```
 
 
