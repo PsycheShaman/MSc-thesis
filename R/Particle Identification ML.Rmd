@@ -6,81 +6,87 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,message = F,warn=F)
+```
+
+###Set seed for reproducibility:
+
+```{r}
+set.seed(123456789)
 ```
 
 #Read in all the json files, created from python dictionaries
 
-```{r}
-# rm(list=ls())
-# 
-# require(jsonlite)
-# require(readtext)
-# 
-# #PDG codes
-# pdg.elec <- c(11,-11)
-# pdg.pion <- c(-211,211)
-# 
-# files <- list.files(path="~/Thesis data/SemiFullData", pattern="*json", full.names=T, recursive=FALSE)
-# 
-# j <- fromJSON(files[1])
-# 
-# for(i in 2:length(files)){
-# 
-#   f <- fromJSON(files[i])
-#   j <- c(j,f)
-# }
-# 
-# length(j)
-# 
-# save(j,file="~/Thesis data/SemiFullData/fulljson.rdata")
+```{r,eval =F}
+rm(list=ls())
+
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="~/Thesis data/SemiFullData", pattern="*json", full.names=T, recursive=FALSE)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+length(j)
+
+save(j,file="~/Thesis data/SemiFullData/fulljson.rdata")
 ```
 
 #Threshold pad data
 
 Load full json record of all extracted events:
 
-```{r}
-# rm(list=ls())
+```{r,eval=F}
+rm(list=ls())
 load("~/Thesis data/SemiFullData/fulljson.rdata")
 ```
 
 Extract pad data
 
-```{r}
+```{r,eval=F}
 
-#pads <- sapply(j,`[[`,"layer0")
+pads <- sapply(j,`[[`,"layer0")
 
 ```
 
 Replace all pads that have data, with only those bin-rows which are all non-zero
 
-```{r}
-#no.zero.row.pads <- list()
-# 
-# for(i in 1:length(pads)){
-#   if(is.null(pads[[i]])){
-#     no.zero.row.pads[[i]] <- NULL
-#   }else if(typeof(pads[[i]])=="list"){
-#     no.zero.row.pads[[i]] <- NULL
-#   }else{
-#   this.pad <- as.matrix(pads[[i]])
-#   r <- rowSums(this.pad)
-#   r <- which(r==0)
-#   
-#   if(length(r)==11){
-#     this.pad <- NULL
-#   }else{
-#     this.pad <- this.pad[-r,]
-#   }
-#   
-#   
-#   
-#   no.zero.row.pads[[i]] <- this.pad
-#   }
-# }
-# 
-# save(no.zero.row.pads,file="~/Thesis data/SemiFullData/no_zero_row_pads.rdata")
+```{r,eval=F}
+no.zero.row.pads <- list()
+
+for(i in 1:length(pads)){
+  if(is.null(pads[[i]])){
+    no.zero.row.pads[[i]] <- NULL
+  }else if(typeof(pads[[i]])=="list"){
+    no.zero.row.pads[[i]] <- NULL
+  }else{
+  this.pad <- as.matrix(pads[[i]])
+  r <- rowSums(this.pad)
+  r <- which(r==0)
+
+  if(length(r)==11){
+    this.pad <- NULL
+  }else{
+    this.pad <- this.pad[-r,]
+  }
+
+
+
+  no.zero.row.pads[[i]] <- this.pad
+  }
+}
+
+save(no.zero.row.pads,file="~/Thesis data/SemiFullData/no_zero_row_pads.rdata")
 ```
 
 
@@ -89,331 +95,333 @@ Create look-up tables to find pad data for both electrons and pions, and add an 
 Also create an indicator of which tracks' trackIDs are 0, since this may indicate that an error has occurred
 
 
-```{r}
-# tracks <- sapply(j, `[[`,"track")
-# tracks <- as.numeric(tracks)
-# 
-# 
-# pdg <- sapply(j, `[[`,"pdgCode")
-# pdg <- as.numeric(pdg)
-# 
-# exclude <- rep(0,length(no.zero.row.pads))
-# 
-# for(i in 1:length(no.zero.row.pads)){
-#   if(is.null(no.zero.row.pads[[i]])){
-#     exclude[i] <- 1
-#   }
-# }
-# 
-# exclude2 <- rep(0,length(no.zero.row.pads))
-# 
-# for(i in 1:length(tracks)){
-#   if(tracks[i]==0){
-#     exclude2[i] <- 1
-#   }
-# }
-# 
-# 
-# look.up.table <- data.frame(cbind(pdg,1:length(pdg),exclude,exclude2))
-# names(look.up.table) <- c("pdg","index","exclude.null.pads","exclude.track.id.0")
+```{r,eval=F}
+tracks <- sapply(j, `[[`,"track")
+tracks <- as.numeric(tracks)
+
+
+pdg <- sapply(j, `[[`,"pdgCode")
+pdg <- as.numeric(pdg)
+
+exclude <- rep(0,length(no.zero.row.pads))
+
+for(i in 1:length(no.zero.row.pads)){
+  if(is.null(no.zero.row.pads[[i]])){
+    exclude[i] <- 1
+  }
+}
+
+exclude2 <- rep(0,length(no.zero.row.pads))
+
+for(i in 1:length(tracks)){
+  if(tracks[i]==0){
+    exclude2[i] <- 1
+  }
+}
+
+
+look.up.table <- data.frame(cbind(pdg,1:length(pdg),exclude,exclude2))
+names(look.up.table) <- c("pdg","index","exclude.null.pads","exclude.track.id.0")
 ```
 
-```{r}
-# require(dplyr)
-# pdg.elec <- c(11,-11)
-# pdg.pion <- c(211,-211)
-# electrons <- look.up.table[which(look.up.table$pdg %in% pdg.elec),]
-# pions <- look.up.table[which(look.up.table$pdg %in% pdg.pion),]
-# 
-# electrons <- unique(electrons)
-# pions <- unique(pions)
-# 
-# electrons <- electrons %>%
-#   subset(exclude.null.pads==0) %>%
-#   subset(exclude.track.id.0==0)
-# 
-# pions <- pions %>%
-#   subset(exclude.null.pads==0)  %>%
-#   subset(exclude.track.id.0==0)
-# 
-# electrons <- as.data.frame(electrons)
-# pions <- as.data.frame(pions)
-# 
-# electrons <- electrons$index
-# pions <- pions$index
+```{r,eval=F}
+require(dplyr)
+pdg.elec <- c(11,-11)
+pdg.pion <- c(211,-211)
+electrons <- look.up.table[which(look.up.table$pdg %in% pdg.elec),]
+pions <- look.up.table[which(look.up.table$pdg %in% pdg.pion),]
 
+electrons <- unique(electrons)
+pions <- unique(pions)
+
+electrons <- electrons %>%
+  subset(exclude.null.pads==0) %>%
+  subset(exclude.track.id.0==0)
+
+pions <- pions %>%
+  subset(exclude.null.pads==0)  %>%
+  subset(exclude.track.id.0==0)
+
+electrons <- as.data.frame(electrons)
+pions <- as.data.frame(pions)
+
+electrons <- electrons$index
+pions <- pions$index
+
+save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
+save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
+save(pads,file="~/Thesis data/SemiFullData/pads.rdata")
 ```
 
-Clear up some memory
+```{r,eval=F,echo=F}
 
-```{r}
-
-# rm(look.up.table)
-# rm(j)
-# rm(exclude)
-# rm(exclude2)
-# rm(tracks)
-# rm(r)
-# rm(this.pad)
-# rm(i)
-# rm(pdg)
-
-# save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
-# save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
-# save(pads,file="~/Thesis data/SemiFullData/pads.rdata")
+rm(look.up.table)
+rm(j)
+rm(exclude)
+rm(exclude2)
+rm(tracks)
+rm(r)
+rm(this.pad)
+rm(i)
+rm(pdg)
 ```
 
 #Descriptive statistics
 
 Get total energy deposition per pad, for pions and electrons, respectively:
 
-```{r}
-# electron.pad.sum <- c()
-#   
-# for(i in electrons){
-#   this.pad.sum <- sum(as.numeric(pads[[i]]))
-#   electron.pad.sum <- c(electron.pad.sum,this.pad.sum)
-# }
-# 
-# pion.pad.sum <- c()
-# 
-# for(i in pions){
-#   this.pad.sum <- sum(as.numeric(pads[[i]]))
-#   pion.pad.sum <- c(pion.pad.sum,this.pad.sum)
-# }
+```{r,,eval=F}
+electron.pad.sum <- c()
+
+for(i in electrons){
+  this.pad.sum <- sum(as.numeric(pads[[i]]))
+  electron.pad.sum <- c(electron.pad.sum,this.pad.sum)
+}
+
+pion.pad.sum <- c()
+
+for(i in pions){
+  this.pad.sum <- sum(as.numeric(pads[[i]]))
+  pion.pad.sum <- c(pion.pad.sum,this.pad.sum)
+}
 
 ```
 
-```{r}
-# electrons <- data.frame(cbind(electrons,electron.pad.sum))
-# pions <- data.frame(cbind(pions,pion.pad.sum))
-# 
-# names(electrons) <- c("index","total.charge.deposit")
-# names(pions) <- c("index","total.charge.deposit")
+```{r,eval=F}
+electrons <- data.frame(cbind(electrons,electron.pad.sum))
+pions <- data.frame(cbind(pions,pion.pad.sum))
+
+names(electrons) <- c("index","total.charge.deposit")
+names(pions) <- c("index","total.charge.deposit")
 ```
 
 Get 5 number summary statistics, for each pad where 0-sum bin-rows have been removed.
 
 
-```{r}
-# electron.pad.summary <- numeric(6)
-# 
-# for(i in electrons$index){
-#   this.pad <- summary(as.numeric(no.zero.row.pads[[i]]))
-#   electron.pad.summary <- rbind(electron.pad.summary,this.pad)
-# }
-# 
-# electron.pad.summary <- as.data.frame(electron.pad.summary)
-# names(electron.pad.summary) <- c("Min","1Q","Median","Mean","3Q","Max")
-# 
-# pion.pad.summary <- numeric(6)
-# 
-# for(i in pions$index){
-#   this.pad <- summary(as.numeric(no.zero.row.pads[[i]]))
-#   pion.pad.summary <- rbind(pion.pad.summary,this.pad)
-# }
-# 
-# pion.pad.summary <- as.data.frame(pion.pad.summary)
-# names(pion.pad.summary) <- c("Min","1Q","Median","Mean","3Q","Max")
+```{r,eval=F}
+electron.pad.summary <- numeric(6)
+
+for(i in electrons$index){
+  this.pad <- summary(as.numeric(no.zero.row.pads[[i]]))
+  electron.pad.summary <- rbind(electron.pad.summary,this.pad)
+}
+
+electron.pad.summary <- as.data.frame(electron.pad.summary)
+names(electron.pad.summary) <- c("Min","1Q","Median","Mean","3Q","Max")
+
+pion.pad.summary <- numeric(6)
+
+for(i in pions$index){
+  this.pad <- summary(as.numeric(no.zero.row.pads[[i]]))
+  pion.pad.summary <- rbind(pion.pad.summary,this.pad)
+}
+
+pion.pad.summary <- as.data.frame(pion.pad.summary)
+names(pion.pad.summary) <- c("Min","1Q","Median","Mean","3Q","Max")
 ```
 
-Clean up memory:
+Clean up:
 
-```{r}
-# electron.pad.summary <- electron.pad.summary[-1,]
-# pion.pad.summary <- pion.pad.summary[-1,]
-# 
-# electrons <- data.frame(cbind(electrons,electron.pad.summary))
-# pions <- data.frame(cbind(pions,pion.pad.summary))
-# 
-# rm(pion.pad.summary)
-# rm(electron.pad.summary)
-# rm(electron.pad.sum)
-# rm(pion.pad.sum)
-# 
-# 
-# save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
-# save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
+```{r,eval=F}
+electron.pad.summary <- electron.pad.summary[-1,]
+pion.pad.summary <- pion.pad.summary[-1,]
+
+electrons <- data.frame(cbind(electrons,electron.pad.summary))
+pions <- data.frame(cbind(pions,pion.pad.summary))
+
+
+save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
+save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
 ```
+
+```{r,echo=F,eval=F}
+rm(pion.pad.summary)
+rm(electron.pad.summary)
+rm(electron.pad.sum)
+rm(pion.pad.sum)
+```
+
 
 Get the number of non-zero bin-rows per detector pad, for electrons and pions:
 
-```{r}
-# electron.timebins <- c()
-# 
-# for(i in electrons$index){
-# 
-#   if(is.null(nrow(no.zero.row.pads[[i]]))){
-#     this.num.bin <- 0
-#   }else{
-#     this.num.bin <- nrow(no.zero.row.pads[[i]])
-#   }
-# 
-# 
-#   electron.timebins <- c(electron.timebins,this.num.bin)
-# 
-# }
-# 
-# pion.timebins <- c()
-# 
-# for(i in pions$index){
-# 
-#     if(is.null(nrow(no.zero.row.pads[[i]]))){
-#     this.num.bin <- 0
-#   }else{
-#   this.num.bin <- nrow(no.zero.row.pads[[i]])
-#   
-# 
-#   }
-#   
-#   pion.timebins <- c(pion.timebins,this.num.bin)
-# }
-# 
-# 
-# electrons$num.bins <- electron.timebins
-# pions$num.bins <- pion.timebins
-# 
-# save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
-# save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
+```{r,eval=F}
+electron.timebins <- c()
+
+for(i in electrons$index){
+
+  if(is.null(nrow(no.zero.row.pads[[i]]))){
+    this.num.bin <- 0
+  }else{
+    this.num.bin <- nrow(no.zero.row.pads[[i]])
+  }
+
+
+  electron.timebins <- c(electron.timebins,this.num.bin)
+
+}
+
+pion.timebins <- c()
+
+for(i in pions$index){
+
+    if(is.null(nrow(no.zero.row.pads[[i]]))){
+    this.num.bin <- 0
+  }else{
+  this.num.bin <- nrow(no.zero.row.pads[[i]])
+
+
+  }
+
+  pion.timebins <- c(pion.timebins,this.num.bin)
+}
+
+
+electrons$num.bins <- electron.timebins
+pions$num.bins <- pion.timebins
+
+save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
+save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
 ```
 
-Clean up memory
-
-```{r}
-# rm(electron.timebins)
-# rm(pion.timebins)
+```{r,eval=F,echo=F}
+rm(electron.timebins)
+rm(pion.timebins)
 ```
 
 
 Get the column means for each pad, where non-zero time-bins have been removed:
 
-```{r}
-# electron.compressed.bins <- numeric(24)
-# 
-# for(i in electrons$index){
-#   
-#   if(is.null(dim(no.zero.row.pads[[i]]))){
-#     this.entry <- as.numeric(no.zero.row.pads[[i]])
-#   }else{
-#   
-# this.entry <- as.numeric(colSums(no.zero.row.pads[[i]]))
-# 
-# 
-#   }
-#   
-#   electron.compressed.bins <- rbind(electron.compressed.bins,this.entry)
-# }
-# 
-# pion.compressed.bins <- c()
-# 
-# for(i in pions$index){
-#   
-#     if(is.null(dim(no.zero.row.pads[[i]]))){
-#     this.entry <- as.numeric(no.zero.row.pads[[i]])
-#   }else{
-#   
-#   this.entry <- as.numeric(colSums(no.zero.row.pads[[i]]))
-#   
-#   }
-#   pion.compressed.bins <- rbind(pion.compressed.bins,this.entry)
-# }
-# 
-# electron.compressed.bins <- electron.compressed.bins[-1,]
-# 
-# pion.compressed.bins <- pion.compressed.bins[-1,]
-# 
-# electron.compressed.bins <- as.data.frame(electron.compressed.bins)
-# pion.compressed.bins <- as.data.frame(pion.compressed.bins)
-# 
-# names <- paste0("c",1:24)
-# 
-# names(electron.compressed.bins) <- names
-# names(pion.compressed.bins) <- names
-# 
-# electrons <- data.frame(cbind(electrons,electron.compressed.bins))
-# pions <- data.frame(cbind(pions,pion.compressed.bins))
-# 
-# save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
-# save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
-# 
-# electrons$id <- "electron"
-# pions$id <- "pion"
-# 
-# electrons$id <- as.factor(electrons$id)
-# pions$id <- as.factor(pions$id)
+```{r,eval=F}
+electron.compressed.bins <- numeric(24)
+
+for(i in electrons$index){
+
+  if(is.null(dim(no.zero.row.pads[[i]]))){
+    this.entry <- as.numeric(no.zero.row.pads[[i]])
+  }else{
+
+this.entry <- as.numeric(colSums(no.zero.row.pads[[i]]))
+
+
+  }
+
+  electron.compressed.bins <- rbind(electron.compressed.bins,this.entry)
+}
+
+pion.compressed.bins <- c()
+
+for(i in pions$index){
+
+    if(is.null(dim(no.zero.row.pads[[i]]))){
+    this.entry <- as.numeric(no.zero.row.pads[[i]])
+  }else{
+
+  this.entry <- as.numeric(colSums(no.zero.row.pads[[i]]))
+
+  }
+  pion.compressed.bins <- rbind(pion.compressed.bins,this.entry)
+}
+
+electron.compressed.bins <- electron.compressed.bins[-1,]
+
+pion.compressed.bins <- pion.compressed.bins[-1,]
+
+electron.compressed.bins <- as.data.frame(electron.compressed.bins)
+pion.compressed.bins <- as.data.frame(pion.compressed.bins)
+
+names <- paste0("c",1:24)
+
+names(electron.compressed.bins) <- names
+names(pion.compressed.bins) <- names
+
+electrons <- data.frame(cbind(electrons,electron.compressed.bins))
+pions <- data.frame(cbind(pions,pion.compressed.bins))
+
+save(electrons,file="~/Thesis data/SemiFullData/electrons.rdata")
+save(pions,file="~/Thesis data/SemiFullData/pions.rdata")
+
+electrons$id <- "electron"
+pions$id <- "pion"
+
+electrons$id <- as.factor(electrons$id)
+pions$id <- as.factor(pions$id)
 ```
 
-Clear up memory
-
-```{r}
-# rm(pion.compressed.bins)
-# rm(electron.compressed.bins)
+```{r,eval=F,echo=F}
+rm(pion.compressed.bins)
+rm(electron.compressed.bins)
 ```
 
-```{r}
-# dat <- data.frame(rbind(electrons,pions))
-# rm(electrons)
-# rm(pions)
-#rm(no.zero.row.pads)
-# save(dat,file="~/Thesis data/SemiFullData/unscaled_data.rdata")
+```{r,eval=F}
+dat <- data.frame(rbind(electrons,pions))
+save(dat,file="~/Thesis data/SemiFullData/unscaled_data.rdata")
 ```
+
+```{r,echo=F,eval=F}
+rm(electrons)
+rm(pions)
+rm(no.zero.row.pads)
+```
+
 
 Scale data
 
-```{r}
-# dat[,2:33] <- scale(dat[,2:33])
-# save(dat,file="~/Thesis data/SemiFullData/scaled_data.rdata")
-# 
+```{r,eval=F}
+dat[,2:33] <- scale(dat[,2:33])
+save(dat,file="~/Thesis data/SemiFullData/scaled_data.rdata")
 
-# load("~/Thesis data/SemiFullData/scaled_data.rdata")
-# i <- dat$index
-# rm(dat)
+load("~/Thesis data/SemiFullData/scaled_data.rdata")
+i <- dat$index
+rm(dat)
 ```
 
-Unroll pad data into a vector for each entry:
+Remove missing values
 
-```{r}
+```{r,eval=F}
 load("~/Thesis data/SemiFullData/scaled_data.rdata")
 dat <- na.omit(dat)
 ```
 
-```{r}
-# rownames(dat) <- NULL
-# 
-# index <- dat$index
-# 
-# dat <- dat[,-1]
-# 
-# dat$id <- as.character(dat$id)
-# 
-# dat$electron <- ifelse(dat$id=="electron",1,0)
-# 
-# id <- dat$id
-# 
-# dat <- dat[,-1]
+```{r,eval=F}
+rownames(dat) <- NULL
+
+index <- dat$index
+
+dat <- dat[,-1]
+
+dat$id <- as.character(dat$id)
+
+dat$electron <- ifelse(dat$id=="electron",1,0)
+
+id <- dat$id
+
+dat <- dat[,-1]
 ```
 
 Get a equal sample of electrons and pions (50 000 each):
 
-```{r}
-# id.index <- data.frame(cbind(id,index))
-# 
-# require(dplyr)
-# 
-# electron.id <- id.index[id.index$id=="electron",]
-# 
-# pion.id <- id.index[id.index$id=="pion",]
-# 
-# electron.train <- base::sample(electron.id$index,50000,replace = F)
-# pion.train <- base::sample(pion.id$index, 50000,replace=F)
-# 
-# rm(electron.id)
-# rm(pion.id)
-# rm(id.index)
-# 
-# electron.train <- as.numeric(as.character(electron.train))
-# pion.train <- as.numeric(as.character(pion.train))
+```{r,eval=F}
+id.index <- data.frame(cbind(id,index))
+
+require(dplyr)
+
+electron.id <- id.index[id.index$id=="electron",]
+
+pion.id <- id.index[id.index$id=="pion",]
+
+electron.train <- base::sample(electron.id$index,50000,replace = F)
+pion.train <- base::sample(pion.id$index, 50000,replace=F)
+
+electron.train <- as.numeric(as.character(electron.train))
+pion.train <- as.numeric(as.character(pion.train))
 ```
+
+```{r,echo=F,eval=F}
+rm(electron.id)
+rm(pion.id)
+rm(id.index)
+```
+
 
 Since particles pass through pads at different angles, and at different coordinates within a pad, the exact column/ row in the matrix representation of a detector trace is not important.
 
@@ -423,97 +431,418 @@ At a later stage, kernels/ masks will be employed in a convolutional neural netw
 
 Furthermore, the 24 column sums can only be informative insomuch as they are averaged across all columns, since the positional information is not relevant to the PID process:
 
-```{r}
-# dat <- data.frame(cbind(index,dat))
-# 
-# c <- dat[,9:32]
-# 
-# c <- rowMeans(c)
-# 
-# dat <- dat[,c(1:8,33,34)]
-# 
-# dat <- data.frame(cbind(c,dat))
-# 
-# dat <- dat[,-10]
-# 
-# save(dat,file="~/Thesis data/SemiFullData/final_data.rdata")
-# rm(c)
-# 
-# train.id <- c(electron.train,pion.train)
-# 
-# train <- dat %>%
-#   subset(index %in% train.id)
-# 
-# test <- dat %>%
-#   subset(! index %in% train.id)
-# 
-# save(train,file="~/Thesis data/SemiFullData/train1.rdata")
-# save(test,file="~/Thesis data/SemiFullData/test1.rdata")
-# rm(dat)
-# rm(electron.train)
-# rm(pion.train)
-# rm(id)
-# rm(index)
-# rm(train.id)
+```{r,eval=F}
+dat <- data.frame(cbind(index,dat))
+
+c <- dat[,9:32]
+
+c <- rowMeans(c)
+
+dat <- dat[,c(1:8,33,34)]
+
+dat <- data.frame(cbind(c,dat))
+
+dat <- dat[,-10]
+
+save(dat,file="~/Thesis data/SemiFullData/final_data.rdata")
+rm(c)
+
+train.id <- c(electron.train,pion.train)
+
+train <- dat %>%
+  subset(index %in% train.id)
+
+test <- dat %>%
+  subset(! index %in% train.id)
+
+save(train,file="~/Thesis data/SemiFullData/train1.rdata")
+save(test,file="~/Thesis data/SemiFullData/test1.rdata")
+
 ```
+
+```{r,eval=F,echo=F}
+rm(dat)
+rm(electron.train)
+rm(pion.train)
+rm(id)
+rm(index)
+rm(train.id)
+```
+
+```{r}
+load("~/Thesis data/SemiFullData/train1.rdata")
+load("~/Thesis data/SemiFullData/test1.rdata")
+```
+
 
 Separate out index from data:
 
 ```{r}
-# test.id.index <- test[,c(2,10)]
-# train.id.index <- train[,c(2,10)]
-# 
-# test <- test[,-2]
-# train <- train[,-2]
+test.id.index <- test[,c(2,10)]
+train.id.index <- train[,c(2,10)]
+
+test <- test[,-2]
+train <- train[,-2]
 ```
 
 
 #Particle Identification:
 
-##Naive Bayes:
+##Majority Class Classifier:
+
+The vast majority of particles detected in the TRD are pions, in fact in our dataset we have the following ratio:
+
+```{r}
+PID <- c(train$electron,test$electron)
+
+pion.percentage <- 100-sum(PID/length(PID))
+electron.percentage <- sum(PID/length(PID))
+
+t <- data.frame(pion.percentage,electron.percentage)
+require(knitr)
+kable(t)
+```
+
+It is clear, then, that our task is not smiply as classification problem, since predicting "pion" for each particle will result in upwards of 99% accuracy, without any effort.
+
+Our task centers around pion efficiency, i.e. not misclassifying a pion as an electron, while not losing too many electrons in the process.
+
+##Confusion matrix:
+
+```{r}
+PID <- data.frame(cbind(PID,rep(0,length(PID))))
+names(PID) <- c("GroundTruth","MajorityClassClassifierPred")
+
+PID$GroundTruth <- as.factor(PID$GroundTruth)
+PID$MajorityClassClassifierPred <- as.factor(PID$MajorityClassClassifierPred)
+
+levels(PID$MajorityClassClassifierPred) <- c("0","1")
+
+kable(table(PID))
+
+negs <- c("True Negative","False Negative")
+poss <- c("False Positives","True Positives")
+
+conf.m <- data.frame(cbind(negs,poss))
+names(conf.m) <- c("Predicted PION","Predicted ELECTRON")
+rownames(conf.m) <- c("IS a PION", "IS an ELECTRON")
+
+kable(conf.m)
+```
+
+A more realistic evaluation of our Majority Classifier model accuracy, would be as follows:
+
+We reject 100% of Pions, but we keep 0% of electrons.
+
+Our goal is to find a model that rejects as many pions as possible, but keeps as many electrons as possible as well.
+
+```{r,echo=F}
+rm(PID)
+rm(conf.m)
+rm(t)
+```
+
+
+##Simple linear regression:
+
+```{r}
+linmod1 <- lm(electron~.,data=train)
+
+linmod.preds <- predict(linmod1,test)
+
+```
+
+We plot the distribution of electron predictions, where electrons were labeled as integer 1 and pions as integer 0, and add reference lines for the mean prediction in red and the 99th quantile in purple.
+
+If we go with our prior knowledge that around 99.9% of particles detected in the TRD, the 99th quantile seems like a reasonable cut-off point at this point to get a benchmark for pion rejection.
+
+```{r}
+
+accuracy <- data.frame(cbind(as.numeric(test$electron),linmod.preds))
+
+names(accuracy) <- c("actual","Linear Model Prediction")
+
+r <- range(accuracy$`Linear Model Prediction`)
+
+q <- quantile(accuracy$`Linear Model Prediction`,0.99)
+
+hist(accuracy$`Linear Model Prediction`,breaks=1000,main="Histogram of Linear Model Electron Prediction",sub="Mean prediction (red), and 99th quantile (purple) indicated",xlab="")
+abline(v=mean(accuracy$`Linear Model Prediction`),col="red")
+abline(v=q,col="purple")
+```
+
+We apply this logic to get a binary response value from our basic linear model, and show the confusion matrix for this prediction:
+
+```{r}
+accuracy$lm1.99quantile.pred <- ifelse(accuracy$`Linear Model Prediction`>=q,1,0)
+
+accuracy$actual <- as.factor(accuracy$actual)
+
+accuracy$lm1.99quantile.pred <- as.factor(accuracy$lm1.99quantile.pred)
+
+kable(table(accuracy$actual,accuracy$lm1.99quantile.pred))
+```
+
+Assessing our model accuracy:
+
+```{r}
+accuracy$actual <- as.numeric(as.character(accuracy$actual))
+accuracy$lm1.99quantile.pred <- as.numeric(as.character(accuracy$lm1.99quantile.pred))
+accuracy$correct <- ifelse(accuracy$actual==accuracy$lm1.99quantile.pred,1,0)
+
+a <- sum(accuracy$correct/nrow(accuracy))
+```
+
+```{r,echo=F}
+print(paste0("We achieve an accuracy score of ",a))
+```
+
+###Pion Efficiency:
+
+```{r}
+pion.efficiency <- ifelse(accuracy$actual==0&accuracy$lm1.99quantile.pred==0,1,0)
+p <- length(which(accuracy$actual==0)==T)
+pion.efficiency <- sum(pion.efficiency)/p
+
+pion.efficiency <- 100-pion.efficiency*100
+```
+
+```{r,echo=F}
+print(paste0("Our majority class classifier incorrectly classified ",round(100-pion.percentage,5),"% of pions as electrons"))
+print(paste0("Based on predictions from our basic linear model, we incorrectly classify ",round(pion.efficiency,5),"% of pions in our test set as electrons"))
+```
+
+###Electron Efficiency:
+
+```{r}
+electron.efficiency <- ifelse(accuracy$actual==1&accuracy$lm1.99quantile.pred==1,1,0)
+e <- length(which(accuracy$actual==1)==T)
+electron.efficiency <- sum(electron.efficiency)/e
+
+electron.efficiency <- electron.efficiency*100
+```
+
+```{r,echo=F}
+print(paste0("Our majority class classifier correctly accepted 0% of electrons in our test set"))
+print(paste0("Based on predictions from our basic linear model, we correctly accept ",round(electron.efficiency,5),"% of electrons in our test set"))
+```
+
+##Optimization of linear model prediction cut-off point for electron classification:
+
+```{r}
+
+library(pROC)
+
+#Penalize pion error and electron error equally:
+
+lm.optimization <- function(cut.off){
+  p <- predict(linmod1,test)
+  a <- test$electron
+  
+  my.prediction <- ifelse(p>=cut.off,1,0)
+  
+  roc_obj <- roc(a, my.prediction)
+  auc(roc_obj)
+  
+}
+
+optim.q <- optim(par=r[1],fn=lm.optimization,lower=r[1],upper=r[2],method="Brent",control = list(fnscale=-1))
+
+q <- optim.q$par
+
+```
+
+```{r,echo=F}
+print(paste0("After optimizing the electron prediction cut-off, by maximizing the area under the curve of the receiver operating characteristic, an AUC value of ",optim.q$value," is achieved"))
+```
+
+
+Our new confusion matrix, with a more informed cut-off point, looks as follows:
+
+```{r}
+accuracy$lm1.99quantile.pred <- ifelse(accuracy$`Linear Model Prediction`>=q,1,0)
+
+accuracy$actual <- as.factor(accuracy$actual)
+
+accuracy$lm1.99quantile.pred <- as.factor(accuracy$lm1.99quantile.pred)
+
+kable(table(accuracy$actual,accuracy$lm1.99quantile.pred))
+```
+
+
+###Optimized Cut-off linear model accuracy assessment:
+
+```{r}
+accuracy$actual <- as.numeric(as.character(accuracy$actual))
+accuracy$lm1.99quantile.pred <- as.numeric(as.character(accuracy$lm1.99quantile.pred))
+accuracy$correct <- ifelse(accuracy$actual==accuracy$lm1.99quantile.pred,1,0)
+
+a <- sum(accuracy$correct/nrow(accuracy))
+```
+
+```{r,echo=F}
+print(paste0("We achieve an accuracy score of ",a))
+```
+
+###Pion Efficiency:
+
+```{r}
+old.pion.efficiency <- pion.efficiency
+
+pion.efficiency <- ifelse(accuracy$actual==0&accuracy$lm1.99quantile.pred==0,1,0)
+p <- length(which(accuracy$actual==0)==T)
+pion.efficiency <- sum(pion.efficiency)/p
+
+pion.efficiency <- 100-pion.efficiency*100
+```
+
+```{r,echo=F}
+print(paste0("Our majority class classifier incorrectly classified ",round(100-pion.percentage,5),"% of pions as electrons"))
+print(paste0("Based on predictions from our basic linear model, we incorrectly classify ",round(old.pion.efficiency,5),"% of pions in our test set as electrons"))
+
+print(paste0("Based on predictions from our cut-off optimized basic linear model, we incorrectly classify ",round(pion.efficiency,5),"% of pions in our test set as electrons"))
+```
+
+
+###Electron Efficiency:
+
+```{r}
+old.electron.efficiency <- electron.efficiency
+
+electron.efficiency <- ifelse(accuracy$actual==1&accuracy$lm1.99quantile.pred==1,1,0)
+e <- length(which(accuracy$actual==1)==T)
+electron.efficiency <- sum(electron.efficiency)/e
+
+electron.efficiency <- electron.efficiency*100
+```
+
+```{r,echo=F}
+print(paste0("Our majority class classifier correctly accepted 0% of electrons in our test set"))
+print(paste0("Based on predictions from our basic linear model, we correctly accept ",round(old.electron.efficiency,5),"% of electrons in our test set"))
+
+print(paste0("Based on predictions from our cut-off optimized basic linear model, we correctly accept ",round(electron.efficiency,5),"% of electrons in our test set as electrons"))
+```
+
+
+#DataRobot: Automated ML
+
+DataRobot is a platform for automated ML, which automates data-preprocessing, feature generation, model building with cross validation, and prediction API deployment.
+
+In order to find models which could be useful in PID, the full training and test set were uploaded onto their platform and "Autopilot" was initialized.
+
+Figure one shows the feature importance results after data upload:
+
+```{r}
+datarobot.train <- rbind(train,test)
+datarobot.train$electron <- ifelse(datarobot.train$electron==1,"electron","pion")
+write.csv(datarobot.train,"~/MSc-train-data.csv")
+```
+
+![Figure1: Feature Importance](/Users/gerhard/MSc-thesis/dr1.png)
+
+After running models overnight, DataRobot built 58 models, of which the top 5 are shown here:
+
+![Figure 2: Top 5 DataRobot models](/Users/gerhard/dr2.png)
+
+Evaluating the top model's metrics, shows the following model blueprint:
+
+![Figure 3: Extreme Gradient Boosted Tree Classifier with Early Stopping (Fast Feature Binning) Bueprint](/Users/gerhard/dr3.png)
+
+
+The ROC curve and Prediction Distribtution plots are as follows:
+
+![Figure 4: Top Model Evaluation](/Users/gerhard/dr4.png)
+
+DataRobot's Confusion Matrix is flipped relative to what has been shown so far, i.e. IS(pion) +/ IS NOT(pion) -
+
+![Figure 5: Top Model Confusion Matrix](/Users/gerhard/dr5.png)
+
+```{r,echo=F}
+print(paste0("DataRobot detects ",100*(2200/13007),"% of electrons in the holdout set it created from the FULL dataset that was uploaded"))
+```
+
+```{r,echo=F}
+print(paste0("DataRobot incorrectly classifies ",100*(1237/107849),"% of pions as electrons in the holdout set it created from the FULL dataset that was uploaded"))
+```
+
+#Convolutional Neural Networks
+
+```{r,eval=F}
+rm(list=ls())
+
+load("~/Thesis data/SemiFullData/fulljson.rdata")
+
+pads <- sapply(j,`[[`,"layer0")
+rm(j)
+```
+
+##Roll out pad data
+
+```{r,eval=F}
+require(Smisc)
+
+pad.df <- sapply(pads,as.numeric)
+rm(pads)
+
+for(i in 1:length(pad.df)){
+  if(length(pad.df[[i]])!=264){
+    pad.df[[i]] <- as.numeric(rep(0,264))
+  }
+}
+
+pad.df <- do.call(rbind,pad.df)
+
+save(pad.df,file="~/Thesis data/SemiFullData/cleanpads.rdata")
+```
+
+```{r,eval=F}
+load("~/Thesis data/SemiFullData/fulljson.rdata")
+pdg <- sapply(j,`[[`,"pdgCode")
+
+pdg <- as.numeric(pdg)
+
+pdg <- as.data.frame(pdg)
+pdg$index <- rownames(pdg)
+
+pdg$pdg <- ifelse(pdg$pdg %in% c(11,-11),T,F)
+
+names(pdg) <- c("electron","index")
+
+pdg <- pdg[,c(2,1)]
+
+cnn.dat <- data.frame(cbind(pdg,pad.df))
+
+save(cnn.dat,file="~/Thesis data/SemiFullData/cnn.rdata")
+```
+
+```{r,eval=F,echo=F}
+rm(j)
+rm(pad.df)
+```
+
+```{r,eval=F}
+load("~/Thesis data/SemiFullData/cnn.rdata")
+
+cnn.dat <- as.matrix(cnn.dat[,-c(1,2)])
+
+zero.pads <- c()
+
+for(i in 1:nrow(cnn.dat)){
+  if(all(cnn.dat[i,]==0)){
+    zero.pads <- c(zero.pads,i)
+  }
+}
+
+cnn.dat <- cnn.dat[-zero.pads,]
+pdg <- pdg[-zero.pads,]
+
+save(cnn.dat,file="~/Thesis data/SemiFullData/cnn.rdata")
+save(pdg,file="~/Thesis data/SemiFullData/pdg.rdata")
+```
 
 ```{r}
 
 ```
-
-
-Simple linear regression:
-
-```{r}
-linmod1 <- lm(electron~.,data=dat[9:32])
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
