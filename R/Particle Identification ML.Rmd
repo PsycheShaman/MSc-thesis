@@ -732,7 +732,7 @@ In order to find models which could be useful in PID, the full training and test
 
 Figure one shows the feature importance results after data upload:
 
-```{r}
+```{r,eval=F}
 datarobot.train <- rbind(train,test)
 datarobot.train$electron <- ifelse(datarobot.train$electron==1,"electron","pion")
 write.csv(datarobot.train,"~/MSc-train-data.csv")
@@ -797,6 +797,7 @@ save(pad.df,file="~/Thesis data/SemiFullData/cleanpads.rdata")
 
 ```{r,eval=F}
 load("~/Thesis data/SemiFullData/fulljson.rdata")
+load("~/Thesis data/SemiFullData/cleanpads.rdata")
 pdg <- sapply(j,`[[`,"pdgCode")
 
 pdg <- as.numeric(pdg)
@@ -840,9 +841,291 @@ save(cnn.dat,file="~/Thesis data/SemiFullData/cnn.rdata")
 save(pdg,file="~/Thesis data/SemiFullData/pdg.rdata")
 ```
 
-```{r}
+```{r,eval=F}
+set.seed(123456)
+pdg$index <- 1:nrow(pdg)
+
+require(dplyr)
+
+e.ind <- pdg %>%
+  subset(electron==T)
+
+p.ind <- pdg %>%
+  subset(electron==F)
+
+e.holdout <- base::sample(e.ind$index,size=5000,replace=F)
+p.holdout <- base::sample(p.ind$index,size=5000,replace=F)
+
+e.ind <- e.ind %>%
+  subset(!index %in% e.holdout)
+
+p.ind <- p.ind %>%
+  subset(!index %in% p.holdout)
+
+holdout.ind <- as.numeric(c(e.holdout,p.holdout))
+
+holdout.data <- cnn.dat[holdout.ind,]
+
+cnn.dat <- cnn.dat[-holdout.ind,]
+
+pdg.holdout <- pdg[holdout.ind,]
+
+pdg <- pdg[-holdout.ind,]
+
+pdg$index <- 1:nrow(pdg)
+pdg.holdout$index <- 1:nrow(pdg.holdout)
+
+save(cnn.dat,file="~/Thesis data/SemiFullData/cnn.rdata")
+save(holdout.data,file="~/Thesis data/SemiFullData/holdout.rdata")
+save(pdg,file="~/Thesis data/SemiFullData/pdg.rdata")
+save(pdg.holdout,file="~/Thesis data/SemiFullData/pdg.holdout.rdata")
+```
+
+```{r,echo=F,eval=F}
+rm("e.ind","p.ind","e.holdout","p.holdout","zero.pads","i","holdout.ind")
+```
+
+##Unbalanced class compensation:
+
+Resample electrons 10 times:
+
+```{r,eval=F}
+e.bootstrap.ind <- pdg %>%
+  subset(electron==T)
+
+e.bootstrap.ind <- rbind(e.bootstrap.ind,e.bootstrap.ind,e.bootstrap.ind,e.bootstrap.ind,e.bootstrap.ind,e.bootstrap.ind,e.bootstrap.ind,e.bootstrap.ind,e.bootstrap.ind,e.bootstrap.ind)
+
+pdg <- rbind(pdg,e.bootstrap.ind)
+pdg$index <- 1:nrow(pdg)
+
+e.bootstrap.ind <- e.bootstrap.ind$index
+
+cnn.dat <- rbind(cnn.dat,cnn.dat[e.bootstrap.ind,])
+
+save(cnn.dat,file="~/Thesis data/SemiFullData/cnn.rdata")
+save(pdg,file="~/Thesis data/SemiFullData/pdg.rdata")
+```
+
+```{r,echo=F,eval=F}
+rm("e.bootstrap","e.bootstrap.ind")
+```
+
+
+
+```{r,eval=F}
+install.packages("keras")
+
+library(keras)
+install_keras()
+```
+
+
+```{r,eval=F}
+load("~/Thesis data/SemiFullData/cnn.rdata")
+load("~/Thesis data/SemiFullData/pdg.rdata")
+load("~/Thesis data/SemiFullData/pdg.holdout.rdata")
+load("~/Thesis data/SemiFullData/holdout.rdata")
+require(keras)
+```
+
+```{r,eval=F}
+x_train <- array_reshape(cnn.dat, c(nrow(cnn.dat), 264))
+x_test <- array_reshape(holdout.data, c(nrow(holdout.data), 264))
+
+y_train <- as.matrix(ifelse(pdg$electron, 1,0))
+y_test <- as.matrix(ifelse(pdg.holdout$electron, 1,0))
+
+scale.factor <- mean(mean(x_train),mean(x_test))
+
+x_train <- x_train/scale.factor
+x_test <- x_test/scale.factor
+```
+
+```{r,eval=F,echo=F}
+rm(cnn.dat)
+
+rm(holdout.data)
+
+rm(pdg)   
+
+rm(pdg.holdout)
+```
+
+```{r,eval=F}
+y_test = to_categorical(y_test)
+y_train = to_categorical(y_train)
+
+dim(x_train) <- c(nrow(x_train), ncol(x_train))
+dim(x_test) <- c(nrow(x_test), ncol(x_test))
+```
+
+```{r,eval=F}
+save(x_test,file="~/Thesis data/SemiFullData/xtest.rdata")
+save(x_train,file="~/Thesis data/SemiFullData/xtrain.rdata")
+save(y_train,file="~/Thesis data/SemiFullData/ytrain.rdata")
+save(y_test,file="~/Thesis data/SemiFullData/ytest.rdata")
+
+
+load("~/Thesis data/SemiFullData/ytest.rdata")
+load("~/Thesis data/SemiFullData/ytrain.rdata")
+```
+
+
+
+
+```{r,eval=F}
+require(keras)
+rm(model)
+model <- keras_model_sequential() 
+model %>% 
+  layer_dense(units = 128, activation = "relu", input_shape = ncol(x_train)) %>% 
+  layer_dropout(rate = 0.4) %>% 
+  layer_dense(units = 64, activation = "relu") %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 2, activation = "softmax")
+
+save(model,file="~/Thesis data/SemiFullData/model.rdata")
+```
+
+```{r,echo=F}
+load("~/Thesis data/SemiFullData/model.rdata")
+summary(model)
+```
+
+```{r,eval=F}
+model %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = optimizer_adam(),
+  metrics = c("accuracy")
+)
+```
+
+```{r,eval=F}
+
+history <- model %>% fit(
+  x_train, y_train, 
+  epochs = 30, batch_size = 128, 
+  validation_split = 0.2
+)
+
+save(history,file="~/Thesis data/SemiFullData/history.rdata")
 
 ```
+
+
+```{r,echo=F}
+load("~/Thesis data/SemiFullData/history.rdata")
+plot(history)
+```
+
+
+#Truly balance classes
+
+```{r,eval=F}
+rm(list=ls())
+load("~/Thesis data/SemiFullData/fulljson.rdata")
+load("~/Thesis data/SemiFullData/cleanpads.rdata")
+pdg <- sapply(j,`[[`,"pdgCode")
+
+pdg <- as.numeric(pdg)
+
+pdg <- as.data.frame(pdg)
+pdg$index <- rownames(pdg)
+
+pdg$pdg <- ifelse(pdg$pdg %in% c(11,-11),T,F)
+
+names(pdg) <- c("electron","index")
+
+pdg <- pdg[,c(2,1)]
+
+cnn.dat <- data.frame(cbind(pdg,pad.df))
+
+save(cnn.dat,file="~/Thesis data/SemiFullData/cnn2.rdata")
+```
+
+```{r,eval=F,echo=F}
+rm(j)
+rm(pad.df)
+```
+
+```{r,eval=F}
+load("~/Thesis data/SemiFullData/cnn2.rdata")
+
+cnn.dat <- as.matrix(cnn.dat[,-c(1,2)])
+
+zero.pads <- c()
+
+for(i in 1:nrow(cnn.dat)){
+  if(all(cnn.dat[i,]==0)){
+    zero.pads <- c(zero.pads,i)
+  }
+}
+
+cnn.dat <- cnn.dat[-zero.pads,]
+pdg <- pdg[-zero.pads,]
+
+pdg$index <- 1:length(pdg$index)
+
+save(cnn.dat,file="~/Thesis data/SemiFullData/cnn2.rdata")
+save(pdg,file="~/Thesis data/SemiFullData/pdg2.rdata")
+```
+
+```{r,eval=F}
+load("~/Thesis data/SemiFullData/cnn2.rdata")
+load("~/Thesis data/SemiFullData/pdg2.rdata")
+set.seed(123)
+electron.ind <- pdg %>%
+  subset(electron==T)
+
+pion.ind <- pdg %>%
+  subset(electron!=T)
+
+electron.ind <- as.numeric(electron.ind$index)
+
+pion.ind <- as.numeric(pion.ind$index)
+
+final.test <- c(base::sample(electron.ind,100,replace = F),base::sample(pion.ind,100,replace=F))
+
+electron.ind <- electron.ind %>%
+  subset(!electron.ind %in% final.test)
+
+pion.ind <- pion.ind %>%
+  subset(!pion.ind %in% final.test)
+
+N <- length(pion.ind)
+
+electron.ind <- sample(electron.ind,N, replace = T)
+
+train.id <- c(electron.ind,pion.ind)
+train.id <- sample(train.id)
+test.id <- final.test
+
+train <- cnn.dat[train.id,]
+test <- cnn.dat[test.id,]
+
+save(train,file="~/Thesis data/SemiFullData/train.rdata")
+save(test,file="~/Thesis data/SemiFullData/test.rdata")
+
+pdg.train <- pdg[train.id,]
+pdg.test <- pdg[test.id,]
+
+save(pdg.train,file="~/Thesis data/SemiFullData/y_train.rdata")
+save(pdg.test,file="~/Thesis data/SemiFullData/y_test.rdata")
+```
+
+
+```{r}
+rm(list=ls())
+load("~/Thesis data/SemiFullData/train.rdata")
+load("~/Thesis data/SemiFullData/test.rdata")
+load("~/Thesis data/SemiFullData/y_train.rdata")
+load("~/Thesis data/SemiFullData/y_test.rdata")
+```
+
+
+
+
+
 
 
 
