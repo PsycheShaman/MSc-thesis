@@ -1114,7 +1114,7 @@ save(pdg.test,file="~/Thesis data/SemiFullData/y_test.rdata")
 ```
 
 
-```{r}
+```{r,eval=F}
 rm(list=ls())
 load("~/Thesis data/SemiFullData/train.rdata")
 load("~/Thesis data/SemiFullData/test.rdata")
@@ -1122,10 +1122,57 @@ load("~/Thesis data/SemiFullData/y_train.rdata")
 load("~/Thesis data/SemiFullData/y_test.rdata")
 ```
 
+```{r,eval=F}
+require(keras)
+rm(model2)
+model2 <- keras_model_sequential() 
+model2 %>% 
+  layer_dense(units = 256, activation = "relu", input_shape = ncol(train)) %>% 
+  layer_dropout(rate = 0.4) %>% 
+  layer_dense(units = 128, activation = "relu") %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 64, activation = "relu") %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 32, activation = "relu") %>%
+  layer_dropout(rate = 0.2) %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dropout(rate = 0.2) %>%
+  layer_dense(units = 2, activation = "softmax")
+
+save(model2,file="~/Thesis data/SemiFullData/model2.rdata")
+```
+
+```{r,eval=F}
+model2 %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = optimizer_rmsprop(),
+  metrics = c("accuracy")
+)
+```
+
+```{r,eval=F}
+y_test <- as.matrix(ifelse(pdg.test$electron,1,0))
+y_test <- to_categorical(y_test)
+
+y_train <- as.matrix(ifelse(pdg.train$electron,1,0))
+y_train <- to_categorical(y_train)
+```
 
 
+```{r,eval=F}
+history2 <- model2 %>% fit(
+  train, y_train, 
+  epochs = 500, batch_size = 1000, 
+  validation_split = 0.2
+)
 
+save(history2,file="~/Thesis data/SemiFullData/history2.rdata")
+```
 
+```{r,echo=F}
+load("~/Thesis data/SemiFullData/history2.rdata")
+plot(history2)
+```
 
 
 
