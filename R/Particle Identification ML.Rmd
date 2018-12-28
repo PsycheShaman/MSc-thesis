@@ -2,12 +2,18 @@
 title: "Particle Identification ML"
 author: "Gerhard Viljoen"
 date: "12/22/2018"
-output: html_document
+output: 
+  tufte::tufte_html: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,message = F,warn=F)
 ```
+
+```{r}
+require(tufte)
+```
+
 
 ###Set seed for reproducibility:
 
@@ -765,7 +771,7 @@ print(paste0("DataRobot detects ",100*(2200/13007),"% of electrons in the holdou
 print(paste0("DataRobot incorrectly classifies ",100*(1237/107849),"% of pions as electrons in the holdout set it created from the FULL dataset that was uploaded"))
 ```
 
-#Convolutional Neural Networks
+#Deep Learning
 
 ```{r,eval=F}
 rm(list=ls())
@@ -1167,12 +1173,161 @@ history2 <- model2 %>% fit(
 )
 
 save(history2,file="~/Thesis data/SemiFullData/history2.rdata")
+save(model2,file="~/Thesis data/SemiFullData/model2.rdata")
 ```
 
 ```{r,echo=F}
 load("~/Thesis data/SemiFullData/history2.rdata")
 plot(history2)
 ```
+
+```{r,eval=F}
+load("~/Thesis data/SemiFullData/ytest.rdata")
+p <- model2 %>% predict_proba(test)
+
+p <- cbind(as.matrix(y_test),p)
+
+p <- p[,c(2,4)]
+
+p <-data.frame(p)
+
+names(p) <- c("actual","model2.pred")
+
+p$error <- p$actual-p$model2.pred
+
+p$squared.error <- p$error^2
+
+mean(p$squared.error)
+
+p$p0.5 <- ifelse(p$model2.pred>=0.5,1,0)
+p$p0.5 <- as.character(p$p0.5)
+p$actual <- as.character(p$actual)
+
+t1 <- table(p$actual,p$p0.5)
+
+save(t1,file="~/Thesis data/SemiFullData/t1.rdata")
+```
+
+```{r,echo=F}
+require(knitr)
+load("~/Thesis data/SemiFullData/t1.rdata")
+kable(t1)
+```
+
+
+```{r,eval=F}
+p2 <- model2 %>% predict_proba(train)
+
+p2 <- cbind(as.matrix(y_train),p2)
+
+p2 <- p2[,c(2,4)]
+
+p2 <-data.frame(p2)
+
+names(p2) <- c("actual","model2.pred")
+
+p2$error <- p2$actual-p2$model2.pred
+
+p2$squared.error <- p2$error^2
+
+mean(p2$squared.error)
+
+p2$p0.5 <- ifelse(p2$model2.pred>=0.5,1,0)
+p2$p0.5 <- as.character(p2$p0.5)
+p2$actual <- as.character(p2$actual)
+
+t2 <- table(p2$actual,p2$p0.5)
+save(t2,file="~/Thesis data/SemiFullData/t2.rdata")
+```
+
+```{r,echo=F}
+load("~/Thesis data/SemiFullData/t2.rdata")
+kable(t2)
+```
+
+```{r,echo=F}
+print(paste0("Our second keras deep learning model correctly detects ",100*(t2[2,2]/sum(t2[2,1],t2[2,2])),"% of electrons in our training set (bootstrapped sample size n = 1 185 732)"))
+print(paste0("Our second keras deep learning model incorrectly classifies ",100*(t2[1,2]/sum(t2[1,1],t2[1,2])),"% of pions in our training set as electrons (bootstrapped sample size n = 1 185 732)"))
+
+print(paste0("Our second keras deep learning model correctly detects 62% of electrons in our holdout set (sample size n = 100"))
+print(paste0("Our second keras deep learning model incorrectly classifies 16% of pions in our holdout set as electrons (sample size n = 100"))
+
+
+```
+
+//TODO:
+
+Optimize prediction cut-off point.
+
+```{r}
+
+```
+
+#Even Deeper Learning
+
+```{r,eval=F}
+require(keras)
+#rm(model3)
+model3 <- keras_model_sequential() 
+model3 %>% 
+  layer_dense(units = 256, activation = "relu", input_shape = ncol(train)) %>% 
+  layer_dropout(rate = 0.4) %>% 
+  layer_dense(units = 256, activation = "relu", input_shape = ncol(train)) %>% 
+  layer_dropout(rate = 0.4) %>% 
+  layer_dense(units = 256, activation = "relu", input_shape = ncol(train)) %>% 
+  layer_dropout(rate = 0.4) %>% 
+  layer_dense(units = 256, activation = "relu", input_shape = ncol(train)) %>% 
+  layer_dropout(rate = 0.4) %>% 
+  layer_dense(units = 128, activation = "relu") %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 64, activation = "relu") %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 32, activation = "relu") %>%
+  layer_dropout(rate = 0.2) %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dropout(rate = 0.2) %>%
+  layer_dense(units = 2, activation = "softmax")
+
+save(model3,file="~/Thesis data/SemiFullData/model3.rdata")
+```
+
+```{r,eval=F}
+model3 %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = optimizer_rmsprop(),
+  metrics = c("accuracy")
+)
+```
+
+
+```{r,eval=F}
+history3 <- model3 %>% fit(
+  train, y_train, 
+  epochs = 500, batch_size = 1000, 
+  validation_split = 0.2
+)
+
+save(history3,file="~/Thesis data/SemiFullData/history3.rdata")
+save(model3,file="~/Thesis data/SemiFullData/model3.rdata")
+```
+
+##Model 3 Analysis
+
+###Possible Causes:
+
+* Learning rate too high
+* Overfitting (too many epochs, oversampling of electrons)
+* Log operation in categorical cross-entropy causing unexpected jumps in loss function, which in turn causes backpropagation to adjust weights by too much
+* Highly likely that neural network started outputting a single class prediction for the last 40-50 epochs, resulting in accuracy of around 0.5 throughout these training rounds.
+
+![](/Users/gerhard/MSc-thesis/Rplot.png)
+
+
+
+
+#Convolutional Neural Networks
+
+
 
 
 
