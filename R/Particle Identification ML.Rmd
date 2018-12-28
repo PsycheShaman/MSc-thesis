@@ -1323,9 +1323,133 @@ save(model3,file="~/Thesis data/SemiFullData/model3.rdata")
 ![](/Users/gerhard/MSc-thesis/Rplot.png)
 
 
+#Undersampling of pions, instead of oversampling of electrons
+
+##Using the second neural network, draw a sample of pions of the same n as the sample of electrons, prefering those pions are most similar to electrons based on nusupervised learning methods
+
+```{r,eval=F}
+rm(list=ls())
+load("~/Thesis data/SemiFullData/fulljson.rdata")
+load("~/Thesis data/SemiFullData/cleanpads.rdata")
+pdg <- sapply(j,`[[`,"pdgCode")
+
+pdg <- as.numeric(pdg)
+
+pdg <- as.data.frame(pdg)
+pdg$index <- rownames(pdg)
+
+pdg$pdg <- ifelse(pdg$pdg %in% c(11,-11),1,0)
+
+names(pdg) <- c("electron","index")
+
+pdg <- pdg[,c(2,1)]
+
+cnn.dat <- data.frame(cbind(pdg,pad.df))
+```
+
+```{r,eval=F,echo=F}
+rm(j)
+rm(pad.df)
+```
+
+```{r,eval=F}
+cnn.dat <- as.matrix(cnn.dat[,-c(1,2)])
+
+zero.pads <- c()
+
+for(i in 1:nrow(cnn.dat)){
+  if(all(cnn.dat[i,]==0)){
+    zero.pads <- c(zero.pads,i)
+  }
+}
+
+cnn.dat <- cnn.dat[-zero.pads,]
+pdg <- pdg[-zero.pads,]
+
+pdg$index <- 1:nrow(pdg)
+rm(zero.pads)
+```
+
+```{r,eval=F}
+set.seed(1234)
+require(dplyr)
+
+elec_ind <- pdg %>%
+  subset(electron==1) %>%
+  select(index) %>%
+  unlist() %>%
+  as.numeric()
+
+pion_ind <- pdg %>%
+  subset(electron!=1) %>%
+  select(index) %>%
+  unlist() %>%
+  as.numeric()
+
+e.h <- sample(elec_ind,500,replace=F)
+p.h <- sample(pion_ind,500,replace=F)
+
+test.ind <- c(e.h,p.h)
+
+train.ind <- pdg$index[-test.ind] %>%
+  unlist() %>%
+  as.numeric()
+
+test.y <- pdg[test.ind,]
+train.y <- pdg[train.ind,]
+
+train_electrons <- train.y %>%
+  subset(electron==1) %>%
+  select(index) %>%
+  unlist() %>%
+  as.numeric()
+
+train_pions <- train.y %>%
+  subset(electron==0) %>%
+  select(index) %>%
+  unlist() %>%
+  as.numeric()
+
+train_electrons <- cnn.dat[train_electrons,]
+train_pions <- cnn.dat[train_pions,]
+
+save(train_electrons,file="~/Thesis data/SemiFullData/train_electrons.rdata")
+save(train_pions,file="~/Thesis data/SemiFullData/train_pions.rdata")
+save(test.y,file="~/Thesis data/SemiFullData/test.y.rdata")
+save(train.y,file="~/Thesis data/SemiFullData/train.y.rdata")
+```
+
+```{r}
+load("~/Thesis data/SemiFullData/train_electrons.rdata")
+load("~/Thesis data/SemiFullData/train_pions.rdata")
+e.rs <- rowSums(train_electrons)
+p.rs <- rowSums(train_pions)
+
+d.e.rs <- density(e.rs)
+d.p.rs <- density(p.rs)
+
+par(mfcol=c(2,1))
+
+sc.f <- length(p.rs)/length(e.rs)
+
+plot(x=d.e.rs$x,y=d.e.rs$y/max(d.e.rs$y),col="red",type="l",lwd=3,main="Energy deposit for electrons (red) and pions (blue)",xlab="Energy deposition",ylab="Scaled density",sub="Per-class means (solid lines) and medians (dashed lines) indicated")
+lines(x=d.p.rs$x,y=d.p.rs$y/max(d.p.rs$y),col="blue",lwd=3)
+abline(v=median(e.rs),col="red",lty="dotted")
+abline(v=median(p.rs),col="blue",lty="dotted")
+abline(v=mean(e.rs),col="red")
+abline(v=mean(p.rs),col="blue")
+```
 
 
 #Convolutional Neural Networks
+
+
+
+
+
+
+
+
 
 
 
