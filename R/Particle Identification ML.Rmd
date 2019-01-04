@@ -1422,8 +1422,8 @@ save(train.y,file="~/Thesis data/SemiFullData/train.y.rdata")
 ```{r}
 load("~/Thesis data/SemiFullData/train_electrons.rdata")
 load("~/Thesis data/SemiFullData/train_pions.rdata")
-e.rs <- rowSums(train_electrons)
-p.rs <- rowSums(train_pions)
+e.rs <- as.numeric(rowSums(train_electrons))
+p.rs <- as.numeric(rowSums(train_pions))
 
 d.e.rs <- density(e.rs)
 d.p.rs <- density(p.rs)
@@ -1440,10 +1440,495 @@ abline(v=mean(e.rs),col="red")
 abline(v=mean(p.rs),col="blue")
 ```
 
+```{r,eval=F}
+elec.feat <- data.frame(e.rs)
+pion.feat <- data.frame(p.rs)
+
+rm(e.rs)
+rm(p.rs)
+
+names(elec.feat) <- "energy_deposit"
+names(pion.feat) <- "energy_deposit"
+
+range.lo <- 0
+range.hi <- max(range(train_electrons)[2],range(train_pions)[2])+100
+
+breaks <- seq(range.lo,range.hi,50)
+
+e.bins <- apply(train_electrons,1,function(x) hist(x,breaks = breaks, plot=F)$count)
+
+p.bins <- apply(train_pions,1,function(x) hist(x,breaks = breaks, plot=F)$count)
+
+rm(train_electrons)
+rm(train_pions)
+
+e.bins <- t(e.bins)
+p.bins <- t(p.bins)
+
+elec.feat <- data.frame(cbind(elec.feat,e.bins))
+pion.feat <- data.frame(cbind(pion.feat,p.bins))
+
+save(elec.feat,file="~/Thesis data/SemiFullData/elec.feat.rdata")
+save(pion.feat,file="~/Thesis data/SemiFullData/pion.feat.rdata")
+```
+
+#Fuzzy Clustering
+
+##Fuzzy C-means
+
+Mathematical distance computed with euclidian norm:
+
+```{r,eval=F}
+load("~/Thesis data/SemiFullData/elec.feat.rdata")
+load("~/Thesis data/SemiFullData/pion.feat.rdata")
+cl.d <- rbind(elec.feat,pion.feat)
+
+all(cl.d[,23]==0)
+
+cl.d <- cl.d[,-23]
+
+cl.d <- scale(cl.d)
+
+rm(elec.feat)
+rm(pion.feat)
+```
+
+```{r,eval=F}
+require(advclust)
+fuzclust <- fuzzy.CM(X=cl.d,K = 3,m = 2,RandomNumber = 1234)
+
+save(fuzclust,file="~/Thesis data/SemiFullData/fuzclust.rdata")
+
+load("~/Thesis data/SemiFullData/train.y.rdata")
+
+unsupervised.features <- data.frame(cbind(train.y,fuzclust@member))
+
+save(unsupervised.features,file="~/Thesis data/SemiFullData/unsup_feat1.rdata")
+```
+
+```{r,eval=F}
+radar.plotting(fuzclust, cl.d)
+```
+
+![Radarplot for c means clustering](/Users/gerhard/MSc-thesis/radarplot.png)
+
+
+
+
+##Model based clustering
+
+```{r,eval=F}
+require(mclust)
+
+clustered.dat <- Mclust(cl.d)
+
+save(clustered.dat,file="~/Thesis data/SemiFullData/mclust.rdata")
+
+unsupervised.features <- data.frame(cbind(unsupervised.features,clustered.dat$z))
+
+save(unsupervised.features,file="~/Thesis data/SemiFullData/unsup_feat1.rdata")
+```
+
+```{r}
+load("~/Thesis data/SemiFullData/fuzclust.rdata")
+load("~/Thesis data/SemiFullData/mclust.rdata")
+load("~/Thesis data/SemiFullData/unsup_feat1.rdata")
+barplot(table(as.character(unsupervised.features$electron),as.character(clustered.dat$classification)),col=c("blue","red"),
+        main="Model based clustering barplot: electrons=RED, pions=BLUE")
+
+barplot(table(as.character(unsupervised.features$electron), as.character(fuzclust@hard.label)),main="Barplot of fuzzy clustering, electrons=RED, pions=BLUE",col=c("blue","red"))
+```
+
+
+```{r,eval=F}
+cl.d.2 <- data.frame(cbind(cl.d,unsupervised.features))
+
+
+
+save(cl.d.2,file="~/Thesis data/SemiFullData/cld2.rdata")
+```
+
+
+
+```{r}
+load("~/Thesis data/SemiFullData/cld2.rdata")
+
+cl.d.2 <- cl.d.2[,-c(23:24)]
+
+pc <- prcomp(cl.d.2)
+```
+
+```{r}
+require(factoextra)
+fviz_eig(pc)
+```
+
+```{r}
+fviz_pca_var(pc,
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+             )
+```
+
+```{r}
+find.uncert.pions.x <- pc$x
+```
+
+```{r}
+principal.component <- 0:34
+cumulative.proportion.of.variance.explained <- c(0,cumsum(pc$sdev^2)/sum(pc$sdev^2))
+
+plot(principal.component,cumulative.proportion.of.variance.explained,type="b",col="purple",main="Proportion of variance explained: 99% indicated by red line")
+abline(v=min(which(cumulative.proportion.of.variance.explained>=.99)),col="red")
+```
+
+
+#H2O
+
+```{r,eval=F}
+require(h2o)
+h2o.init()
+```
+
+```{r,eval=F}
+load("~/Thesis data/SemiFullData/train.y.rdata")
+
+dat <- data.frame(cbind(find.uncert.pions.x,train.y$electron))
+names(dat)[35] <- "electron"
+
+dat.hex <- as.h2o(dat)
+
+find.uncert.pion <- h2o.randomForest(x=1:34,y=35,dat.hex,nfolds=10)
+```
+
+```{r,eval=F}
+h2o.performance(find.uncert.pion)
+
+p.rf <- h2o.predict(find.uncert.pion,dat.hex)
+
+p.rf <- as.data.frame(p.rf)
+
+p.rf <- data.frame(cbind(train.y,p.rf))
+
+row.names(p.rf) <- NULL
+
+p.rf$index <- 1:nrow(p.rf)
+
+electron.sample.ind <- p.rf$index[train.y$electron==1]
+
+pion.sample.ind <- p.rf[train.y$electron==0,]
+
+pion.sample.ind <- pion.sample.ind[order(pion.sample.ind$predict,decreasing = T),]
+
+N <- length(electron.sample.ind)
+
+pion.sample.ind <- pion.sample.ind$index[1:N]
+
+any(is.na(pion.sample.ind))
+
+
+
+png(filename="~/Thesis data/SemiFullData/probability.dens.png")
+par(mfrow=c(1,2))
+
+d <- p.rf[pion.sample.ind,]
+
+d <- as.numeric(d$predict)
+
+max(d)
+plot(density(d),"Pion electron probability")
+
+d <- p.rf[electron.sample.ind,]
+
+d <- as.numeric(d$predict)
+
+max(d)
+plot(density(d),"Electron electron probablitiy")
+
+dev.off()
+
+save(pion.sample.ind,file="~/Thesis data/SemiFullData/pion.sample.ind.rdata")
+save(electron.sample.ind,file="~/Thesis data/SemiFullData/electron.sample.ind.rdata")
+```
+
+![](/Users/gerhard/MSc-thesis/rfmod.png)
+
+![](/Users/gerhard/Thesis data/SemiFullData/probability.dens.png)
+
+```{r,eval=F}
+find.uncert.pion.2 <- h2o.automl(x=1:34,y=35,dat.hex,nfolds=10)
+```
+
+```{r,eval=F}
+h2o.performance(find.uncert.pion.2@leader)
+
+p.rf <- h2o.predict(find.uncert.pion.2@leader,dat.hex)
+
+p.rf <- as.data.frame(p.rf)
+
+p.rf <- data.frame(cbind(train.y,p.rf))
+
+row.names(p.rf) <- NULL
+
+p.rf$index <- 1:nrow(p.rf)
+
+electron.sample.ind <- p.rf$index[train.y$electron==1]
+
+pion.sample.ind <- p.rf[train.y$electron==0,]
+
+pion.sample.ind <- pion.sample.ind[order(pion.sample.ind$predict,decreasing = T),]
+
+N <- length(electron.sample.ind)
+
+pion.sample.ind <- pion.sample.ind$index[1:N]
+
+any(is.na(pion.sample.ind))
+
+
+
+png(filename="~/Thesis data/SemiFullData/probability.dens2.png")
+par(mfrow=c(1,2))
+
+d <- p.rf[pion.sample.ind,]
+
+d <- as.numeric(d$predict)
+
+max(d)
+plot(density(d),"Pion electron probability")
+
+d <- p.rf[electron.sample.ind,]
+
+d <- as.numeric(d$predict)
+
+max(d)
+plot(density(d),"Electron electron probablitiy")
+
+dev.off()
+
+save(pion.sample.ind,file="~/Thesis data/SemiFullData/pion.sample.ind.rdata")
+save(electron.sample.ind,file="~/Thesis data/SemiFullData/electron.sample.ind.rdata")
+```
+
+![](/Users/gerhard/MSc-thesis/bestmod.png)
+
+![](/Users/gerhard/Thesis data/SemiFullData/probability.dens2.png)
+
+```{r,eval=F}
+dat$electron <- as.factor(dat$electron)
+
+dat2.hex <- as.h2o(dat)
+
+find.uncert.pion.classification <- h2o.automl(x=1:34,y=35,dat2.hex,nfolds=10)
+```
+
+
+```{r,eval=F}
+h2o.performance(find.uncert.pion.classification@leader)
+
+h2o.confusionMatrix(find.uncert.pion.classification@leader)
+
+p.rf <- h2o.predict(find.uncert.pion.classification,dat.hex)
+
+p.rf <- as.data.frame(p.rf$p1)
+
+p.rf <- data.frame(cbind(train.y,p.rf))
+
+row.names(p.rf) <- NULL
+
+p.rf$index <- 1:nrow(p.rf)
+
+electron.sample.ind <- p.rf$index[train.y$electron==1]
+
+pion.sample.ind <- p.rf[train.y$electron==0,]
+
+pion.sample.ind <- pion.sample.ind[order(pion.sample.ind$p1,decreasing = T),]
+
+N <- length(electron.sample.ind)
+
+pion.sample.ind <- pion.sample.ind$index[1:N]
+
+any(is.na(pion.sample.ind))
+
+
+
+png(filename="~/Thesis data/SemiFullData/probability.dens3.png")
+par(mfrow=c(1,2))
+
+d <- p.rf[pion.sample.ind,]
+
+d <- as.numeric(d$p1)
+
+max(d)
+plot(density(d),"Pion electron probability")
+
+d <- p.rf[electron.sample.ind,]
+
+d <- as.numeric(d$p1)
+
+max(d)
+plot(density(d),"Electron electron probablitiy")
+
+dev.off()
+
+save(pion.sample.ind,file="~/Thesis data/SemiFullData/pion.sample.ind.rdata")
+save(electron.sample.ind,file="~/Thesis data/SemiFullData/electron.sample.ind.rdata")
+```
+
+Training on principal components results in very similar predictions for all observations, rather train on features created for clustering algorithms above.
+
+```{r,eval=F}
+rm(list=ls())
+load("~/Thesis data/SemiFullData/cld2.rdata")
+load("~/Thesis data/SemiFullData/train.y.rdata")
+
+cl.d.2 <- cl.d.2[,-c(23,24)]
+
+dat <- data.frame(cbind(cl.d.2,train.y$electron))
+
+dat$train.y.electron <- ifelse(dat$train.y.electron==1,"electron","pion")
+
+dat$train.y.electron <- as.factor(dat$train.y.electron)
+
+h2o.shutdown(prompt = F)
+
+h2o.init()
+
+h2o.removeAll()
+
+dat.hex <- as.h2o(dat,"dat.hex")
+
+rf.m <- h2o.randomForest(x=1:34,y=35,training_frame="dat.hex",nfolds=10,
+                         ntrees = 100,balance_classes = T,
+                         stopping_metric = "AUC",stopping_tolerance = 0.001)
+
+p <- h2o.predict(rf.m,dat.hex)
+
+p <- as.data.frame(p)
+
+a <- train.y
+
+p <- data.frame(cbind(a,p))
+
+h2o.performance(rf.m)
+
+save(p,file="~/Thesis data/SemiFullData/p.rdata")
+
+p$predict <- ifelse(as.character(p$predict)=="electron",1,0)
+
+save(p,file="~/Thesis data/SemiFullData/p.rdata")
+```
+
+```{r,eval=F}
+load("~/Thesis data/SemiFullData/electron.sample.ind.rdata")
+
+N <- length(electron.sample.ind)
+
+pion.sample.ind <- p[p$electron==0,]
+
+pion.sample.ind <- pion.sample.ind[order(pion.sample.ind$electron.1,decreasing = T),]
+
+pion.sample.ind <- pion.sample.ind$index[1:N]
+
+png(filename="~/Thesis data/SemiFullData/probability.dens4.png")
+par(mfrow=c(1,1))
+
+d <- p[pion.sample.ind,]
+
+d <- as.numeric(d$electron.1)
+
+hist(d,breaks=10000)
+
+dev.off()
+
+save(pion.sample.ind,file="~/Thesis data/SemiFullData/pion.sample.ind.rdata")
+```
+
+![](/Users/gerhard/Thesis data/SemiFullData/probability.dens4.png)
 
 #Convolutional Neural Networks
 
 
+```{r,eval=F}
+rm(list=ls())
+load("~/Thesis data/SemiFullData/train_electrons.rdata")
+load("~/Thesis data/SemiFullData/train_pions.rdata")
+load("~/Thesis data/SemiFullData/train.y.rdata")
+
+x_train <- rbind(train_electrons,train_pions)
+
+load("~/Thesis data/SemiFullData/pion.sample.ind.rdata")
+load("~/Thesis data/SemiFullData/electron.sample.ind.rdata")
+
+final.ind <- c(electron.sample.ind,pion.sample.ind)
+```
+
+```{r,eval=F}
+x_train <- cnn.dat[final.ind,]
+y_train <- as.matrix(pdg$electron[final.ind])
+y_train <- to_categorical(y_train)
+```
+
+
+```{r,eval=F}
+require(keras)
+
+batch_size <- 1000
+num_classes <- 2
+epochs <- 100
+
+img_rows <- 11
+img_cols <- 24
+
+x_train <- scale(x_train)
+
+x_train <- as.array(x_train)
+
+x_train <- array_reshape(x_train, c(nrow(y_train), img_rows, img_cols,1))
+
+input_shape <- c(img_rows, img_cols, 1)
+
+
+
+model <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = 'relu',
+                input_shape = input_shape) %>% 
+  layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = 'relu') %>% 
+  layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+  layer_dropout(rate = 0.25) %>% 
+  layer_flatten() %>% 
+  layer_dense(units = 128, activation = 'relu') %>% 
+  layer_dropout(rate = 0.5) %>% 
+  layer_dense(units = num_classes, activation = 'softmax')
+
+summary(model)
+
+# Compile model
+model %>% compile(
+  loss = loss_categorical_crossentropy,
+  optimizer = optimizer_adadelta(),
+  metrics = c('accuracy')
+)
+
+# Train model
+model %>% fit(
+  x_train, y_train,
+  batch_size = batch_size,
+  epochs = epochs,
+  validation_split = 0.2
+)
+
+
+
+
+scores <- model %>% evaluate(
+  x_test, y_test, verbose = 0
+)
+
+# Output metrics
+cat('Test loss:', scores[[1]], '\n')
+cat('Test accuracy:', scores[[2]], '\n')
+```
 
 
 
