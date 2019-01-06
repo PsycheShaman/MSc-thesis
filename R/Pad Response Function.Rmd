@@ -2,7 +2,9 @@
 title: "Pad Response Function"
 author: "Gerhard Viljoen"
 date: "12/11/2018"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}

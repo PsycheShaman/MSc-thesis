@@ -2,7 +2,8 @@
 title: "Particle Identification ML"
 author: "Gerhard Viljoen"
 date: "12/22/2018"
-output: 
+output:
+  word_document: default
   tufte::tufte_html: default
 ---
 
