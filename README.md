@@ -26,5 +26,5 @@ http://rpubs.com/PsycheShaman/442670
 
 http://rpubs.com/PsycheShaman/pad_response_function
 
-# Current Thesis Draft lives here:
+# An old Thesis Draft lives here:
 https://docs.google.com/document/d/1hObRn3Hdpw62AnmTrFjp70P_UdV0ntQOk6IIW8ZjjIQ/edit?usp=sharing
