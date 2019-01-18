@@ -1,0 +1,33 @@
+---
+title: "Binary Cross Entropy"
+author: "Gerhard Viljoen"
+date: "1/18/2019"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#For binary classification:
+
+```{r}
+cross.entropy <- function(y,p){
+  -(y * log(p,base = 10) + ((1-y)*(1 - log(p,base=10))))
+}
+
+#if the predicted class is 1:
+
+y <- 1
+
+p <- seq(0,1,0.01)
+
+loss <- cross.entropy(y,p)
+
+require(latex2exp)
+
+plot(x=p,y=loss, type="b", col=rainbow(250),cex=0.5, main = TeX("J($\\theta$) = -(y log(p)-(1-log(p)))"),ylab = "Cross Entropy", xlab = TeX("$\\hat{y}$"))
+```
+
