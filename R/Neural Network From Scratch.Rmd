@@ -1,0 +1,210 @@
+---
+title: "Neural Network From Scratch"
+author: "Gerhard Viljoen"
+date: "1/20/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = F,warning = F)
+```
+
+```{r}
+data(iris)
+
+x <- as.matrix(iris[,1:4])
+y <- ifelse(iris$Species=="setosa",1,0)
+```
+
+#Weights matrix for the first hidden layer:
+
+
+```{r}
+x <- scale(x)
+x <- t(x)
+
+w1 <- matrix(
+  runif(56 * ncol(x)),
+  nrow = nrow(x),
+  ncol = 56,
+  byrow = TRUE
+)
+```
+
+
+#Forward propogation
+
+```{r}
+#Output of layer 1, pre-nonlinear activation
+a0 <- x
+
+#init bias term=1
+b1 <- 1
+
+z1 <- (t(w1) %*% a0) + b1
+
+#Tanh activation function applied to input of layer1
+
+g1 <- function(z){
+  (2/(1+exp(-2*z)))-1
+}
+
+
+a1 <- g1(z=z1)
+
+#Weights matrix of layer 2
+
+w2 <- matrix(
+  runif(28 * nrow(a1)),
+  nrow = nrow(a1),
+  ncol = 28,
+  byrow = TRUE
+)
+
+#Output of layer2, pre-nonlinear activation
+
+b2 <- 1
+
+z2 <- (t(w2) %*% a1) + b2
+
+#Parametric Rectified Linear Unit (PReLU) activation function applied to input of layer1
+
+alpha=0.05
+
+g2 <- function(z, alpha){
+  
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    if(z[i,j]>=0){
+      z[i,j] <- z[i,j]
+    }else{
+      z[i,j] <- alpha * z[i,j]
+    }
+  }
+}
+  return(z)
+}
+
+a2 <- g2(z=z2,alpha)
+
+#We'll use the Tanh Activation function in layer 3
+
+w3 <- matrix(
+  runif(nrow(a2) * 4),
+  nrow = nrow(a2),
+  ncol = 4,
+  byrow = TRUE
+)
+
+b3 <- 1
+
+z3 <- (t(w3) %*% a2) + b3
+
+a3 <- g1(z3)
+
+#And in layer 4 we'll use SoftPlus
+
+w4 <- matrix(
+  runif(nrow(a3)),
+  nrow = nrow(a3),
+  ncol = 1,
+  byrow = TRUE
+)
+
+b4 <- 1
+
+z4 <- (t(w4) %*% a3) + b4
+
+g3 <- function(z){
+  log(1+exp(z),base=exp(1))
+}
+
+a4 <- g3(z4)
+
+#To provide a probability between 0 and 1, we do a bounded relu
+
+y.hat <- as.numeric(a4)
+y.hat.prob <- function(y.hat){
+  y.hat[y.hat<0] <- 0
+  y.hat[y.hat>1] <- 1
+  y.hat
+}
+
+y.hat <- y.hat.prob(y.hat)
+
+```
+
+#As an aside, before we train this network, let's plot the activation functions used in this neural network:
+
+```{r}
+#Tanh
+tanh.plot.x <- seq(-10,10,length.out = 100)
+tanh.plot.y <- g1(z=tanh.plot.x)
+
+plot(x=tanh.plot.x,y=tanh.plot.y,type="l",col="red",main="Tanh Activation Function", ylab = "Tanh(z)",xlab="z")
+abline(h=0,lty="dashed")
+abline(v=0,lty="dashed")
+
+#PReLU
+prelu.x <- as.matrix(seq(-10,10,length.out = 100))
+prelu.y <- g2(z=prelu.x,alpha)
+
+plot(x=prelu.x,y=prelu.y,type="l",col="red",main="PReLU Activation Function", ylab = "PReLU(z)",xlab="z")
+abline(h=0,lty="dashed")
+abline(v=0,lty="dashed")
+
+#Softplus//TODO:
+
+softplus.x <- seq(-10,10,length.out = 100)
+softplus.y <- g3(softplus.x)
+
+plot(x=softplus.x,y=softplus.y,type="l",col="red",main="SoftPlus Activation Function", ylab = "SoftPlus(z)",xlab="z")
+abline(h=0,lty="dashed")
+abline(v=0,lty="dashed")
+
+#"Bounded ReLU"
+
+brelu.x <- as.numeric(seq(-2,2,length.out = 1000))
+brelu.y <- y.hat.prob(y.hat=brelu.x)
+
+plot(x=brelu.x,y=brelu.y,type="l",col="red",main="Bounded ReLU Transformation", ylab = "p.model(y|x)",xlab="a4: output layer")
+abline(h=0,lty="dashed")
+abline(v=0,lty="dashed")
+abline(v=1,lty="dashed")
+abline(h=1,lty="dashed")
+```
+
+#After one epoch of passing all the data through the neural network, let's view the states of the various elements:
+
+```{r}
+par(mfrow=c(1,3))
+
+image(a0,yaxt='n',xaxt='n',main="Input data: 150 observations\nof 4 features")
+image(w1,yaxt='n',xaxt='n',main="Initialized weights for layer 1\nwith 56 neurons")
+image(as.matrix(b1),yaxt='n',xaxt='n',main="Bias term for layer 1,\ninitialized as b=1")
+
+image(a1,yaxt='n',xaxt='n',main="Input to layer 2 is\nTanh activated output of layer 1")
+image(w2,yaxt='n',xaxt='n',main="Layer 2 has 28 neurons \nDimensions of layer 2 weights\nis therefore 56x28",cex.main=0.8)
+image(as.matrix(b2),yaxt='n',xaxt='n',main="Bias term for layer 2,\ninitialized as b=1")
+
+image(a2,yaxt='n',xaxt='n',main="Input to layer 3 is\nTanh activated output of layer 2")
+image(w3,yaxt='n',xaxt='n',main="Layer 3 has 4 neurons \nDimensions of layer 3 weights\nis therefore 2x48",cex.main=0.8)
+
+image(a3,yaxt='n',xaxt='n',main="Input to layer 4 is\nTanh activated output of layer 3")
+image(w4,yaxt='n',xaxt='n',main="Layer 4 has 1 neuron \nDimensions of layer 4 weights\nis therefore 2x4",cex.main=0.8)
+
+par(mfrow=c(1,1))
+
+image(t(a4),yaxt='n',xaxt='n',main="The Raw Output of the Neural Network")
+image(as.matrix(y.hat),yaxt='n',xaxt='n',main="The Raw Output of the Neural Network\n
+      Transformed to probabilities for each obeservation")
+image(as.matrix(y),yaxt='n',xaxt='n',main="The True Class Labels (if 'setosa' then TRUE else FALSE end")
+```
+
+
+#Let's train this network
+
+```{r}
+
+```
+
