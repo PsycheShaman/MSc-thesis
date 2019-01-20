@@ -206,5 +206,71 @@ image(as.matrix(y),yaxt='n',xaxt='n',main="The True Class Labels (if 'setosa' th
 
 ```{r}
 
+cache.nn <- list(
+  #parameters for layer1:
+    #input
+  a0 <- a0,
+    #parameters tuned for this layer
+  w1 <- w1,
+  b1 <- b1,
+  z1 <- z1,
+  
+  #parameters for layer2:
+    #input
+  a1 <- a1,
+    #parameters tuned for this layer
+  w2 <- w2,
+  b2 <- b2,
+  z2 <- z2,
+  alpha <- alpha,
+#parameters for layer2:
+    #input  
+  a2 <- a2,
+    #parameters tuned for this layer
+  w3 <- w3,
+  b3 <- b3,
+  z3 <- z3,
+
+#parameters for layer2:
+    #input   
+  a3 <- a3,
+#parameters tuned for this layer
+  w4 <- w4,
+  b4 <- b4,
+  z4 <- z4,
+
+#parameters for layer2:
+    #input    
+  a3 <- a3,
+#parameters tuned for this layer
+  w4 <- w4,
+  b4 <- b4,
+  z4 <- z4,
+
+#output of neural network
+  a4 <- a4,
+#transformed to a probability
+  y.hat <- y.hat
+
+)
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
