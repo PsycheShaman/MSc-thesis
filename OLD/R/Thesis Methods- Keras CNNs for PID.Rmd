@@ -1,0 +1,305 @@
+---
+title: 'Thesis Methods: Keras CNNs for PID'
+author: "Gerhard Viljoen"
+date: "1/4/2019"
+output: 
+  tufte::tufte_html: default
+---
+
+```{r setup, include=FALSE,message=F,warning=F}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,echo=F}
+require(tufte)
+```
+
+#Data Preparation
+
+##Extract Particle ID
+
+```{r,eval=F}
+rm(list=ls())
+load("~/Thesis data/SemiFullData/fulljson.rdata")
+load("~/Thesis data/SemiFullData/cleanpads.rdata")
+pdg <- sapply(j,`[[`,"pdgCode")
+
+pdg <- as.numeric(pdg)
+
+pdg <- as.data.frame(pdg)
+pdg$index <- rownames(pdg)
+
+pdg$pdg <- ifelse(pdg$pdg %in% c(11,-11),"electron","pion")
+
+names(pdg) <- c("electron","index")
+
+pdg <- pdg[,c(2,1)]
+```
+
+##Extract cleaned pad data, removing pads that have no data (where all elements of pad image are == 0)
+
+```{r,eval=F}
+cnn.dat <- as.matrix(pad.df)
+
+zero.pads <- c()
+
+for(i in 1:nrow(cnn.dat)){
+  if(all(cnn.dat[i,]==0)){
+    zero.pads <- c(zero.pads,i)
+  }
+}
+
+cnn.dat <- cnn.dat[-zero.pads,]
+pdg <- pdg[-zero.pads,]
+
+rm("pad.df","j","zero.pads","i")
+```
+
+##Rename variables
+
+```{r,eval=F}
+all_x <- cnn.dat
+all_y <- pdg
+
+rm(cnn.dat)
+rm(pdg)
+
+#fix index column, to correct row-references altered by removal of empty images
+
+all_y$index <- 1:nrow(all_y)
+
+#scale x data
+
+all_x <- scale(all_x)
+```
+
+##Extract all Electrons' and all Pions' Row-indices, respectively
+
+```{r,eval=F}
+require(dplyr)
+
+all_electrons_ind <- which(all_y$electron=="electron")
+
+all_pions_ind <- which(all_y$electron=="pion")
+```
+
+##Put aside 500 electrons and 500 pions
+
+```{r,eval=F}
+#set seed for reproducibility
+set.seed(123)
+
+holdout_elec_ind <- sample(all_electrons_ind,size=500,replace=F)
+
+holdout_pion_ind <- sample(all_pions_ind,size=500,replace=F)
+
+holdout_ind <- c(holdout_elec_ind,holdout_pion_ind)
+
+test_x <- all_x[holdout_ind,]
+test_y <- all_y[holdout_ind,2]
+
+train_x <- all_x[-holdout_ind,]
+train_y <- all_y[-holdout_ind,2]
+```
+
+##Train the same basic Keras Convolutional Neural Network on the full training electron set, vs 8 same-size samples of pions, and one sample of pions containing the remaining particles that have not been trained on
+
+```{r,eval=F}
+all_train_pion_ind <- which(train_y=="pion")
+
+all_train_electron_ind <- which(train_y=="electron")
+
+N <- length(all_train_electron_ind)
+
+print(length(all_train_pion_ind)/N)
+```
+
+```{r,eval=F}
+train_ind_sample_1 <- c(all_train_electron_ind,all_train_pion_ind[1:N])
+
+new_start <- N+1
+new_end <- N+N
+
+train_ind_sample_2 <- c(all_train_electron_ind,all_train_pion_ind[new_start:new_end])
+
+new_start <- new_end+1
+new_end <- new_end+N
+
+train_ind_sample_3 <- c(all_train_electron_ind,all_train_pion_ind[new_start:new_end])
+
+new_start <- new_end+1
+new_end <- new_end+N
+
+train_ind_sample_4 <- c(all_train_electron_ind,all_train_pion_ind[new_start:new_end])
+
+new_start <- new_end+1
+new_end <- new_end+N
+
+train_ind_sample_5 <- c(all_train_electron_ind,all_train_pion_ind[new_start:new_end])
+
+new_start <- new_end+1
+new_end <- new_end+N
+
+train_ind_sample_6 <- c(all_train_electron_ind,all_train_pion_ind[new_start:new_end])
+
+new_start <- new_end+1
+new_end <- new_end+N
+
+train_ind_sample_7 <- c(all_train_electron_ind,all_train_pion_ind[new_start:new_end])
+
+new_start <- new_end+1
+new_end <- new_end+N
+
+train_ind_sample_8 <- c(all_train_electron_ind,all_train_pion_ind[new_start:new_end])
+
+new_start <- new_end+1
+new_end <- length(all_pions_ind)
+
+train_ind_sample_9 <- c(all_train_electron_ind,all_train_pion_ind[new_start:new_end])
+
+(length(train_ind_sample_1)-length(all_train_electron_ind))/N
+
+(length(train_ind_sample_9)-length(all_train_electron_ind))/N
+```
+
+
+```{r,eval=F}
+train_x_1 <- train_x[train_ind_sample_1,]
+train_y_1 <- train_y[train_ind_sample_1]
+
+train_x_2 <- train_x[train_ind_sample_2,]
+train_y_2 <- train_y[train_ind_sample_2]
+
+train_x_3 <- train_x[train_ind_sample_3,]
+train_y_3 <- train_y[train_ind_sample_3]
+
+train_x_4 <- train_x[train_ind_sample_4,]
+train_y_4 <- train_y[train_ind_sample_4]
+
+train_x_5 <- train_x[train_ind_sample_5,]
+train_y_5 <- train_y[train_ind_sample_5]
+
+train_x_6 <- train_x[train_ind_sample_6,]
+train_y_6 <- train_y[train_ind_sample_6]
+
+train_x_7 <- train_x[train_ind_sample_7,]
+train_y_7 <- train_y[train_ind_sample_7]
+
+train_x_8 <- train_x[train_ind_sample_8,]
+train_y_8 <- train_y[train_ind_sample_8]
+
+train_x_9 <- train_x[train_ind_sample_9,]
+train_y_9 <- train_y[train_ind_sample_9]
+
+```
+
+```{r,eval=F}
+rm("all_electrons_ind","all_pions_ind","all_train_electron_ind","all_train_pion_ind",
+   "all_x","all_y","train_x","train_y","holdout_elec_ind","holdout_ind","holdout_pion_ind",
+   "N","new_end","new_start","train_ind_sample_1","train_ind_sample_2","train_ind_sample_3",
+   "train_ind_sample_4","train_ind_sample_5","train_ind_sample_6","train_ind_sample_7",
+   "train_ind_sample_8","train_ind_sample_9")
+
+save.image(file="~/Thesis data/final_cnn/multisamples.rdata")
+```
+
+#Train CNN
+
+```{r}
+rm(list=ls())
+load("~/Thesis data/final_cnn/multisamples.rdata")
+```
+
+
+```{r}
+require(keras)
+
+batch_size <- 100
+num_classes <- 2
+epochs <- 100
+
+img_rows <- 11
+img_cols <- 24
+
+x_train <- train_x_1
+
+y_train <- ifelse(train_y_1=="electron",1,0)
+
+y_train <- to_categorical(y_train)
+
+x_train <- as.array(x_train)
+
+x_train <- array_reshape(x_train, c(nrow(y_train), img_rows, img_cols,1))
+
+input_shape <- c(img_rows, img_cols, 1)
+
+
+
+model <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = 'relu',
+                input_shape = input_shape) %>% 
+  layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = 'relu') %>% 
+  layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+  layer_dropout(rate = 0.25) %>% 
+  layer_flatten() %>% 
+  layer_dense(units = 128, activation = 'relu') %>% 
+  layer_dropout(rate = 0.5) %>% 
+  layer_dense(units = num_classes, activation = 'softmax')
+
+summary(model)
+
+# Compile model
+model %>% compile(
+  loss = loss_categorical_crossentropy,
+  optimizer = optimizer_adadelta(),
+  metrics = c('accuracy')
+)
+
+# Train model
+model %>% fit(
+  x_train, y_train,
+  batch_size = batch_size,
+  epochs = epochs,
+  validation_split = 0.2
+)
+
+l <- nrow(test_x)
+
+test_x <- as.array(test_x)
+
+test_x <- array_reshape(test_x, c(l, img_rows, img_cols,1))
+test_y <- ifelse(test_y=="electron",1,0)
+
+p <- model %>% predict_proba(test_x)
+
+p <- data.frame(cbind(test_y,p))
+
+names(p)[2:3] <- c("0","1")
+
+predict <- model %>% predict_classes(test_x)
+
+p <- data.frame(cbind(p,predict))
+
+
+t <- table(as.character(p$test_y),as.character(p$predict))
+```
+
+```{r}
+require(knitr)
+kable(t)
+```
+
+
+![](/Users/gerhard/Thesis data/final_cnn/Rplot.png)
+
+
+
+
+
+
+
+
+
+
+
+

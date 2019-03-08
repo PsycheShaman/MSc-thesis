@@ -1,0 +1,115 @@
+---
+title: "Bethe-Bloche Equation"
+author: "Gerhard Viljoen"
+date: "1/18/2019"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Create a Bethe-Bloch function
+
+```{r}
+#Planck's constant:
+h <- 6.62607004e-34
+
+#Speed of light m/s
+c <- 299792458
+
+#Fine structure constant
+alpha <- 1/137
+
+#Mass of an electron Mass/GeV
+
+m.e <- 0.005
+
+#Density n, atomic number Z, the fraction of the speed of light the particle is moving at, beta, and the particle's velocity v are specified as parameters to the equation
+
+
+dE.dx <- function(n,Z,v,beta){
+  -4 * pi * h^2 * c^2 * alpha^2 * ((n * Z)/(m.e * v^2)) * log(((2 * beta^2 * gamma^2 * c^2 * m.e)/(I.e)) - beta^2,base=exp(1))
+}
+
+#For an electron traversing a silicon detector:
+
+v <- seq(0.1*c,c,100000)
+
+beta <- v/c
+
+#Lorentz factor
+
+gamma <- 1/(sqrt(1-(v^2/c^2)))
+
+n <- 1
+
+
+
+Z <- 14
+
+#Effective ionization potential of the material
+
+I.e <- 10 * Z
+
+electron.y = dE.dx(n=n,Z=Z,v=v,beta=beta)
+
+require(latex2exp)
+
+m.e <- 273.13*m.e
+
+pion.y = dE.dx(n=n,Z=Z,v=v,beta=beta)
+
+
+
+plot(x=beta*gamma, y=-pion.y,type="l",main="Bethe-Bloch Curve of a Pion moving through Silicon", xlab = TeX("$\\beta\\cdot\\gamma$"),ylab=TeX("$-dE/dx$"),col="blue",cex.main=0.8)
+
+plot(x=beta*gamma, y=-electron.y,type="l",main="Bethe-Bloch Curve of an Electron moving through Silicon", xlab = TeX("$\\beta\\cdot\\gamma$"),ylab=TeX("$-dE/dx$"),col="red",cex.main=0.8)
+
+v <- seq(0.8*c,c,100000)
+
+beta <- v/c
+
+#Lorentz factor
+
+gamma <- 1/(sqrt(1-(v^2/c^2)))
+
+n <- 1
+
+m.e <- 0.005
+
+electron.y = dE.dx(n=n,Z=Z,v=v,beta=beta)
+
+m.e <- 273.13*m.e
+
+pion.y = dE.dx(n=n,Z=Z,v=v,beta=beta)
+
+plot(x=beta*gamma, y=-pion.y,type="l",main="Bethe-Bloch Curve of a Pion moving through Silicon \nat Speeds Upwards of 80% of the Speed of Light", xlab = TeX("$\\beta\\cdot\\gamma$"),ylab=TeX("$-dE/dx$"),col="blue",cex.main=0.8)
+
+plot(x=beta*gamma, y=-electron.y,type="l",main="Bethe-Bloch Curve of an Electron moving through Silicon \nat Speeds Upwards of 80% of the Speed of Light", xlab = TeX("$\\beta\\cdot\\gamma$"),ylab=TeX("$-dE/dx$"),col="red",cex.main=0.8)
+
+v <- seq(0.9*c,c,100000)
+
+beta <- v/c
+
+#Lorentz factor
+
+gamma <- 1/(sqrt(1-(v^2/c^2)))
+
+n <- 1
+
+m.e <- 0.005
+
+electron.y = dE.dx(n=n,Z=Z,v=v,beta=beta)
+
+m.e <- 273.13*m.e
+
+pion.y = dE.dx(n=n,Z=Z,v=v,beta=beta)
+
+plot(x=beta*gamma, y=-pion.y,type="l",main="Bethe-Bloch Curve of a Pion moving through Silicon \nat Speeds Upwards of 90% of the Speed of Light", xlab = TeX("$\\beta\\cdot\\gamma$"),ylab=TeX("$-dE/dx$"),col="blue",cex.main=0.8)
+
+plot(x=beta*gamma, y=-electron.y,type="l",main="Bethe-Bloch Curve of an Electron moving through Silicon \nat Speeds Upwards of 90% of the Speed of Light", xlab = TeX("$\\beta\\cdot\\gamma$"),ylab=TeX("$-dE/dx$"),col="red",cex.main=0.8)
+```
+

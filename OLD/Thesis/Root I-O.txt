@@ -1,0 +1,56 @@
+BACKGROUND: DATA EXTRACTION
+
+#ALIENSH
+
+Explain this here...
+
+#ROOT: File Input and Output
+
+##ROOT File Architecture
+
+ROOT files are comparable to UNIX file directories, an unlimited level of subdirectories containing files and other subdirectories can be contained in a ROOT file. Additionally, storage is implemented in a machine-independent manner.
+
+Within ROOT, a ROOT file (extension ".root"), exists as a TFile class, and is generally opened as follows:
+
+root[] TFile f("demo.root");
+
+
+The Map() method can be used to view the structure of the file contents, including the byte index of specific objects, their individual sizes in bytes, Classes and Class descriptions. The first 100 bytes contain the file header.
+
+File recovery can be implemented by scanning and reimplementing the information in the header. This method can obviously only revocer the structure of a file, not its contents.
+
+## The Logical Root File
+
+###Direct File Access
+
+Specific objects can be accessed using a list of TKey objects, which serve as indices to specific objects.We can get a list of TKeys, as follows:
+
+root[] f.GetListOfKeys()->Print();
+
+We can then load a specific object into memory using its TKey, for example if our TFile contains a single histogram (called "myHistogram" in this example), we will see something like this:
+
+TKey Name = myHistogram, Title = histo nr:1, Cycle = 1
+
+We can then load this histogram into memory by calling:
+
+root[] TH1F *myHistogram = (TH1F*)f.Get("myHistogram")
+
+###The Current Directory
+
+Upon initializing Root, the current directory is the ROOT session, i.e.:
+
+root[] gDirectory->pwd()
+Rint:/
+
+But, since a .root file is in essence a UNIX directory: once it is loaded into memory, it becomes the current directory, i.e.:
+
+root[] TFile f1("AFile1.root");
+root[] gDirectory->pwd()
+AFile1.root:/
+
+#The Tree Object:
+
+The TTree Class was specifically designed to optimize storage (i.e. in a more compressed format, and allowing faster access) of a large amount of objects of the same class.
+
+
+
