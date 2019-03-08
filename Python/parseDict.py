@@ -13,9 +13,13 @@ dat_files = os.listdir("/Users/gerhard/MSc-thesis")
 
 for i in range(0,len(dat_files)):
     if dat_files[i].endswith(".txt"):
-        if len(dat_files[i])==14:
+        if dat_files[i]=="pythonDict.txt":
             print(dat_files[i])
             d = open(dat_files[i])
+            appendFile = open(dat_files[i], 'a') # file object, notice 'a' mode
+            appendString = "}"
+            appendFile.write(appendString)
+            appendFile.close()
             d = d.read()
             d = literal_eval(d)
             jayson = json.dumps(d,indent=4,sort_keys=True)
