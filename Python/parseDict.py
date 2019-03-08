@@ -7,13 +7,13 @@ import os
 from ast import literal_eval
 import json
 
-os.chdir("/Users/gerhard/MSc-thesis/SemiFullData")
+os.chdir("/Users/gerhard/MSc-thesis")
 
-dat_files = os.listdir("/Users/gerhard/MSc-thesis/SemiFullData")
+dat_files = os.listdir("/Users/gerhard/MSc-thesis")
 
 for i in range(0,len(dat_files)):
     if dat_files[i].endswith(".txt"):
-        if len(dat_files[i])==16:
+        if len(dat_files[i])==14:
             print(dat_files[i])
             d = open(dat_files[i])
             d = d.read()
@@ -24,4 +24,5 @@ for i in range(0,len(dat_files)):
             name=name1+str(i)+name2
             outfile = open(name,"w")
             outfile.write(jayson)
+            print(name)
             
