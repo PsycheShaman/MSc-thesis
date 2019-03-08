@@ -36,9 +36,11 @@ http://rpubs.com/PsycheShaman/pad_response_function
 
 http://rpubs.com/PsycheShaman/BetheBloch
 
-# An old Thesis Draft lives here:
+# Previous Thesis drafts:
 https://docs.google.com/document/d/1hObRn3Hdpw62AnmTrFjp70P_UdV0ntQOk6IIW8ZjjIQ/edit?usp=sharing
+
+https://github.com/PsycheShaman/MSc-thesis/blob/master/Thesis/Thesis%20Draft%201.2.docx
 
 # Current Thesis Draft is:
 
-https://github.com/PsycheShaman/MSc-thesis/blob/master/Thesis/Thesis%20Draft%201.2.docx
+https://github.com/PsycheShaman/MSc-thesis/blob/master/NEW/Thesis%20Draft%201.3.docx
