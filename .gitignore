@@ -7,4 +7,5 @@ R/testdict/pions100.csv
 R/testdict/electrons100.csv
 R/testdict/test.json
 R/testdict/pythonDict.txt
-
+*.png
+*.jpg
