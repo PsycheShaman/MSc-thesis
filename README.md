@@ -10,6 +10,10 @@
 
 **Supervisor:** Dr Thomas Dietel
 
+# C++ ROOT code repository
+
+An additional C++ ROOT code repository pushing from HEP01 SSH server at UCT lives here: https://github.com/PsycheShaman/trdML-gerhard
+
 ## Some Exploratory data analysis lives here:
 
 ### Initial Deep Learning EDA:
