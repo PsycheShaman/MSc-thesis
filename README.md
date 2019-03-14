@@ -32,13 +32,15 @@ http://rpubs.com/PsycheShaman/nn_from_scratch
 
 http://rpubs.com/PsycheShaman/442670
 
-### Calculation of Pad Response Function (in progress):
+### Calculation of Pad Response Function (concept):
 
 http://rpubs.com/PsycheShaman/pad_response_function
 
-### The Bethe-Bloch Equation
+### The Bethe-Bloch Equation (concept):
 
 http://rpubs.com/PsycheShaman/BetheBloch
+
+### Evolution of Time Signal and Bethe-Bloch (practical implementation V1)
 
 # Previous Thesis drafts:
 https://docs.google.com/document/d/1hObRn3Hdpw62AnmTrFjp70P_UdV0ntQOk6IIW8ZjjIQ/edit?usp=sharing
