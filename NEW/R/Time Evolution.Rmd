@@ -1,0 +1,141 @@
+---
+title: "Time Evolution Plots"
+author: "Gerhard Viljoen"
+date: "3/14/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F,echo=F)
+```
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+```
+
+```{r}
+files <- list.files(path="/Users/gerhard/msc-thesis-data/000265309/JS",
+                    pattern="*json",
+                    full.names=T,
+                    recursive=FALSE)
+
+j <- fromJSON(files[2])
+
+for(i in 3:length(files)){
+  
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+rm(f)
+```
+
+#dEdX
+
+```{r}
+p <- sapply(j, `[[`,"momentum")
+
+pads <- sapply(j, `[[`,"layer0")
+
+dedX <- numeric(length(pads))
+
+nulls <- which(sapply(pads, is.null)==T)
+
+pads[nulls] <- NULL
+
+dedX <- dedX[-nulls]
+
+p <- p[-nulls]
+
+weird.lists <- c()
+
+for(i in pads){
+  weird.lists <- c(weird.lists,typeof(i))
+}
+
+weird.lists <- which(weird.lists!="integer")
+
+pads[weird.lists] <- NULL
+
+dedX <- dedX[-weird.lists]
+
+p <- p[-weird.lists]
+
+for(i in 1:length(pads)){
+  dedX[i] <- sum(pads[[i]])
+}
+
+pid <- sapply(j, `[[`,"pdgCode")
+
+pid <- pid[-nulls]
+pid <- pid[-weird.lists]
+
+pid <- ifelse(pid==211|pid==-211,"pion","electron")
+
+plotme <- data.frame(cbind(p,dedX,pid))
+```
+
+```{r}
+plot(x=p[plotme$pid=="electron"],y=dedX[plotme$pid=="electron"],pch=16,cex=0.1,main="Bethe-Bloch for Electrons",sub="Run 265309", xlab="PT",ylab="Integrated Charge Deposit")
+
+plot(x=p[plotme$pid=="pion"],y=dedX[plotme$pid=="pion"],pch=16,cex=0.1,main="Bethe-Bloch for Pions", sub="Run 265309", xlab="PT",ylab="Integrated Charge Deposit")
+```
+
+#Time Evolution of Signal
+
+```{r}
+w <- ncol(pads[[1]])
+l <- length(pads)
+time.evolution <- matrix(ncol = w,nrow=l)
+
+for(i in 1:nrow(time.evolution)){
+  time.evolution[i,] <- colSums(pads[[i]])
+}
+
+time.evol.e <- time.evolution[pid=="electron",]
+time.evol.p <- time.evolution[pid!="electron",]
+```
+
+#Time Evolution of signal for 10 electrons
+
+```{r}
+plot(x=1:w,y=time.evol.e[2,],type="b")
+plot(x=1:w,y=time.evol.e[3,],type="b")
+plot(x=1:w,y=time.evol.e[4,],type="b")
+plot(x=1:w,y=time.evol.e[5,],type="b")
+plot(x=1:w,y=time.evol.e[6,],type="b")
+plot(x=1:w,y=time.evol.e[7,],type="b")
+plot(x=1:w,y=time.evol.e[8,],type="b")
+plot(x=1:w,y=time.evol.e[9,],type="b")
+plot(x=1:w,y=time.evol.e[10,],type="b")
+plot(x=1:w,y=time.evol.e[11,],type="b")
+```
+
+#Time Evolution of signal for 10 pions
+
+```{r}
+plot(x=1:w,y=time.evol.p[2,],type="b")
+plot(x=1:w,y=time.evol.p[3,],type="b")
+plot(x=1:w,y=time.evol.p[4,],type="b")
+plot(x=1:w,y=time.evol.p[5,],type="b")
+plot(x=1:w,y=time.evol.p[6,],type="b")
+plot(x=1:w,y=time.evol.p[7,],type="b")
+plot(x=1:w,y=time.evol.p[8,],type="b")
+plot(x=1:w,y=time.evol.p[9,],type="b")
+plot(x=1:w,y=time.evol.p[10,],type="b")
+plot(x=1:w,y=time.evol.p[11,],type="b")
+```
+
+
+
+
+
+
+
+
+
+
+
+

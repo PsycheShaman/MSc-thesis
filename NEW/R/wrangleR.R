@@ -3,7 +3,7 @@ rm(list=ls())
 require(jsonlite)
 require(readtext)
 
-files <- list.files(path="/Users/gerhard/Thesis-data/JS/000265377",
+files <- list.files(path="/Users/gerhard/msc-thesis-data/000265309/JS",
                     pattern="*json",
                     full.names=T,
                     recursive=FALSE)
@@ -18,4 +18,4 @@ for(i in 3:length(files)){
 
 length(j)
 
-save(j,file="/Users/gerhard/Thesis-data/RDATA/000265377/000265377_fulljson.rdata")
+save(j,file="/Users/gerhard/msc-thesis-data/000265309/RDATA/000265309_fulljson.rdata")

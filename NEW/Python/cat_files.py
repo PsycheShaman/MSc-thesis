@@ -5,13 +5,13 @@ Spyder Editor
 This is a temporary script file.
 """
 
-import os
+#import os
 
-os.chdir("/Users/gerhard/Thesis-data")
+#os.chdir("/Users/gerhard/Thesis-data")
 
 import glob
 
-files = glob.glob("/Users/gerhard/Thesis-data/JS/000265377" + '/**/*.txt', recursive=True)
+files = glob.glob("/Users/gerhard/msc-thesis-data/000265309/RAW" + '/**/*.txt', recursive=True)
 
 a = list(range(1,len(files)-1))
 
@@ -40,7 +40,7 @@ for i in range(0,len(files_in_order)):
             d = d.read()
             d = literal_eval(d)
             jayson = json.dumps(d,indent=4,sort_keys=True)
-            name1="/Users/gerhard/Thesis-data/JS/000265377/js"
+            name1="/Users/gerhard/msc-thesis-data/000265309/JS/js"
             name2=".json"
             name=name1+str(i)+name2
             outfile = open(name,"w")
