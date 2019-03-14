@@ -40,7 +40,9 @@ http://rpubs.com/PsycheShaman/pad_response_function
 
 http://rpubs.com/PsycheShaman/BetheBloch
 
-### Evolution of Time Signal and Bethe-Bloch (practical implementation V1)
+### Evolution of Time Signal and Bethe-Bloch (practical implementation V1):
+
+http://rpubs.com/PsycheShaman/TimeEvolBetheBlochProto
 
 # Previous Thesis drafts:
 https://docs.google.com/document/d/1hObRn3Hdpw62AnmTrFjp70P_UdV0ntQOk6IIW8ZjjIQ/edit?usp=sharing
