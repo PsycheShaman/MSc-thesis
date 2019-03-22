@@ -2,14 +2,15 @@
 title: "Deep Learning v2"
 author: "Gerhard Viljoen"
 date: "3/15/2019"
-output: html_document
+output: tufte::tufte_html
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
 ```
 
 ```{r}
+require(tufte)
 #remove all objects from R session
 rm(list=ls())
 ```
@@ -74,7 +75,7 @@ j <- c(dat1,dat2,dat3)
 rm(dat1,dat2,dat3)
 ```
 
-```{r}
+```{r,eval=F}
 #extract p (in these earlier files, p is actually PT)
 p <- sapply(j, `[[`,"momentum")
 
@@ -124,7 +125,7 @@ pid <- ifelse(pid==211|pid==-211,"pion","electron")
 #plotme <- data.frame(cbind(p,dedX,pid))
 ```
 
-```{r}
+```{r,eval=F}
 #to plot the time evolution of the signal we construct an x-axis, which is simply the number of columns in the matrix of the ADC signal for each tracklet
 w <- ncol(pads[[1]])
 
@@ -145,7 +146,7 @@ for(i in 1:nrow(time.evolution)){
 
 #Momentum Distribution
 
-```{r}
+```{r,eval=F}
 #display the 5 number summary statistics and quantiles for momenta of electrons and pions in our dataset
 require(pander)
 pander(summary(p[pid=="electron"]))
@@ -165,102 +166,551 @@ abline(v=2,col="red")
 #get the proportion of data we will lose by doing this:
 length(p[p<=2])/length(p[p>2])
 ```
-#Let's set up a benchmark NN, only taking particles in the 2 GeV momentum range
 
 ```{r}
-#get indices of all particles with momentum >= 2 GeV
-benchmark.sample <- which(p<=2)
+#rm(i,l,j,nulls,w,weird.lists)
+#save.image("/Users/gerhard/msc-thesis-data/concept.rdata")
+load("/Users/gerhard/msc-thesis-data/concept.rdata")
 ```
 
 
-```{r}
-#free up memory
-rm(i,j,l,nulls,w,weird.lists,wrangle)
+#Feedforward NN for PID based on Time Evolution of the Signal
+
+```{r,eval=F}
+plot(x=1:ncol(time.evolution),y=time.evolution[1,],type="l")
+mu <- mean(time.evolution)
+
+time.evolution <- time.evolution/mu
+
+k <- nrow(time.evolution)
+
+dP.dt <- matrix(nrow = nrow(time.evolution),ncol=ncol(time.evolution)-1+
+                  ncol(time.evolution)-2+ncol(time.evolution)-2+
+                ncol(time.evolution)-3)
+
+
+for(i in 1:k){
+  
+  dP.dt[i,] <- a <- c(diff(time.evolution[i,]),diff(diff(time.evolution[i,])),
+                 diff(time.evolution[i,],2),diff(diff(time.evolution[i,],2)))
+  
+}
+
+x <- cbind(time.evolution,dP.dt)
+dedX <- scale(dedX)
+x <- cbind(x,dedX)
 ```
 
 ```{r}
-#get a list of all tracklet indices
-rm.pad.indices <- 1:length(pads)
-
-#get a list of all indices that are not in our benchmark sample
-rm.pad.indices <- rm.pad.indices[-benchmark.sample]
-
-#delete them from our list by setting them to NULL (R is weird like this)
-pads[rm.pad.indices] <- NULL
-
-#now we restrict the rest of the datasets we have to the same set of indices
-time.evolution <- time.evolution[benchmark.sample,]
-dedX <- dedX[benchmark.sample]
-pid <- pid[benchmark.sample]
-p <- p[benchmark.sample]
+#rm(pads,time.evolution,dP.dt,dedX,a,i,k,mu)
+#save.image("/Users/gerhard/msc-thesis-data/concept2.rdata")
+load("/Users/gerhard/msc-thesis-data/concept2.rdata")
 ```
 
 ```{r}
-plot(density(p[pid=="electron"]),col="red")
-lines(density(p[pid=="pion"]),col="blue")
-```
-
-
-```{r}
-#install.packages("keras")
-#conda activate py3keras
 library(keras)
-#install_keras()
-#system("conda activate r-tensorflow")
 use_condaenv('r-tensorflow')
-# 
-#
-reticulate::py_discover_config("keras")
-```
-
-```{r}
-all_x <- array(pads,dim=c(94202,14,24))
-
-pid <- ifelse(pid=="electron",1,0)
-
-all_y <- to_categorical(pid)
-
-val_indices <- base::sample(x=1:dim(all_x)[1],size=round(dim(all_x)[1]*0.25),replace=F)
-
-valid_x <- all_x[val_indices]
-train_x <- all_x[-val_indices]
-
-valid_y <- all_y[val_indices]
-train_y <- all_y[-val_indices]
+#conda activate py3keras
 ```
 
 
 ```{r}
-pid_model <- keras_model_sequential() %>%
-  layer_conv_2d(filters = 32,kernel_size = c(3,3), activation = "relu",input_shape = c(17,24,1)) %>%  layer_max_pooling_2d(pool_size = c(2,2)) %>%
-  layer_conv_2d(filters = 64,kernel_size = c(3,3), activation = "relu") %>% layer_max_pooling_2d(pool_size = c(2,2)) %>%
-  layer_flatten() %>%
-  layer_dense(units=256, activation = "relu",input_shape = c(17,24,1)) %>%
-  layer_dropout(rate=0.3) %>%
-  layer_dense(units=256, activation = "relu") %>%
-  layer_dropout(rate=0.3) %>%
-  layer_dense(units=2, activation = "softmax")
-
-pid_model
+pid <- ifelse(pid=="pion",0,1)
+pid <- to_categorical(pid)
 ```
 
 ```{r}
-rm(all_x,all_y,pads,time.evolution,benchmark.sample,p,pid,rm.pad.indices,val_indices,dedX)
-```
+rm(model1)
+model1 <- keras_model_sequential()
 
+model1 %>%
+  layer_dense(units = 256,activation = "relu",input_shape = ncol(x)) %>%
+  layer_dropout(rate=0.2) %>%
+  layer_dense(units=256,activation = "relu") %>%
+  layer_dropout(rate=0.2) %>%
+  layer_dense(units=2,activation = "softmax") 
 
-```{r}
-pid_model  %>% compile(
-  loss = "categorical_crossentropy",
-  optimizer = optimizer_adam(),
-  metrics = c("accuracy")
+model1 %>% compile(
+  optimizer=optimizer_sgd(),
+  loss="binary_crossentropy",
+  metrics=c("accuracy")
 )
 ```
 
 ```{r}
-require(ggplot2)
-hist1 <- pid_model %>% fit(train_x,train_y, epochs=5, verbose=2,
-                       view_metrics=T,validation_split=0.2)
+model1
+```
+
+
+```{r,eval=F}
+model1 %>% fit(x,pid,epochs=20,validation_split=0.2)
+model1 %>% save_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel1.h5")
+```
+
+```{r}
+load_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel1.h5")
+```
+
+![](/Users/gerhard/MSc-thesis/NEW/R/model1.png)
+
+```{r}
+rm(model2)
+model2 <- keras_model_sequential()
+
+model2%>%
+  layer_dense(units = 512,activation = "relu",input_shape = ncol(x)) %>%
+  layer_dropout(rate=0.2) %>%
+  layer_dense(units = 256,activation = "relu",input_shape = ncol(x)) %>%
+  layer_dropout(rate=0.2) %>%
+  layer_dense(units=128,activation = "relu") %>%
+  layer_dropout(rate=0.2) %>%
+  layer_dense(units=2,activation = "softmax") 
+
+model2 %>% compile(
+  optimizer=optimizer_sgd(),
+  loss="binary_crossentropy",
+  metrics=c("accuracy")
+)
+```
+
+```{r}
+model2
+```
+
+
+```{r,eval=F}
+model2 %>% fit(x,pid,epochs=20,validation_split=0.2)
+model2 %>% save_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel2.h5")
+```
+
+```{r}
+load_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel2.h5")
+```
+
+![](/Users/gerhard/MSc-thesis/NEW/R/model2.png)
+
+```{r}
+p1 <- predict_proba(model1,x)
+preds <- cbind(pid[,1],p1[,1])
+rm(p1)
+p1 <- predict_proba(model2,x)
+preds <- cbind(preds,p1[,1])
+rm(p1)
+```
+
+```{r}
+load("/Users/gerhard/msc-thesis-data/concept.rdata")
+```
+
+#Only time evolution, no lag differentials
+
+```{r}
+rm(model3)
+model3 <- keras_model_sequential()
+
+model3 %>%
+  layer_dense(units = 256,activation = "relu",input_shape = ncol(time.evolution)) %>%
+  layer_dropout(rate=0.2) %>%
+  layer_dense(units=256,activation = "relu") %>%
+  layer_dropout(rate=0.2) %>%
+  layer_dense(units=2,activation = "softmax") 
+
+model3 %>% compile(
+  optimizer=optimizer_sgd(),
+  loss="binary_crossentropy",
+  metrics=c("accuracy")
+)
+```
+
+```{r}
+model3
+```
+
+
+```{r,eval=F}
+pid <- ifelse(pid=="electron",1,0)
+pid <- to_categorical(pid)
+model3 %>% fit(time.evolution,pid,epochs=20,validation_split=0.2)
+model3 %>% save_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel3.h5")
+```
+
+```{r}
+load_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel3.h5")
+```
+
+![](/Users/gerhard/MSc-thesis/NEW/R/model3.png)
+
+```{r}
+p1 <- predict_proba(model3,time.evolution)
+preds <- cbind(preds,p1[,1])
+rm(p1)
+```
+
+#Back to derived features
+
+```{r}
+rm(model4)
+model4 <- keras_model_sequential()
+
+model4 %>%
+  layer_dense(units = 512,activation = "relu",input_shape = ncol(x),
+                            kernel_regularizer = regularizer_l1_l2(l1 = 0.001,l2=0.001)) %>%
+  layer_dropout(rate=0.6) %>%
+  layer_dense(units=512,activation = "relu",
+              kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dropout(rate=0.6) %>%
+  layer_dense(units=512,activation = "relu",
+                            kernel_regularizer = regularizer_l1_l2(l1 = 0.001,l2=0.001)) %>%
+  layer_dropout(rate=0.6) %>%
+  layer_dense(units=512,activation = "relu",
+                            kernel_regularizer = regularizer_l1_l2(l1 = 0.001,l2=0.001)) %>%
+  layer_dropout(rate=0.6) %>%
+  layer_dense(units=512,activation = "relu",
+                            kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dropout(rate=0.6) %>%
+  layer_dense(units=512,activation = "relu",
+                            kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dropout(rate=0.4) %>%
+  layer_dense(units=2,activation = "softmax") 
+
+model4 %>% compile(
+  optimizer=optimizer_sgd(lr=0.001),
+  loss="binary_crossentropy",
+  metrics=c("accuracy")
+)
+```
+
+```{r}
+model4
+```
+
+```{r}
+rm(j,pads,time.evolution,dedX)
+preds <- cbind(preds,p)
+preds <- as.data.frame(preds)
+names(preds) <- c("actual","p1","p2","p3","momentum")
+```
+
+
+```{r,eval=F}
+model4 %>% fit(x,pid,epochs=50,validation_split=0.2, batch_size=128)
+model4 %>% save_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel4.h5")
+```
+
+![](/Users/gerhard/MSc-thesis/NEW/R/model4.png)
+
+```{r}
+rm(model4.1)
+model4.1 <- keras_model_sequential()
+
+model4.1 %>%
+  layer_dense(units = 512,activation = "relu",input_shape = ncol(x),
+                            kernel_regularizer = regularizer_l1_l2(l1 = 0.001,l2=0.001)) %>%
+  layer_dropout(rate=0.3) %>%
+  layer_dense(units=512,activation = "relu",
+              kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dropout(rate=0.3) %>%
+  layer_dense(units=512,activation = "relu",
+                            kernel_regularizer = regularizer_l1_l2(l1 = 0.001,l2=0.001)) %>%
+  layer_dropout(rate=0.3) %>%
+  layer_dense(units=512,activation = "relu",
+                            kernel_regularizer = regularizer_l1_l2(l1 = 0.001,l2=0.001)) %>%
+  layer_dropout(rate=0.3) %>%
+  layer_dense(units=512,activation = "relu",
+                            kernel_regularizer = regularizer_l1_l2(l1 = 0.001,l2=0.001)) %>%
+  layer_dropout(rate=0.3) %>%
+  layer_dense(units=512,activation = "relu",
+                            kernel_regularizer = regularizer_l1_l2(l1 = 0.001,l2=0.001)) %>%
+  layer_dropout(rate=0.4) %>%
+  layer_dense(units=2,activation = "softmax") 
+
+model4.1 %>% compile(
+  optimizer=optimizer_adam(),
+  loss="binary_crossentropy",
+  metrics=c("accuracy")
+)
+```
+
+```{r}
+model4.1
+```
+
+
+```{r,eval=F}
+model4.1 %>% fit(x,pid,epochs=50,validation_split=0.3, batch_size=512)
+model4.1 %>% save_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel4_1.h5")
+```
+
+```{r}
+load_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel4_1.h5")
+```
+
+![](/Users/gerhard/MSc-thesis/NEW/R/model4_1.png)
+
+```{r}
+rm(model4.2)
+model4.2 <- keras_model_sequential()
+
+model4.2 %>%
+  layer_dense(units = 512,activation = "relu",input_shape = ncol(x),
+                            kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dense(units=512,activation = "relu",
+              kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dense(units=512,activation = "relu",
+                            kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dense(units=256,activation = "relu",
+                            kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dense(units=256,activation = "relu",
+                            kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dense(units=256,activation = "relu",
+                            kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dense(units=2,activation = "softmax") 
+
+model4.2 %>% compile(
+  optimizer=optimizer_adam(),
+  loss="binary_crossentropy",
+  metrics=c("accuracy")
+)
+```
+
+```{r}
+model4.2
+```
+
+
+```{r,eval=F}
+model4.2 %>% fit(x,pid,epochs=50,validation_split=0.3, batch_size=512)
+model4.2 %>% save_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel4_2.h5")
+```
+
+```{r}
+load_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel4_2.h5")
+```
+
+![](/Users/gerhard/MSc-thesis/NEW/R/model4_2.png)
+
+```{r}
+rm(model2.1)
+model2.1 <- keras_model_sequential()
+
+model2.1%>%
+  layer_dense(units = 512,activation = "relu",input_shape = ncol(x),
+              kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dense(units = 256,activation = "relu",input_shape = ncol(x),
+              kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dense(units=128,activation = "relu") %>%
+  layer_dropout(rate=0.3) %>%
+  layer_dense(units=2,activation = "softmax") 
+
+model2.1 %>% compile(
+  optimizer=optimizer_adamax(),
+  loss="binary_crossentropy",
+  metrics=c("accuracy","categorical_accuracy","mae")
+)
+```
+
+```{r}
+model2
+```
+
+
+```{r,eval=F}
+model2.1 %>% fit(x,pid,epochs=50,validation_split=0.3)
+model2.1 %>% save_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodel2.h5")
+```
+
+![](/Users/gerhard/msc-thesis/NEW/R/model2_1.png)
+
+#New features:
+
+
+
+```{r}
+p1 <- predict_proba(model4.2,x)
+preds <- cbind(preds,p1[,1])
+rm(p1)
+```
+
+```{r}
+p1 <- predict_proba(model2.1,x)
+preds <- cbind(preds,p1[,1])
+rm(p1)
+```
+
+```{r}
+preds <- as.data.frame(preds)
+names(preds)[c(6,7)] <- c("p4.2","p2.1")
+preds <- preds[,c(1:4,6,7,5)]
+```
+
+```{r}
+table(preds$actual)
+20777/174448
+```
+
+
+
+```{r}
+load("/Users/gerhard/msc-thesis-data/concept.rdata")
+```
+
+```{r}
+threesum1 <- time.evolution[,1]+time.evolution[,2]+time.evolution[,3]
+threesum2 <- time.evolution[,4]+time.evolution[,5]+time.evolution[,6]
+threesum3 <- time.evolution[,7]+time.evolution[,7]+time.evolution[,9]
+threesum4 <- time.evolution[,10]+time.evolution[,11]+time.evolution[,12]
+threesum5 <- time.evolution[,13]+time.evolution[,14]+time.evolution[,15]
+threesum6 <- time.evolution[,16]+time.evolution[,17]+time.evolution[,18]
+threesum7 <- time.evolution[,19]+time.evolution[,20]+time.evolution[,21]
+threesum8 <- time.evolution[,22]+time.evolution[,23]+time.evolution[,24]
+
+threesum <- cbind(threesum1,threesum2,
+                  threesum3,threesum4,threesum5,threesum6,threesum7,
+                  threesum8)
+```
+
+```{r}
+rm(pads,threesum1,threesum2,threesum3,threesum4,threesum5,threesum6,threesum7,threesum8,dedX)
+rm(p,x,model1,model2,model2.1,model3,model4,model4.1,model4.2)
+```
+
+
+```{r}
+mu <- mean(threesum)
+
+threesum <- threesum/mu
+
+k <- nrow(threesum)
+
+dP.dt <- matrix(nrow = nrow(threesum),ncol=ncol(threesum)-1+ncol(threesum)-2)
+
+
+for(i in 1:k){
+  
+  dP.dt[i,] <- a <- c(diff(threesum[i,]),diff(diff(threesum[i,])))
+  
+}
+
+x_2 <- cbind(threesum,dP.dt)
+
+pid <- ifelse(pid=="electron",1,0)
+pid <- to_categorical(pid)
+```
+
+```{r}
+rm(model.z)
+model.z <- keras_model_sequential()
+
+model.z%>%
+  layer_dense(units = 512,activation = "relu",input_shape = ncol(x_2)) %>%
+  layer_dropout(rate=0.35) %>%
+    layer_dense(units = 512,activation = "relu",
+              kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dense(units = 256,activation = "relu",
+              kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dense(units=128,activation = "relu",
+              kernel_regularizer = regularizer_l2(l = 0.001)) %>%
+  layer_dense(units=2,activation = "softmax") 
+
+model.z %>% compile(
+  optimizer=optimizer_adamax(),
+  loss="binary_crossentropy",
+  metrics=c("accuracy","categorical_accuracy","mae")
+)
+```
+
+```{r}
+model.z
+```
+
+```{r,eval=F}
+model.z %>% fit(x_2,pid,epochs=25,validation_split=0.3)
+model.z %>% save_model_hdf5("/Users/gerhard/Msc-thesis/NEW/Rmodelz.h5")
+```
+
+```{r}
+p1 <- predict_proba(model.z,x_2)
+preds <- cbind(preds[,1:6],p1[,1],preds[,7])
+names(preds)[c(7,8)] <- c("pz","momentum")
+```
+
+
+```{r}
+rm(dP.dt,threesum,x_2,a,k,i,model.z,mu)
+rm(p1)
+```
+
+```{r}
+rs <- numeric(nrow(time.evolution))
+for(i in 1:nrow(time.evolution)){
+  rs[i] <- sum(time.evolution[i,])
+}
+
+zeros <- which(rs==0)
+
+pid <- pid[-zeros,]
+preds <- preds[-zeros,]
+time.evolution <- time.evolution[-zeros]
+
+rm(i, zeros)
+```
+
+```{r}
+pred.f <- as.matrix(preds[,c(2:7)])
+
+p.f <- numeric(nrow(pred.f))
+
+for(i in 1:length(p.f)){
+  p.f[i] <- mean(as.numeric(unlist(pred.f[i,])))
+}
+
+p.a <- data.frame(cbind(preds$actual,p.f))
+p.a$err <- p.a$V1-p.a$p.f
+
+hist(p.a$err)
+hist(p.a$p.f,breaks=100)
+```
+
+```{r}
+p.a.low.p <- which(preds$momentum<=2)
+
+preds <- preds[p.a.low.p,]
+p.a <- p.a[p.a.low.p,]
+
+final.prediction <- ifelse(p.a$p.f>.5,1,0)
+
+p.a <- data.frame(cbind(p.a,final.prediction))
+pions <- which(p.a$V1==1)
+electrons <- which(p.a$V1==0)
+
+pions <- p.a[pions,]
+electrons <- p.a[electrons,]
+
+pions <- pions[,c(1,4)]
+electrons <- electrons[,c(1,4)]
+
+electrons$correct <- electrons[,1]==electrons[,2]
+pions$correct <- pions[,1]==pions[,2]
+
+p.top <- length(which(pions$correct==T))
+p.bottom <- length(pions$correct)
+
+p.accuracy <- p.top/p.bottom
+
+e.top <- length(which(electrons$correct==T))
+e.bottom <- length(electrons$correct)
+
+e.accuracy <- e.top/e.bottom
+```
+
+
+```{r}
+e.accuracy
+```
+
+
+```{r}
+p.accuracy
 ```
 
 
