@@ -1,0 +1,270 @@
+---
+title: "Deep Learning v2"
+author: "Gerhard Viljoen"
+date: "3/15/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#remove all objects from R session
+rm(list=ls())
+```
+
+```{r,echo=F}
+load("/Users/gerhard/msc-thesis-data/000265309/RDATA/000265309_fulljson.rdata")
+j1 <- j
+rm(j)
+
+load("/Users/gerhard/msc-thesis-data/000265377/RDATA/000265377_fulljson.rdata")
+j2 <- j
+rm(j)
+
+load("/Users/gerhard/msc-thesis-data/000265378/RDATA/000265378_fulljson.rdata")
+j <- c(j1,j1,j)
+rm(j1,j2)
+```
+
+```{r,eval=F}
+#define a function to concatenate all json objects into an R list object
+wrangle <- function(run){
+  
+  #load required opackages
+  require(jsonlite)
+  require(readtext)
+  
+  #list all files in the run specified as the input parameter to this function
+  files <- list.files(path=paste0("/Users/gerhard/msc-thesis-data/000",run,"/JS"),
+                      pattern="*json",
+                      full.names=T,
+                      recursive=TRUE)
+  
+  #use the jsonlite::fromJSON function to convert JSON into list, starting at position 2, since the first JSON object is empty (only contains: "}")
+  j <- fromJSON(files[2])
+  
+  #iterate through the rest of the files in the specified run
+  for(i in 3:length(files)){
+    
+    #convert each into a list and concatenate them to the preceding list
+    f <- fromJSON(files[i])
+    j <- c(j,f)
+  }
+  
+j
+  
+}
+
+```
+
+```{r,eval=F}
+#run the function defined above on the following runs
+dat1 <- wrangle("265309")
+dat2 <- wrangle("265377")
+dat3 <- wrangle("265378")
+```
+
+```{r,eval=F}
+#concat all json files
+j <- c(dat1,dat2,dat3)
+
+#free up memory
+rm(dat1,dat2,dat3)
+```
+
+```{r}
+#extract p (in these earlier files, p is actually PT)
+p <- sapply(j, `[[`,"momentum")
+
+#get ADC signal
+pads <- sapply(j, `[[`,"layer0")
+
+#set up an empty vector to save the integrated charge deposit per pad
+dedX <- numeric(length(pads))
+
+#get particle Id
+pid <- sapply(j, `[[`,"pdgCode")
+
+#find out which pads have no data
+nulls <- which(sapply(pads, is.null)==T)
+
+#remove those indices from all lists we've created
+pads[nulls] <- NULL
+dedX <- dedX[-nulls]
+p <- p[-nulls]
+pid <- pid[-nulls]
+
+#sometimes there are some weird empty lists within lists, not sure what causes them but let's remove them so we can move forward for now
+weird.lists <- c()
+
+#in this loop we find the datatype for each element in the list of pads
+for(i in pads){
+  weird.lists <- c(weird.lists,typeof(i))
+}
+
+#we then find those entries which are not integer matrices
+weird.lists <- which(weird.lists!="integer")
+
+#remove them from all the lists we've created:
+pads[weird.lists] <- NULL
+dedX <- dedX[-weird.lists]
+p <- p[-weird.lists]
+pid <- pid[-weird.lists]
+
+#integrated charge is the sum of ADC signal
+for(i in 1:length(pads)){
+  dedX[i] <- sum(pads[[i]])
+}
+
+#assign particle ID based on PDG code
+pid <- ifelse(pid==211|pid==-211,"pion","electron")
+
+#plotme <- data.frame(cbind(p,dedX,pid))
+```
+
+```{r}
+#to plot the time evolution of the signal we construct an x-axis, which is simply the number of columns in the matrix of the ADC signal for each tracklet
+w <- ncol(pads[[1]])
+
+#we will fill each entry in the vector thus constructed, for each tracklet in our dataset
+l <- length(pads)
+
+#therefore for the time evolution of the signal, we construct a matrix with an integrated charge deposit signal in each time bin (number of columns), for each tracklet in our dataset (number of rows)
+time.evolution <- matrix(ncol = w,nrow=l)
+
+#take the column sums for each entry and be done with it
+for(i in 1:nrow(time.evolution)){
+  time.evolution[i,] <- colSums(pads[[i]])
+}
+
+#remove the strange entries spoken about above
+#time.evolution <- time.evolution[-c(nulls,weird.lists),]
+```
+
+#Momentum Distribution
+
+```{r}
+#display the 5 number summary statistics and quantiles for momenta of electrons and pions in our dataset
+require(pander)
+pander(summary(p[pid=="electron"]))
+pander(summary(p[pid=="pion"]))
+
+pander(quantile(p[pid=="electron"]))
+pander(quantile(p[pid=="pion"]))
+
+#plot histograms for momentum distributions for electrons and pions
+par(mfrow=c(1,2))
+hist(p[pid=="electron"],breaks=1000)
+#add a vertical red line to show which particles will be cut from our data if we cut on p<=2
+abline(v=2,col="red")
+hist(p[pid=="pion"],breaks=1000)
+abline(v=2,col="red")
+
+#get the proportion of data we will lose by doing this:
+length(p[p<=2])/length(p[p>2])
+```
+#Let's set up a benchmark NN, only taking particles in the 2 GeV momentum range
+
+```{r}
+#get indices of all particles with momentum >= 2 GeV
+benchmark.sample <- which(p<=2)
+```
+
+
+```{r}
+#free up memory
+rm(i,j,l,nulls,w,weird.lists,wrangle)
+```
+
+```{r}
+#get a list of all tracklet indices
+rm.pad.indices <- 1:length(pads)
+
+#get a list of all indices that are not in our benchmark sample
+rm.pad.indices <- rm.pad.indices[-benchmark.sample]
+
+#delete them from our list by setting them to NULL (R is weird like this)
+pads[rm.pad.indices] <- NULL
+
+#now we restrict the rest of the datasets we have to the same set of indices
+time.evolution <- time.evolution[benchmark.sample,]
+dedX <- dedX[benchmark.sample]
+pid <- pid[benchmark.sample]
+p <- p[benchmark.sample]
+```
+
+```{r}
+plot(density(p[pid=="electron"]),col="red")
+lines(density(p[pid=="pion"]),col="blue")
+```
+
+
+```{r}
+#install.packages("keras")
+#conda activate py3keras
+library(keras)
+#install_keras()
+#system("conda activate r-tensorflow")
+use_condaenv('r-tensorflow')
+# 
+#
+reticulate::py_discover_config("keras")
+```
+
+```{r}
+all_x <- array(pads,dim=c(94202,14,24))
+
+pid <- ifelse(pid=="electron",1,0)
+
+all_y <- to_categorical(pid)
+
+val_indices <- base::sample(x=1:dim(all_x)[1],size=round(dim(all_x)[1]*0.25),replace=F)
+
+valid_x <- all_x[val_indices]
+train_x <- all_x[-val_indices]
+
+valid_y <- all_y[val_indices]
+train_y <- all_y[-val_indices]
+```
+
+
+```{r}
+pid_model <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32,kernel_size = c(3,3), activation = "relu",input_shape = c(17,24,1)) %>%  layer_max_pooling_2d(pool_size = c(2,2)) %>%
+  layer_conv_2d(filters = 64,kernel_size = c(3,3), activation = "relu") %>% layer_max_pooling_2d(pool_size = c(2,2)) %>%
+  layer_flatten() %>%
+  layer_dense(units=256, activation = "relu",input_shape = c(17,24,1)) %>%
+  layer_dropout(rate=0.3) %>%
+  layer_dense(units=256, activation = "relu") %>%
+  layer_dropout(rate=0.3) %>%
+  layer_dense(units=2, activation = "softmax")
+
+pid_model
+```
+
+```{r}
+rm(all_x,all_y,pads,time.evolution,benchmark.sample,p,pid,rm.pad.indices,val_indices,dedX)
+```
+
+
+```{r}
+pid_model  %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = optimizer_adam(),
+  metrics = c("accuracy")
+)
+```
+
+```{r}
+require(ggplot2)
+hist1 <- pid_model %>% fit(train_x,train_y, epochs=5, verbose=2,
+                       view_metrics=T,validation_split=0.2)
+```
+
+
+
+
+
+

@@ -1,21 +1,28 @@
-rm(list=ls())
+#rm(list=ls())
 
-require(jsonlite)
-require(readtext)
-
-files <- list.files(path="/Users/gerhard/msc-thesis-data/000265309/JS",
-                    pattern="*json",
-                    full.names=T,
-                    recursive=FALSE)
-
-j <- fromJSON(files[2])
-
-for(i in 3:length(files)){
+wrangle <- function(run){
   
-  f <- fromJSON(files[i])
-  j <- c(j,f)
+  require(jsonlite)
+  require(readtext)
+  
+  files <- list.files(path=paste0("/Users/gerhard/msc-thesis-data/000",run,"/JS"),
+                      pattern="*json",
+                      full.names=T,
+                      recursive=TRUE)
+  
+  j <- fromJSON(files[2])
+  
+  for(i in 3:length(files)){
+    
+    f <- fromJSON(files[i])
+    j <- c(j,f)
+  }
+  
+j
+  
 }
 
-length(j)
+dat1 <- wrangle("265309")
+dat2 <- wrangle("265377")
+dat3 <- wrangle("265378")
 
-save(j,file="/Users/gerhard/msc-thesis-data/000265309/RDATA/000265309_fulljson.rdata")
