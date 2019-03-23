@@ -46,6 +46,10 @@ http://rpubs.com/PsycheShaman/BetheBloch
 
 http://rpubs.com/PsycheShaman/TimeEvolBetheBlochProto
 
+### Informative Feature Generation using PCA:
+
+http://rpubs.com/PsycheShaman/479110
+
 # Previous Thesis drafts:
 https://docs.google.com/document/d/1hObRn3Hdpw62AnmTrFjp70P_UdV0ntQOk6IIW8ZjjIQ/edit?usp=sharing
 
