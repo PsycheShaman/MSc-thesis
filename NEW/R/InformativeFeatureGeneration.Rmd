@@ -1,0 +1,113 @@
+---
+title: "Informative Feature Generation"
+author: "Gerhard Viljoen"
+date: "3/23/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,eval=F}
+load("/Users/gerhard/msc-thesis-data/concept.rdata")
+
+rs <- numeric(nrow(time.evolution))
+for(i in 1:nrow(time.evolution)){
+  rs[i] <- sum(time.evolution[i,])
+}
+
+zeros <- which(rs==0)
+
+pid <- ifelse(pid=="electron",1,0)
+pid <- as.numeric(unlist(pid))
+
+pid <- pid[-zeros]
+p <- p[-zeros]
+dedX <- dedX[-zeros]
+time.evolution <- time.evolution[-zeros,]
+pads[zeros] <- NULL
+
+p.le.t.2 <- which(p<=2)
+
+pid <- pid[p.le.t.2]
+dont.keep <- 1:length(pads)
+dont.keep <- dont.keep[-p.le.t.2]
+
+pads[dont.keep] <- NULL
+
+dedX <- dedX[p.le.t.2]
+p <- p[p.le.t.2]
+pid <- pid[p.le.t.2]
+time.evolution <- time.evolution[p.le.t.2,]
+
+rm(rs,zeros,i,dont.keep)
+
+rolled.out.pads <- sapply(pads,rbind)
+rolled.out.pads <- t(rolled.out.pads)
+
+if(dim(pads[[1]])[1]==17 && dim(pads[[1]])[2]==24){
+  17*24==ncol(rolled.out.pads)&&nrow(rolled.out.pads)==length(pads)
+}
+```
+
+```{r,eval=F}
+rolled.out.pca <- prcomp(rolled.out.pads)
+```
+
+```{r,eval=F}
+dimnames(rolled.out.pads) <- NULL
+```
+
+```{r,eval=F}
+require(pander)
+pander(head(rolled.out.pca$rotation[,1:6]))
+```
+
+
+```{r,eval=F}
+save(pads,file="/Users/gerhard/msc-thesis-data/pads")
+save(rolled.out.pads,file="/Users/gerhard/msc-thesis-data/rolled.out.pads")
+save(rolled.out.pca,file="/Users/gerhard/msc-thesis-data/rolled.out.pca")
+save(time.evolution,file="/Users/gerhard/msc-thesis-data/time.evolution")
+save(dedX,file="/Users/gerhard/msc-thesis-data/dedX")
+save(p,file="/Users/gerhard/msc-thesis-data/p")
+save(pid,file="/Users/gerhard/msc-thesis-data/pid")
+rm(p.le.t.2)
+```
+
+```{r}
+#//TODO: load...
+```
+
+
+
+```{r,eval=F}
+biplot(rolled.out.pca, scale = 0)
+```
+
+![](/Users/gerhard/MSc-thesis/NEW/pca.png)
+
+```{r}
+std.dev <- rolled.out.pca$sdev
+var <- std.dev^2
+prop.var.ex <- var/sum(var)
+plot(cumsum(prop.var.ex), xlab = "Principal Component",
+              ylab = "Cumulative Proportion of Variance Explained",
+              type = "b")
+abline(v=min(which(cumsum(prop.var.ex)>=0.9)),col="blue")
+text("90%",x=min(which(cumsum(prop.var.ex)>=0.9)+20),y=0.2,col="blue")
+text(as.character(min(which(cumsum(prop.var.ex)>=0.9))),x=min(which(cumsum(prop.var.ex)>=0.9)+15),y=0.3,col="blue")
+abline(v=min(which(cumsum(prop.var.ex)>=0.95)),col="purple")
+text("95%",x=min(which(cumsum(prop.var.ex)>=0.95)+20),y=0.2,col="purple")
+text(as.character(min(which(cumsum(prop.var.ex)>=0.95))),x=min(which(cumsum(prop.var.ex)>=0.95)+15),y=0.3,col="purple")
+abline(v=min(which(cumsum(prop.var.ex)>=0.99)),col="red")
+text("99%",x=min(which(cumsum(prop.var.ex)>=0.99)+20),y=0.2,col="red")
+text(as.character(min(which(cumsum(prop.var.ex)>=0.99))),x=min(which(cumsum(prop.var.ex)>=0.99)+15),y=0.3,col="red")
+```
+
+
+
+
+
+
