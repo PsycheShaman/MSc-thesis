@@ -1,0 +1,171 @@
+---
+title: "NewDataTest"
+author: "Gerhard Viljoen"
+date: "3/31/2019"
+output: tufte::tufte_html
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(tufte)
+```
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+j <- fromJSON("/Users/gerhard/example0.json")
+```
+
+```{r}
+#primary ID table
+run_number <- sapply(j, `[[`,"RunNumber")
+event <- sapply(j, `[[`,"Event")
+v0_id <- sapply(j, `[[`,"V0TrackID")
+track <- sapply(j, `[[`,"track")
+eta <- sapply(j, `[[`,"Eta")
+theta <- sapply(j, `[[`,"Theta")
+phi <- sapply(j, `[[`,"Phi")
+p <- sapply(j, `[[`,"P")
+pt <- sapply(j, `[[`,"PT")
+de_dx <- sapply(j, `[[`,"dEdX")
+n_sig_e <- sapply(j, `[[`,"nSigmaElectron")
+n_sig_p <- sapply(j, `[[`,"nSigmaPion")
+particle <- sapply(j, `[[`,"pdgCode")
+
+
+tracks <- data.frame(cbind(run_number,event, v0_id,
+                           track, eta, theta,phi,p,
+                           pt,de_dx,n_sig_p,n_sig_e,
+                           particle))
+
+tracks$id <- paste(tracks$run_number,tracks$event,tracks$v0_id,tracks$track,sep="_")
+
+tracks$electron <- ifelse(abs(tracks$particle)==211,1,0)
+
+nTracks <- length(track)
+
+layer <- data.frame(rep(0:5,nTracks))
+
+names(layer) <- "layer"
+
+layer$track_id <- tracks$id
+
+layer$id <- paste(layer$track_id,layer$layer,sep="_")
+
+row0 <- sapply(j, `[[`,"row0")
+col0 <- sapply(j, `[[`,"col0")
+det0 <- sapply(j, `[[`,"det0")
+row1 <- sapply(j, `[[`,"row1")
+col1 <- sapply(j, `[[`,"col1")
+det1 <- sapply(j, `[[`,"det1")
+row2 <- sapply(j, `[[`,"row2")
+col2 <- sapply(j, `[[`,"col2")
+det2 <- sapply(j, `[[`,"det2")
+row3 <- sapply(j, `[[`,"row3")
+col3 <- sapply(j, `[[`,"col3")
+det3 <- sapply(j, `[[`,"det3")
+row4 <- sapply(j, `[[`,"row4")
+col4 <- sapply(j, `[[`,"col4")
+det4 <- sapply(j, `[[`,"det4")
+row5 <- sapply(j, `[[`,"row5")
+col5 <- sapply(j, `[[`,"col5")
+det5 <- sapply(j, `[[`,"det5")
+
+null_check <- function(l){
+  nulls <- sapply(l,is.null)
+  
+  if(any(nulls)){
+    
+  l[nulls] <- NA
+  l <- unlist(l)
+  l
+    }else{
+    l
+  }
+}
+
+row0 <- null_check(row0)
+row1 <- null_check(row1)
+row2 <- null_check(row2)
+row3 <- null_check(row3)
+row4 <- null_check(row4)
+row5 <- null_check(row5)
+
+col0 <- null_check(col0)
+col1 <- null_check(col1)
+col2 <- null_check(col2)
+col3 <- null_check(col3)
+col4 <- null_check(col4)
+col5 <- null_check(col5)
+
+det0 <- null_check(det0)
+det1 <- null_check(det1)
+det2 <- null_check(det2)
+det3 <- null_check(det3)
+det4 <- null_check(det4)
+det5 <- null_check(det5)
+
+row <- c()
+col <- c()
+det <- c()
+
+for(i in 1:length(track)){
+  
+    r <- c(as.numeric(row0[i]),
+         as.numeric(row1[i]),
+         as.numeric(row2[i]),
+         as.numeric(row3[i]),
+         as.numeric(row4[i]),
+         as.numeric(row5[i])
+  )
+    
+    row <- c(row,r)
+  
+    c <- c(as.numeric(col0[i]),
+         as.numeric(col1[i]),
+         as.numeric(col2[i]),
+         as.numeric(col3[i]),
+         as.numeric(col4[i]),
+         as.numeric(col5[i])
+  )
+    
+    col <- c(col,c)
+  
+     d <- c(as.numeric(det0[i]),
+         as.numeric(det1[i]),
+         as.numeric(det2[i]),
+         as.numeric(det3[i]),
+         as.numeric(det4[i]),
+         as.numeric(det5[i])
+  )
+     
+     det <- c(det,d)
+}
+
+layer$row <- row
+layer$col <- col
+layer$det <- det
+
+layer0 <- lapply(j, `[[`,"layer 0")
+layer1 <- lapply(j, `[[`,"layer 1")
+layer2 <- lapply(j, `[[`,"layer 2")
+layer3 <- lapply(j, `[[`,"layer 3")
+layer4 <- lapply(j, `[[`,"layer 4")
+layer5 <- lapply(j, `[[`,"layer 5")
+```
+
+```{r}
+sig1 <- signal[,1]
+```
+
+
+
+
+
+
+
+
+
