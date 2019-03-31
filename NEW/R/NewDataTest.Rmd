@@ -45,13 +45,19 @@ tracks$id <- paste(tracks$run_number,tracks$event,tracks$v0_id,tracks$track,sep=
 
 tracks$electron <- ifelse(abs(tracks$particle)==211,1,0)
 
+#//TODO: fix this layer indexing problem
+
+layer <- data.frame(rep(tracks$id[1],6))
+
+names(layer) <- "track_id"
+
+layer <- group_by()
+
 nTracks <- length(track)
 
 layer <- data.frame(rep(0:5,nTracks))
 
 names(layer) <- "layer"
-
-layer$track_id <- tracks$id
 
 layer$id <- paste(layer$track_id,layer$layer,sep="_")
 
@@ -155,10 +161,59 @@ layer2 <- lapply(j, `[[`,"layer 2")
 layer3 <- lapply(j, `[[`,"layer 3")
 layer4 <- lapply(j, `[[`,"layer 4")
 layer5 <- lapply(j, `[[`,"layer 5")
-```
 
-```{r}
-sig1 <- signal[,1]
+layer_null_fix <- function(l){
+  
+  for(i in 1:length(l)){
+    
+    if(is.null(l[[i]])){
+      
+      l[[i]] <- matrix(nrow=17,ncol=24,data=0)
+      
+    }
+    
+  }
+  
+  l
+  
+}
+
+layer0 <- layer_null_fix(layer0)
+layer1 <- layer_null_fix(layer1)
+layer2 <- layer_null_fix(layer2)
+layer3 <- layer_null_fix(layer3)
+layer4 <- layer_null_fix(layer4)
+layer5 <- layer_null_fix(layer5)
+
+layer0_ids <- layer$id[which(layer$layer==0)]
+layer1_ids <- layer$id[which(layer$layer==1)]
+layer2_ids <- layer$id[which(layer$layer==2)]
+layer3_ids <- layer$id[which(layer$layer==3)]
+layer4_ids <- layer$id[which(layer$layer==4)]
+layer5_ids <- layer$id[which(layer$layer==5)]
+
+layer_id_f <- function(l,i){
+  
+  for(j in 1:length(l)){
+    
+    l[[j]] <- list(signal=l[[j]],layer_id=i[j])
+    
+    
+    
+  }
+  
+  return(l)
+  
+}
+
+layer0 <- layer_id_f(layer0,layer0_ids)
+layer1 <- layer_id_f(layer1,layer1_ids)
+layer2 <- layer_id_f(layer2,layer2_ids)
+layer3 <- layer_id_f(layer3,layer3_ids)
+layer4 <- layer_id_f(layer4,layer4_ids)
+layer5 <- layer_id_f(layer5,layer5_ids)
+
+
 ```
 
 
