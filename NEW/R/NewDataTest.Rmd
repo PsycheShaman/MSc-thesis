@@ -16,6 +16,7 @@ require(tufte)
 ```{r}
 rm(list=ls())
 require(jsonlite)
+require(dplyr)
 j <- fromJSON("/Users/gerhard/example0.json")
 ```
 
@@ -47,17 +48,22 @@ tracks$electron <- ifelse(abs(tracks$particle)==211,1,0)
 
 #//TODO: fix this layer indexing problem
 
-layer <- data.frame(rep(tracks$id[1],6))
+track_id <- c()
+
+for(i in 1:nrow(tracks)){
+  rep_track_id <- rep(tracks$id[i],6)
+  track_id <- c(track_id,rep_track_id)
+}
+
+layer <- data.frame(track_id)
 
 names(layer) <- "track_id"
 
-layer <- group_by()
-
 nTracks <- length(track)
 
-layer <- data.frame(rep(0:5,nTracks))
+layer <- data.frame(layer,rep(0:5,nTracks))
 
-names(layer) <- "layer"
+names(layer)[2] <- "layer"
 
 layer$id <- paste(layer$track_id,layer$layer,sep="_")
 
@@ -213,10 +219,32 @@ layer3 <- layer_id_f(layer3,layer3_ids)
 layer4 <- layer_id_f(layer4,layer4_ids)
 layer5 <- layer_id_f(layer5,layer5_ids)
 
+layer$is_na <- ifelse(is.na(layer$row)|is.na(layer$col)|is.na(layer$det),1,0)
+
+layer <- layer %>%
+  group_by(track_id) %>%
+  mutate(num_tracklets=n()-sum(is_na))
+
+layer <- as.data.frame(layer)
+
+num_tracklets <- unique(layer[,c(1,8)])
+
+tracks <- inner_join(tracks,num_tracklets,by=c("id"="track_id"))
 
 ```
 
 
+```{r}
+#id look up test
+sample_id <- sample(tracks$id,size = 1)
+id2 <- layer$id[layer$track_id==sample_id]
+id3 <- sapply(layer0, `[[`,"layer_id")
+
+id <- as.numeric(which(id3==sample_id))
+
+layer0[[i]]$signal
+
+```
 
 
 
