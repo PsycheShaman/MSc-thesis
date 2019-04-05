@@ -144,3 +144,29 @@ for(i in d){
   dat265377[[i]]$`layer 5` <- a
 }
 
+####################################
+rm(a,l,d,i,n,z)
+####################################
+
+x <- list()
+
+for(i in 1:length(dat265377)){
+  
+  print(100*(i/length(dat265377)))
+  
+  l0 <- matrix(dat265377[[i]]$`layer 0`,17,24)
+  l1 <- matrix(dat265377[[i]]$`layer 1`,17,24)
+  l2 <- matrix(dat265377[[i]]$`layer 2`,17,24)
+  l3 <- matrix(dat265377[[i]]$`layer 3`,17,24)
+  l4 <- matrix(dat265377[[i]]$`layer 4`,17,24)
+  l5 <- matrix(dat265377[[i]]$`layer 5`,17,24)
+  
+  x. <- array(c(l0,l1,l2,l3,l4,l5),dim=c(17,24,6))
+  
+  x <- c(x,x.)
+  
+}
+
+save(x,file="265377.rdata")
+
+
