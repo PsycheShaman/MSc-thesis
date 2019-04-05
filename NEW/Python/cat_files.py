@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Spyder Editor
-
-This is a temporary script file.
-"""
 
 #import os
 
@@ -11,7 +6,7 @@ This is a temporary script file.
 
 import glob
 
-files = glob.glob("/Users/gerhard/msc-thesis-data/000265309/RAW" + '/**/*.txt', recursive=True)
+files = glob.glob("/Users/gerhard/msc-thesis-data/forProcessing/000265377" + '/**/*.txt', recursive=True)
 
 a = list(range(1,len(files)-1))
 
@@ -40,7 +35,7 @@ for i in range(0,len(files_in_order)):
             d = d.read()
             d = literal_eval(d)
             jayson = json.dumps(d,indent=4,sort_keys=True)
-            name1="/Users/gerhard/msc-thesis-data/000265309/JS/js"
+            name1="/Users/gerhard/msc-thesis-data/processed/000265377/"
             name2=".json"
             name=name1+str(i)+name2
             outfile = open(name,"w")

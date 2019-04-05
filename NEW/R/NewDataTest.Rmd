@@ -17,8 +17,47 @@ require(tufte)
 rm(list=ls())
 require(jsonlite)
 require(dplyr)
-j <- fromJSON("/Users/gerhard/example0.json")
 ```
+
+```{r,eval=F}
+#define a function to concatenate all json objects into an R list object
+wrangle <- function(run){
+
+  #load required opackages
+  require(jsonlite)
+  require(readtext)
+
+  #list all files in the run specified as the input parameter to this function
+  files <- list.files(path=paste0("/Users/gerhard/msc-thesis-data/processed/000",run,"/"),
+                      pattern="*json",
+                      full.names=T,
+                      recursive=TRUE)
+
+  #use the jsonlite::fromJSON function to convert JSON into list, starting at position 2, since the first JSON object is empty (only contains: "}")
+  j <- fromJSON(files[2])
+
+  #iterate through the rest of the files in the specified run
+  for(i in 3:length(files)){
+
+    #convert each into a list and concatenate them to the preceding list
+    f <- fromJSON(files[i])
+    j <- c(j,f)
+  }
+
+j
+
+}
+
+wrangle("265377")
+
+```
+
+```{r}
+# j <- fromJSON("/Users/gerhard/msc-thesis-data/processed/000265377/0.json")
+# j <- c(j,fromJSON("/Users/gerhard/msc-thesis-data/processed/000265377/1.json"))
+# j <- c(j,fromJSON("/Users/gerhard/msc-thesis-data/processed/000265377/2.json"))
+```
+
 
 ```{r}
 #primary ID table
