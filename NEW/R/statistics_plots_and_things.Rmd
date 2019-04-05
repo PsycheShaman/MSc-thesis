@@ -1,0 +1,109 @@
+---
+title: "Statistics, Plots and Things"
+author: "Gerhard Viljoen"
+date: "4/5/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,warning = F,message = F)
+```
+
+```{r}
+library(knitr)
+library(rgl)
+knit_hooks$set(webgl = hook_webgl)
+```
+
+#Run number 265377
+
+After fixing for anomalies in the data (replacing null layers and layers with no data with a same-size matrix of zeros, here are the dimensions of the array for this run):
+
+
+```{r}
+rm(list=ls())
+
+load("/Users/gerhard/265377.rdata")
+```
+
+```{r}
+require(pander)
+
+pander(
+  
+  paste0("Each 3D tensor consists of ",
+         dim(x)[1],
+         " pads represented as length, with ",
+         dim(x)[2]," timebins per pad, represented as breadth, and ",
+         dim(x)[3]," layers, represented as depth. In run number 265377, there were ",
+         dim(x)[4]," tracklets that had transverse momenta between 2 and 3 GeV..."
+         
+    
+    
+)
+  
+)
+
+```
+
+##Here are two interactive 3D plots to illustrate the product of this process (i.e. there were 13858 of these tensors produced for this run):
+
+```{r}
+x. <- x[,,,1]
+library(reshape2)
+library(rgl)
+M=melt(x.)
+
+linMap <- function(x, from, to){
+  
+  (x - min(x)) / max(x - min(x)) * (to - from) + from
+  
+}
+
+M$value <- linMap(M$value,0,1000)
+  
+rgl::next3d()
+
+rgl::points3d(M$Var1,M$Var2,M$Var3,size=10,color=heat.colors(1000)[M$value])
+
+rgl::rglwidget()
+```
+
+```{r}
+x. <- x[,,,2]
+library(reshape2)
+library(rgl)
+M=melt(x.)
+
+linMap <- function(x, from, to){
+  
+  (x - min(x)) / max(x - min(x)) * (to - from) + from
+  
+}
+
+M$value <- linMap(M$value,0,1000)
+  
+rgl::next3d()
+
+rgl::points3d(M$Var1,M$Var2,M$Var3,size=10,color=heat.colors(1000)[M$value])
+
+rgl::rglwidget()
+```
+
+##In terms of the distribution of nsigma for electron and pion, the following plots give information:
+
+```{r}
+load("/Users/gerhard/test.rdata")
+require(ggplot2)
+ggplot(test,aes(x=n_sig_p,colour=factor(test$pid))) +geom_histogram(bins=1000)+facet_wrap(factor(test$pid))+ggtitle("nSigma Pion by PDG Code")
+
+ggplot(test,aes(x=n_sig_e,colour=factor(test$pid))) +geom_histogram(bins=1000)+facet_wrap(factor(test$pid))+ggtitle("nSigma Electron by PDG Code")
+
+
+```
+
+
+
+
+
+

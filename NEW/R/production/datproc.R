@@ -177,7 +177,37 @@ pid <- sapply(dat265377,`[[`,"pdgCode")
 n_sig_e <- sapply(dat265377,`[[`,"nSigmaElectron")
 n_sig_p <- sapply(dat265377,`[[`,"nSigmaPion")
 
-test <- cbind(pid,n_sig_e,n_sig_p)
+test <- data.frame(cbind(pid,n_sig_e,n_sig_p))
+
+
+require(ggplot2)
+
+test <- test[-which(abs(test$n_sig_e)>=10),]
+test <- test[-which(abs(test$n_sig_p)>=10),]
+
+# hist(test$n_sig_e,breaks=1000)
+# 
+# summary(test$n_sig_e)
+# 
+# ggplot(test,aes(x=n_sig_p,colour=factor(test$pid))) +geom_histogram(bins=1000)+facet_wrap(factor(test$pid))+ggtitle("nSigma Pion by PDG Code")
+# 
+# ggplot(test,aes(x=n_sig_e,colour=factor(test$pid))) +geom_histogram(bins=1000)+facet_wrap(factor(test$pid))+ggtitle("nSigma Electron by PDG Code")
+# 
+
+
+save(test,file="test.rdata")
+
+save(dat265377,file="265377_full")
+
+
+
+
+
+
+
+
+
+
 
 
 
