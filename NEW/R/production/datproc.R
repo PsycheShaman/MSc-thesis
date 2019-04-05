@@ -148,7 +148,9 @@ for(i in d){
 rm(a,l,d,i,n,z)
 ####################################
 
-x <- list()
+require(abind)
+
+x <- array(dim=c(17,24,6))
 
 for(i in 1:length(dat265377)){
   
@@ -163,10 +165,22 @@ for(i in 1:length(dat265377)){
   
   x. <- array(c(l0,l1,l2,l3,l4,l5),dim=c(17,24,6))
   
-  x <- c(x,x.)
+  x <- abind(x,x.,along=4)
   
 }
 
+x <- x[,,,-1]
+
 save(x,file="265377.rdata")
+
+pid <- sapply(dat265377,`[[`,"pdgCode")
+n_sig_e <- sapply(dat265377,`[[`,"nSigmaElectron")
+n_sig_p <- sapply(dat265377,`[[`,"nSigmaPion")
+
+test <- cbind(pid,n_sig_e,n_sig_p)
+
+
+
+
 
 
