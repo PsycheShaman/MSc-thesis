@@ -1,0 +1,102 @@
+---
+title: "Collapsed Tensors"
+author: "Gerhard Viljoen"
+date: "4/7/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list=ls())
+load("/Users/gerhard/x_265377")
+load("/Users/gerhard/265377_full")
+
+y <- sapply(dat265377, `[[`,"pdgCode")
+
+y <- ifelse(abs(y)==211,1,0)
+
+x_2 <- matrix(ncol=144,nrow=dim(x)[4])
+
+for(i in 1:dim(x)[4]){
+  
+  this.i <- x[,,,i]
+  
+  entry <- c()
+  
+  for(j in 1:dim(x)[3]){
+    
+    this.j <- this.i[,,j]
+    
+    this.entry <- apply(X=this.j,MARGIN = 2,FUN=sum)
+    
+    entry <- c(entry,this.entry)
+    
+  }
+  
+  x_2[i,] <- entry 
+  
+}
+
+require(keras)
+
+y <- to_categorical(y)
+rm(dat265377)
+rm(x)
+x <- x_2
+rm(x_2)
+```
+
+
+```{r}
+rm(model1)
+model1 <- keras_model_sequential()
+
+model1 %>%
+  layer_dense(units = 512,activation = "relu",input_shape = ncol(x)) %>%
+  layer_dense(units=512,activation = "relu") %>%
+  layer_dense(units=512,activation = "relu") %>%
+  layer_dense(units=2,activation = "softmax") 
+
+model1 %>% compile(
+  optimizer=optimizer_sgd(),
+  loss="binary_crossentropy",
+  metrics=c("accuracy")
+)
+```
+
+```{r}
+model1
+```
+
+
+```{r,eval=F}
+model1 %>% fit(x,y,epochs=20,validation_split=0.2)
+```
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
