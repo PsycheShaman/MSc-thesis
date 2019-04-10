@@ -54,6 +54,10 @@ http://rpubs.com/PsycheShaman/TimeEvolBetheBlochProto
 
 http://rpubs.com/PsycheShaman/479110
 
+### SBATCH prototyping:
+
+http://rpubs.com/PsycheShaman/sbatch
+
 # Previous Thesis drafts:
 https://docs.google.com/document/d/1hObRn3Hdpw62AnmTrFjp70P_UdV0ntQOk6IIW8ZjjIQ/edit?usp=sharing
 
