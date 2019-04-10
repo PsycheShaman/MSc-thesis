@@ -1,0 +1,146 @@
+---
+title: "sbatch"
+author: "Gerhard Viljoen"
+date: "4/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Sbatch executable setup
+
+```{r,eval=F}
+require(jsonlite, lib.loc = "/scratch/vljchr004/")
+
+
+args = commandArgs(TRUE)
+dirX = args[1]
+input2 = args[2]
+
+if(!file.exists(dirX)|!file.exists(input2)){
+   cat('Cannot find', input_path, 'exiting!\n')
+   stop()
+}
+
+
+require(keras, lib.loc = "/scratch/vljchr004/")
+```
+
+#Json wrangling (non-hardcoded)
+
+```{r}
+#test
+
+dirX="/Users/gerhard/msc-thesis-data/gridtest"
+```
+
+
+```{r}
+wrangle <- function(dirX){
+  
+  require(jsonlite)
+  
+  files <- list.files(path=paste0(dirX),
+                      pattern="*json",
+                      full.names=T,
+                      recursive=TRUE)
+  
+  j <- fromJSON(files[1])
+  
+  print("---------------------------------------------------------------------------------")
+  print(paste0("Processing jsons to list:"))
+  
+  for(i in 2:length(files)){
+    print(100*(i/length(files)))
+    
+    f <- fromJSON(files[i])
+    j <- c(j,f)
+  }
+  
+  j
+  
+}
+
+dat <- wrangle(dirX)
+print("---------------------------------------------------------------------------------")
+print("DONE")
+```
+
+```{r}
+print("---------------------------------------------------------------------------------")
+print("Extracting layers and momenta...")
+
+p <- sapply(dat,`[[`,"P")
+pdg <- sapply(dat, `[[`,"pdgCode")
+layer_0 <- sapply(dat, `[[`,"layer 0")
+layer_1 <- sapply(dat, `[[`,"layer 1")
+layer_2 <- sapply(dat, `[[`,"layer 2")
+layer_3 <- sapply(dat, `[[`,"layer 3")
+layer_4 <- sapply(dat, `[[`,"layer 4")
+layer_5 <- sapply(dat, `[[`,"layer 5")
+
+print("---------------------------------------------------------------------------------")
+print("Removing NULLS")
+
+n <- unique(
+  c(
+  which(sapply(layer_0, is.null)),
+  which(sapply(layer_1, is.null)),
+  which(sapply(layer_2, is.null)),
+  which(sapply(layer_3, is.null)),
+  which(sapply(layer_4, is.null)),
+  which(sapply(layer_5, is.null))
+  )
+  )
+
+pdg <- pdg[-n]
+
+layer_0 <- layer_0[-n]
+
+layer_1 <- layer_1[-n]
+
+layer_2 <- layer_2[-n]
+
+layer_3 <- layer_3[-n]
+
+layer_4 <- layer_4[-n]
+
+layer_5 <- layer_5[-n]
+
+p <- p[-n]
+
+print("---------------------------------------------------------------------------------")
+print("Removing empties:")
+
+e <- unique(
+  
+  as.numeric(which(sapply(layer_0, "typeof")=="list")),
+  as.numeric(which(sapply(layer_1, "typeof")=="list")),
+  as.numeric(which(sapply(layer_2, "typeof")=="list")),
+  as.numeric(which(sapply(layer_3, "typeof")=="list")),
+  as.numeric(which(sapply(layer_4, "typeof")=="list")),
+  as.numeric(which(sapply(layer_5, "typeof")=="list"))
+  
+)
+
+pdg <- pdg[-e]
+
+layer_0 <- layer_0[-e]
+
+layer_1 <- layer_1[-e]
+
+layer_2 <- layer_2[-e]
+
+layer_3 <- layer_3[-e]
+
+layer_4 <- layer_4[-e]
+
+layer_5 <- layer_5[-e]
+
+p <- p[-e]
+```
+
+
+
