@@ -1,0 +1,351 @@
+---
+title: "Anomalies and VAE"
+author: "Gerhard Viljoen"
+date: "4/15/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = F,warning = F)
+```
+
+```{r}
+dirX = "/Users/gerhard/msc-thesis-data/processed"
+
+#L=20
+
+wrangle <- function(dirX){
+  
+  require(jsonlite)
+  
+  files <- list.files(path=paste0(dirX),
+                      pattern="*json",
+                      full.names=T,
+                      recursive=TRUE)
+  
+  j <- fromJSON(files[1])
+  
+  #print("---------------------------------------------------------------------------------")
+  #print(paste0("Processing jsons to list:"))
+  
+  L <- length(files)
+  
+  for(i in 2:L){
+    #print(100*(i/L))
+    
+    f <- fromJSON(files[i])
+    j <- c(j,f)
+  }
+  
+  j
+  
+}
+
+dat <- wrangle(dirX)
+```
+
+
+```{r}
+layer_cake <- function(layer){
+  
+  cake_slice <- sapply(dat,`[[`,layer)
+
+n <- which(as.vector(sapply(cake_slice, is.null)))
+
+d <- which(as.vector(sapply(cake_slice, typeof))!="integer")
+
+for(i in n){
+  
+  cake_slice[[i]] <- matrix(data=0,nrow=17,ncol=24)
+  
+}
+
+for(i in d){
+  
+  cake_slice[[i]] <- matrix(data=0,nrow=17,ncol=24)
+  
+}
+
+for(i in 1:length(cake_slice)){
+  
+  a <- as.matrix(cake_slice[[i]])
+
+a <- colSums(a)
+
+if(all(a==0)){
+  
+  a <- numeric(24)
+  
+  cake_slice[[i]] <- a
+  next()
+}
+
+names(a) <- 1:24
+
+beg <- min(which(a!=0))
+
+end <- min(24,min(which(a[beg:24]==0))+beg-2)
+
+sig1 <- a[beg:end]
+
+sig2 <- a[-c(1:end)]
+
+sig2 <- sig2[!sig2==0]
+
+if(length(sig1)>length(sig2)){
+  
+  signal <- sig1
+  
+}else if(length(sig1==sig2)){
+  if(sum(sig1)>=sum(sig2)){
+    signal <- sig1
+  }else{
+    signal <- sig2
+  }
+}else{
+  signal <- sig2
+}
+
+nm <- names(signal)
+
+nm <- as.numeric(nm)
+
+sig <- numeric(length(a))
+
+sig[nm] <- signal
+
+cake_slice[[i]] <- sig
+  
+  
+}
+
+cake_slice <- matrix(unlist(cake_slice),ncol=24,byrow=T)
+
+return(cake_slice)
+}
+
+layer0 <- layer_cake("layer 0")
+layer1 <- layer_cake("layer 1")
+layer2 <- layer_cake("layer 2")
+layer3 <- layer_cake("layer 3")
+layer4 <- layer_cake("layer 4")
+layer5 <- layer_cake("layer 5")
+
+layer.info <- (layer0+layer1+layer2+layer3+layer4+layer5)/6
+
+zeros <- which(rowSums(layer.info)==0)
+
+pdg <- sapply(dat,`[[`,"pdgCode")
+
+pdg <- ifelse(abs(pdg)==11,1,0)
+
+layer.info <- layer.info[-zeros,]
+pdg <- pdg[-zeros]
+
+elec <- layer.info[pdg==1,]
+pion <- layer.info[pdg==0,]
+
+
+par(mfrow=c(1,2))
+plot(x=1:24, y=colMeans(elec),type="l",col="red",ylim=c(0,max(elec)),
+     ylab="Signal",xlab="Timebins",main="Electron Signal vs Timebin Distribution")
+lines(x=1:24,y=colMeans(elec)+apply(elec,2,sd),lty="dashed")
+lines(x=1:24,y=colMeans(elec)-apply(elec,2,sd),lty="dashed")
+lines(x=1:24,y=apply(elec,2,min),lty="dotted")
+lines(x=1:24,y=apply(elec,2,max),lty="dotted")
+
+plot(x=1:24, y=colMeans(pion),type="l",col="blue",ylim=c(0,max(pion)),
+     ylab="Signal",xlab="Timebins",main="Pion Signal vs Timebin Distribution")
+lines(x=1:24,y=colMeans(pion)+apply(pion,2,sd),lty="dashed")
+lines(x=1:24,y=colMeans(pion)-apply(pion,2,sd),lty="dashed")
+lines(x=1:24,y=apply(pion,2,min),lty="dotted")
+lines(x=1:24,y=apply(pion,2,max),lty="dotted")
+```
+
+
+
+```{r}
+# de.dx <- sapply(dat, `[[`,"dEdX")
+# 
+# e.de.dx <- de.dx[pdg==1]
+# p.de.dx <- de.dx[pdg==0]
+
+# hist(e.de.dx,col="cornflowerblue",border = "orange",breaks = 100)
+# hist(p.de.dx,col="cornflowerblue",border = "orange",breaks=100)
+
+par(mfrow=c(1,2))
+
+hist(rowSums(elec),col="grey",border = "red",breaks = 50)
+abline(v=mean(rowSums(elec)),col="red",lwd=5)
+abline(v=mean(rowSums(elec))+sd(rowSums(elec)),col="red",lwd=4,lty="dotted")
+abline(v=mean(rowSums(elec))-sd(rowSums(elec)),col="red",lwd=4,lty="dotted")
+abline(v=mean(rowSums(elec))+2*sd(rowSums(elec)),col="red",lwd=4,lty="dotted")
+abline(v=mean(rowSums(elec))+3*sd(rowSums(elec)),col="red",lwd=4,lty="dotted")
+abline(v=mean(rowSums(elec))-2*sd(rowSums(elec)),col="red",lwd=4,lty="dotted")
+abline(v=mean(rowSums(elec))-3*sd(rowSums(elec)),col="red",lwd=4,lty="dotted")
+
+hist(rowSums(pion),col="grey",border = "blue",breaks = 50)
+abline(v=mean(rowSums(pion)),col="red",lwd=5)
+abline(v=mean(rowSums(pion))+sd(rowSums(pion)),col="red",lwd=4,lty="dotted")
+abline(v=mean(rowSums(pion))-sd(rowSums(pion)),col="red",lwd=4,lty="dotted")
+abline(v=mean(rowSums(pion))+2*sd(rowSums(pion)),col="red",lwd=4,lty="dotted")
+abline(v=mean(rowSums(pion))+3*sd(rowSums(pion)),col="red",lwd=4,lty="dotted")
+abline(v=mean(rowSums(pion))-2*sd(rowSums(pion)),col="red",lwd=4,lty="dotted")
+abline(v=mean(rowSums(pion))-3*sd(rowSums(pion)),col="red",lwd=4,lty="dotted")
+```
+
+
+```{r}
+layer.info <- data.frame(cbind(layer.info,pdg))
+
+layer.info$pdg <- as.factor(ifelse(abs(layer.info$pdg)==1,"electron","pion"))
+
+layer.info$sum <- rowSums(layer.info[,1:24])
+
+require(dplyr)
+
+layer.info <- layer.info %>%
+  group_by(pdg) %>%
+  mutate(mu = mean(sum)) %>%
+  mutate(sd = sd(sum)) %>%
+  mutate(is.outlier=ifelse(sum>=mu+(1.25*sd)|sum<=mu-(1.25*sd),1,0))
+
+sum(layer.info$is.outlier)/nrow(layer.info)
+
+layer.info <- layer.info %>%
+  subset(is.outlier!=1)
+
+layer.info <- data.frame(layer.info[,1:25])
+```
+
+```{r,eval=F}
+rm(dat,elec,layer0,layer0_test,layer1,layer2,layer3,layer4,layer5,mus,pion,prot,s,s0,s1,s2,s3,s4,s5,a,beg,boundary,checkd,de.dx,dirX,e.de.dx,end,files,first,i,L,mn,mx,n,nm,p.de.dx,pdg,pid,sig,sig1,sig2,signal,y,zeros)
+require(keras)
+
+K <- keras::backend()
+
+# Parameters --------------------------------------------------------------
+
+batch_size <- 100L
+original_dim <- 24L
+latent_dim <- 2L
+intermediate_dim <- 10L
+epochs <- 50L
+epsilon_std <- 1.0
+
+# Model definition --------------------------------------------------------
+
+x <- layer_input(shape = c(original_dim))
+h <- layer_dense(x, intermediate_dim, activation = "relu")
+z_mean <- layer_dense(h, latent_dim)
+z_log_var <- layer_dense(h, latent_dim)
+
+sampling <- function(arg){
+  z_mean <- arg[, 1:(latent_dim)]
+  z_log_var <- arg[, (latent_dim + 1):(2 * latent_dim)]
+  
+  epsilon <- k_random_normal(
+    shape = c(k_shape(z_mean)[[1]]), 
+    mean=0.,
+    stddev=epsilon_std
+  )
+  
+  z_mean + k_exp(z_log_var/2)*epsilon
+}
+
+# note that "output_shape" isn't necessary with the TensorFlow backend
+z <- layer_concatenate(list(z_mean, z_log_var)) %>% 
+  layer_lambda(sampling)
+
+# we instantiate these layers separately so as to reuse them later
+decoder_h <- layer_dense(units = intermediate_dim, activation = "relu")
+decoder_mean <- layer_dense(units = original_dim, activation = "sigmoid")
+h_decoded <- decoder_h(z)
+x_decoded_mean <- decoder_mean(h_decoded)
+
+# end-to-end autoencoder
+vae <- keras_model(x, x_decoded_mean)
+
+# encoder, from inputs to latent space
+encoder <- keras_model(x, z_mean)
+
+# generator, from latent space to reconstructed inputs
+decoder_input <- layer_input(shape = latent_dim)
+h_decoded_2 <- decoder_h(decoder_input)
+x_decoded_mean_2 <- decoder_mean(h_decoded_2)
+generator <- keras_model(decoder_input, x_decoded_mean_2)
+
+
+vae_loss <- function(x, x_decoded_mean){
+  xent_loss <- (original_dim/1.0)*loss_binary_crossentropy(x, x_decoded_mean)
+  kl_loss <- -0.5*k_mean(1 + z_log_var - k_square(z_mean) - k_exp(z_log_var), axis = -1L)
+  xent_loss + kl_loss
+}
+
+vae %>% compile(optimizer = "rmsprop", loss = vae_loss)
+
+
+# Data preparation --------------------------------------------------------
+
+train_ind <- sample(1:nrow(layer.info),size = round(.75*nrow(layer.info)))
+
+layer.info[,1:24] <- scale(layer.info[,1:24])
+
+x_train <- matrix(as.numeric(unlist(layer.info[train_ind,1:24])),ncol=24,byrow = T)
+x_test <-  matrix(as.numeric(unlist(layer.info[-train_ind,1:24])),ncol=24,byrow = T)
+
+
+# Model training ----------------------------------------------------------
+
+vae %>% fit(
+  x_train, x_train, 
+  shuffle = TRUE, 
+  epochs = epochs, 
+  batch_size = batch_size, 
+  validation_data = list(x_test, x_test)
+)
+
+
+# Visualizations ----------------------------------------------------------
+
+library(ggplot2)
+library(dplyr)
+x_test_encoded <- predict(encoder, x_test, batch_size = batch_size)
+
+x_test_encoded %>%
+  as_data_frame() %>% 
+  mutate(class = as.factor(mnist$test$y)) %>%
+  ggplot(aes(x = V1, y = V2, colour = class)) + geom_point()
+
+# display a 2D manifold of the digits
+n <- 15  # figure with 15x15 digits
+digit_size <- 28
+
+# we will sample n points within [-4, 4] standard deviations
+grid_x <- seq(-4, 4, length.out = n)
+grid_y <- seq(-4, 4, length.out = n)
+
+rows <- NULL
+for(i in 1:length(grid_x)){
+  column <- NULL
+  for(j in 1:length(grid_y)){
+    z_sample <- matrix(c(grid_x[i], grid_y[j]), ncol = 2)
+    column <- rbind(column, predict(generator, z_sample) %>% matrix(ncol = 28) )
+  }
+  rows <- cbind(rows, column)
+}
+rows %>% as.raster() %>% plot()
+
+```
+
+
+
+
+
+
+
+
+
+
+
+

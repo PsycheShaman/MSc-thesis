@@ -1,55 +1,32 @@
----
-title: "sbatch"
-author: "Gerhard Viljoen"
-date: "4/10/2019"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-#Sbatch executable setup
-
-```{r,eval=F}
+#required packages
 require(jsonlite, lib.loc = "/scratch/vljchr004/")
 
-
+#command line arguments
 args = commandArgs(TRUE)
 dirX = args[1]
-input2 = args[2]
 
-if(!file.exists(dirX)|!file.exists(input2)){
-   cat('Cannot find', input_path, 'exiting!\n')
-   stop()
+if(!file.exists(dirX)){
+  cat('Cannot find', input_path, 'exiting!\n')
+  stop()
 }
-```
 
-#Json wrangling (non-hardcoded)
+#json wrangling
 
-```{r}
-#test
-
-dirX="/Users/gerhard/msc-thesis-data/gridtest"
-```
-
-
-```{r}
 wrangle <- function(dirX){
-  
-  require(jsonlite)
-  
+  #get all JSON files in directory specified by command line arguments to RScript
   files <- list.files(path=paste0(dirX),
                       pattern="*json",
                       full.names=T,
                       recursive=TRUE)
-  
+  #JSON is read in as an R list object
   j <- fromJSON(files[1])
   
   print("---------------------------------------------------------------------------------")
   print(paste0("Processing jsons to list:"))
   
+  #subsequent JSONs are appended to this list
   for(i in 2:length(files)){
+    #progress indication to stdout
     print(100*(i/length(files)))
     
     f <- fromJSON(files[i])
@@ -60,17 +37,22 @@ wrangle <- function(dirX){
   
 }
 
+#use function defined above to wrangle JSONs
+
 dat <- wrangle(dirX)
 print("---------------------------------------------------------------------------------")
 print("DONE")
-```
 
-```{r}
+#extract elements from lists:
+
 print("---------------------------------------------------------------------------------")
 print("Extracting layers and momenta...")
 
+#momentum
 p <- sapply(dat,`[[`,"P")
+#pdfg code
 pdg <- sapply(dat, `[[`,"pdgCode")
+#layers
 layer_0 <- sapply(dat, `[[`,"layer 0")
 layer_1 <- sapply(dat, `[[`,"layer 1")
 layer_2 <- sapply(dat, `[[`,"layer 2")
@@ -81,16 +63,17 @@ layer_5 <- sapply(dat, `[[`,"layer 5")
 print("---------------------------------------------------------------------------------")
 print("Removing NULLS")
 
+#remove tracklets with less than 6 layers
 n <- unique(
   c(
-  which(sapply(layer_0, is.null)),
-  which(sapply(layer_1, is.null)),
-  which(sapply(layer_2, is.null)),
-  which(sapply(layer_3, is.null)),
-  which(sapply(layer_4, is.null)),
-  which(sapply(layer_5, is.null))
-  )
-  )
+    which(sapply(layer_0, is.null)),
+    which(sapply(layer_1, is.null)),
+    which(sapply(layer_2, is.null)),
+    which(sapply(layer_3, is.null)),
+    which(sapply(layer_4, is.null)),
+    which(sapply(layer_5, is.null))
+  ),namx=100000000000000
+)
 
 pdg <- pdg[-n]
 
@@ -111,6 +94,8 @@ p <- p[-n]
 print("---------------------------------------------------------------------------------")
 print("Removing empties:")
 
+#remove tracklets that passed through detector elements that didn't return data
+
 e <- unique(
   
   as.numeric(which(sapply(layer_0, "typeof")=="list")),
@@ -118,7 +103,7 @@ e <- unique(
   as.numeric(which(sapply(layer_2, "typeof")=="list")),
   as.numeric(which(sapply(layer_3, "typeof")=="list")),
   as.numeric(which(sapply(layer_4, "typeof")=="list")),
-  as.numeric(which(sapply(layer_5, "typeof")=="list"))
+  as.numeric(which(sapply(layer_5, "typeof")=="list")),namx=100000000000000
   
 )
 
@@ -137,27 +122,27 @@ layer_4 <- layer_4[-e]
 layer_5 <- layer_5[-e]
 
 p <- p[-e]
-```
 
+#check if all tracklets have 6 layers, and initialize an empty x
+#array of 17 pads, 24 timebins and 6 layers
 
-```{r}
 if(length(layer_0)==length(layer_1) &&
-  length(layer_1) ==length(layer_2) &&
-  length(layer_2)==length(layer_3)&&
-  length(layer_3)==length(layer_4)&&
-  length(layer_4)==length(layer_5)){
-
-print("Layer dimensions check out")
+   length(layer_1) ==length(layer_2) &&
+   length(layer_2)==length(layer_3)&&
+   length(layer_3)==length(layer_4)&&
+   length(layer_4)==length(layer_5)){
+  
+  print("Layer dimensions check out")
   x <- array(dim=c(1,17,24,6))
-    
+  
 }else{
-    print("Layers are not same dimensions, stopping")
+  #layers missing
+  print("Layers are not same dimensions, stopping")
   stop()
-  }
+}
 
-```
+#append said tensor for each tracklet
 
-```{r}
 require(abind)
 for(i in 1:length(layer_0)){
   a <- array(data=c(
@@ -176,36 +161,23 @@ for(i in 1:length(layer_0)){
   x <- abind(x,a,along = 1)
 }
 
+#remove empty element used to initialize x array
+
 x <- x[-1,,,]
+
+#check if dimensions of array check out and if so load the keras package
 
 if(dim(x)[2]==17 &&
    dim(x)[3]==24 &&
    dim(x)[4]==6 &&
-  dim(x)[1]==length(layer_0)){
+   dim(x)[1]==length(layer_0)){
   require(keras, lib.loc = "/scratch/vljchr004/")
 }else{
   print("Array building seems to not have went well, stopping")
   stop()
   
 }
-```
 
-```{r}
-y <- as.vector(ifelse(abs(as.numeric(pdg))==211,1,0))
-y <- to_categorical(y)
-
-as.numeric(pdg[1])
-#[1] 211
-y[1,]
-#[1] 0 1
-
-#therefore column 1 will be 1 if pion, 0 if electron
-#column 2 will be 1 if electron, 0 if pion
-```
-
-
-
-```{r}
 y <- as.vector(ifelse(abs(as.numeric(pdg))==211,1,0))
 y <- to_categorical(y)
 
@@ -301,20 +273,6 @@ test_ind <- test_ind[-train_ind]
 x_test <- x[,,,test_ind]
 y_test <- y[test_ind]
 
-d <- numeric(dim(x)[1])
-  
-for(i in 1:dim(x)[1]){
-  
-  a <- as.vector(dim(x[i,,,]))==c(17,24,6)
-  
-  if(all(a)){
-    d[i] <- 1
-  }
-  else{d[i] <- -1}
-    
-  
-}
-
 history <- cnn_model %>%
   fit(x_train,
       y_train,
@@ -322,21 +280,8 @@ history <- cnn_model %>%
       epochs=100,
       validation_split=0.3)
 
-all(d==1)
-
 png("/home/vljchr004/cnn_model_1.png")
 
 plot(history)
 
 dev.off()
-```
-
-
-
-
-
-
-
-
-
-
