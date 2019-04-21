@@ -154,6 +154,26 @@ x <- x[,,-1]
 
 print(dim(x))
 
+zero_check <- function(x){
+  
+  zeros <- c()
+  
+  for(i in 1:dim(x)[3]){
+    print(sum(x[,,i]))
+    if(sum(x[,,i])==0){
+      print(sum(x[,,i])==0)
+      zeros <- c(zeros,i)
+    }
+    
+  }
+  
+  x[,,-zeros]
+  
+  
+}
+
+x <- zero_check(x)
+
 x <- array_reshape(x,dim=c(length(dat),6,24))
 
 print(dim(x))
@@ -162,7 +182,11 @@ y <- sapply(dat,`[[`,"pdgCode")
 
 y <- ifelse(abs(y)==11,1,0)
 
+y <- y[-zeros]
+
 y <- to_categorical(as.vector(as.numeric(y)))
+
+
 
 set.seed(1234321)
 print("seed set, sampling train indices")
@@ -185,32 +209,14 @@ model %>%
   ) %>%
   layer_activation("relu") %>%
   
-  # Second hidden layer
-#  layer_conv_1d(filter = 32, kernel_size = 3) %>%
-#  layer_activation("relu") %>%
-  
-  # Use max pooling
   layer_max_pooling_1d(pool_size = c(2)) %>%
   layer_dropout(0.25) %>%
   
-  
- # layer_conv_1d(filter = 32, kernel_size = 3, padding = "causal") %>%
- # layer_activation("relu") %>%
- # layer_conv_1d(filter = 32, kernel_size = 3) %>%
- # layer_activation("relu") %>%
-  
-  # Use max pooling once more
- # layer_max_pooling_1d(pool_size = 2) %>%
- # layer_dropout(0.25) %>%
-  
-  # Flatten max filtered output into feature vector 
-  # and feed into dense layer
   layer_flatten() %>%
   layer_dense(512) %>%
   layer_activation("relu") %>%
   layer_dropout(0.5) %>%
   
- 
   layer_dense(2) %>%
   layer_activation("softmax")
 
