@@ -41,9 +41,4 @@ module load python/TensorAnaconda
 
 # Your science stuff goes here...
 
-Rscript /home/vljchr004/cnn.R /scratch/vljchr004/000265377
-
-#Rscript /home/vljchr004/test2.R /scratch/vljchr004/000265377
-
-#Rscript /home/vljchr004/sbatch.R /scratch/vljchr004/000265377
-
+Rscript cnn.R /scratch/vljchr004/000265377
