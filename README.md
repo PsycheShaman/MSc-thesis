@@ -18,6 +18,10 @@ An additional C++ ROOT code repository pushing from HEP01 SSH server at UCT live
 
 As per data management policy, processed data is kept in a private repository (internally accessible by CERN members) at: https://gitlab.cern.ch/cviljoen/msc-thesis-data
 
+# HPC repository
+
+In order to maintain sanity between the UCT HPC cluster and local edits, a third repository for these purposes exists at: https://github.com/PsycheShaman/msc-hpc
+
 ## Some Exploratory data analysis lives here:
 
 http://rpubs.com/PsycheShaman/ss
