@@ -126,6 +126,7 @@ rs0$nonzero_elements <- 0
 for(i in 1:nrow(rs0)){
   
   rs0$nonzero_elements[i] <- length(which(rs0[i,1:17]!=0))
+  rs0$sum[i] <- sum(rs0[i,1:17])
   
 }
 
@@ -149,6 +150,7 @@ rs1$nonzero_elements <- 0
 for(i in 1:nrow(rs1)){
   
   rs1$nonzero_elements[i] <- length(which(rs1[i,1:17]!=0))
+  rs1$sum[i] <- sum(rs1[i,1:17])
   
 }
 
@@ -173,7 +175,7 @@ rs2$nonzero_elements <- 0
 for(i in 1:nrow(rs2)){
   
   rs2$nonzero_elements[i] <- length(which(rs2[i,1:17]!=0))
-  
+  rs2$sum[i] <- sum(rs2[i,1:17])
 }
 
 
@@ -197,6 +199,7 @@ rs3$nonzero_elements <- 0
 for(i in 1:nrow(rs3)){
   
   rs3$nonzero_elements[i] <- length(which(rs3[i,1:17]!=0))
+  rs3$sum[i] <- sum(rs3[i,1:17])
   
 }
 
@@ -220,6 +223,7 @@ rs4$nonzero_elements <- 0
 for(i in 1:nrow(rs4)){
   
   rs4$nonzero_elements[i] <- length(which(rs4[i,1:17]!=0))
+  rs4$sum[i] <- sum(rs4[i,1:17])
   
 }
 
@@ -244,28 +248,97 @@ rs5$nonzero_elements <- 0
 for(i in 1:nrow(rs5)){
   
   rs5$nonzero_elements[i] <- length(which(rs5[i,1:17]!=0))
+  rs5$sum[i] <- sum(rs5[i,1:17])
   
 }
 
 
-rs <- cbind(rs0[,18],rs1[,18],rs2[,18],rs3[,18],rs4[,18],rs5[,18])
+rs <- data.frame(cbind(rs0[,18],rs1[,18],rs2[,18],rs3[,18],rs4[,18],rs5[,18]))
 
+rs.v <- rs
 
+for(i in 1:nrow(rs)){
+  rs.v[i,] <- as.numeric(scale(as.numeric(rs[i,])))
+}
 
+rs.v <- as.matrix(rs.v)
 
+nans <- apply(rs.v,1,is.nan)
 
+nans <- t(nans)
 
+nans <- apply(nans, 1, all)
 
+nans <- which(nans)
 
+rs.v[nans,] <- 0
 
+# quantile(rs.v,probs=seq(0,1,0.1))
+# 
+# hist(rs.v)
 
+dodge <- apply(rs.v,1,abs)
 
+dodge <- t(dodge)
+  
+dodge <- apply(dodge, 1, `>=`,"1.75")
 
+dodge <- t(dodge)
 
+dodge <- apply(dodge,1,any)
 
+length(which(dodge))
 
+length(dodge)
 
+rs.v <- data.frame(cbind(rs.v,dodge))
 
+##############
+
+rs <- data.frame(cbind(rs0[,19],rs1[,19],rs2[,19],rs3[,19],rs4[,19],rs5[,19]))
+
+for(i in 1:nrow(rs)){
+  rs[i,] <- as.numeric(scale(as.numeric(rs[i,])))
+}
+
+rs <- as.matrix(rs)
+
+nans <- apply(rs,1,is.nan)
+
+nans <- t(nans)
+
+nans <- apply(nans, 1, all)
+
+nans <- which(nans)
+
+rs[nans,] <- 0
+
+quantile(rs,probs=seq(0,1,0.1))
+
+hist(rs)
+
+dodge <- apply(rs,1,abs)
+
+dodge <- t(dodge)
+
+dodge <- apply(dodge, 1, `>=`,"1.75")
+
+dodge <- t(dodge)
+
+dodge <- apply(dodge,1,any)
+
+length(which(dodge))
+
+length(dodge)
+
+dodge <- ifelse(dodge,1,0)
+
+rs.v$dodge2 <- dodge
+
+rs.v <- rs.v[,-c(1:6)]
+rs.v$dodgy <- rs.v$dodge+rs.v$dodge2
+
+s <- d
 
 
 
