@@ -27,7 +27,4 @@ with tf.Session() as sess:
     
  #   'C:\Users\gerhard\AppData\Roaming\Python\Python35\Scripts'
  
- tf.test.is_gpu_available(
-    cuda_only=True,
-    min_cuda_compute_capability=None
-)
+tf.test.is_gpu_available(cuda_only=True,min_cuda_compute_capability=None)

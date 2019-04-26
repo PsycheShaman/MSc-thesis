@@ -19,20 +19,92 @@ for i in a:
     
 from ast import literal_eval
 
-for i in range(0,1):#len(files_in_order)):
+d = {}
+
+for i in range(0,len(files_in_order)):
             print(files_in_order[i])
-            appendFile = open(files_in_order[i], 'a') # file object, notice 'a' mode
-            appendFile.close()
-            d = open(files_in_order[i])
-            d = d.read()
-            d = d + "}"
-            d = literal_eval(d)
-            print(d[1])
-            
-a = d.keys()
+            di = open(files_in_order[i])
+            di = di.read()
+            di = di + "}"
+            di = literal_eval(di)
+            d.update(di)
+       
+names = list(d.get(1).keys())
 
-print(a)
+names.sort()
 
-d.get(1).keys()
+print(names)
 
-d.get(0).get('P')
+k = d.keys()
+
+momentum = []
+
+pdg = []
+
+for i in k:
+    P = d.get(i).get('P')
+    pdg_i = d.get(i).get('pdgCode')
+    
+    momentum.append(P)
+    pdg.append(pdg_i)
+    
+electron = []
+
+for i in pdg:
+    if abs(i)==11:
+        electron.append(1)
+    else:
+        electron.append(0)
+        
+len(electron)
+        
+el_dist=[]
+pi_dist=[]
+
+for i in range(0,len(electron)):
+    if electron[i]==1:
+        el_dist.append(momentum[i])
+    else:
+        pi_dist.append(momentum[i])
+        
+    
+print(momentum)
+
+import matplotlib.pyplot as plt
+
+colors = ['red','blue']
+
+plt.hist([el_dist, pi_dist], density=False, bins=30, color = colors)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

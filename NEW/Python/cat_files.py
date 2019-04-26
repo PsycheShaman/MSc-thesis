@@ -6,7 +6,7 @@
 
 import glob
 
-files = glob.glob("/Users/gerhard/msc-thesis-data/pythonDicts/wd/od/000265378" + '/**/*.txt', recursive=True)
+files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\unprocessed\\000265309" + '/**/*.txt', recursive=True)
 
 a = list(range(1,len(files)-1))
 
@@ -27,15 +27,16 @@ import json
             
 for i in range(0,len(files_in_order)):
             print(files_in_order[i])
-            appendFile = open(files_in_order[i], 'a') # file object, notice 'a' mode
-            appendString = "}"
-            appendFile.write(appendString)
-            appendFile.close()
+#            appendFile = open(files_in_order[i], 'a') # file object, notice 'a' mode
+#            appendString = "}"
+#            appendFile.write(appendString)
+#            appendFile.close()
             d = open(files_in_order[i])
             d = d.read()
+            d = d + "}"
             d = literal_eval(d)
             jayson = json.dumps(d,indent=4,sort_keys=True)
-            name1="/Users/gerhard/msc-thesis-data/processed/000265378/"
+            name1="C:\\Users\\gerhard\\Documents\\msc-thesis-data\\processed\\000265309\\"
             name2=".json"
             name=name1+str(i)+name2
             outfile = open(name,"w")
