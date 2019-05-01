@@ -255,10 +255,19 @@ layer5_zero_signal = layer5_signal[2]
 
 #len(layer0_ok_signal)+len(layer1_ok_signal)+len(layer2_ok_signal)+len(layer3_ok_signal)+len(layer4_ok_signal)+len(layer5_ok_signal)
 
+
+
 import keras
 
-keras.backend.backend()
+import tensorflow as tf
 
+from keras import backend as K
+K.tensorflow_backend._get_available_gpus()
+
+with tf.device('/device:GPU:0'):
+    print(keras.backend.backend())
+
+type(electron)
 
 
 
