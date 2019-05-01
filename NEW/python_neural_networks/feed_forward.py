@@ -151,75 +151,121 @@ plt.hist([el_dist, pi_dist], density=False, bins=30, color = colors, label = ['e
 
 import numpy as np
 
-layer0[1]
-layer0[2]
-layer0[3]
-layer0[4]
-layer0[5]
-layer0[6]
-layer0[7]
-layer0[8]
-layer0[9]
-type(layer0[10])
-type(layer0[11])
-layer0[12]
-layer0[13]
-layer0[14]
-
-layer0[15]
-
-a =[]
-
-a.append(np.average(layer0[15],axis=1).tolist())
-a.append(np.average(layer1[15],axis=1).tolist())
 
 
-
-j=15
-newlist = []
-
-L = len(np.average(layer0[j],axis=1).tolist())
-
-signal = 0
-
-for i in range(L):
-    if i == 0 and np.average(layer0[j],axis=1).tolist()[i]<=10:
-        newlist.append(0)
-    elif i == 0:
-        if signal == 0:
-            signal = signal+1
-            newlist.append(signal)
-    else:
-        if np.average(layer0[j],axis=1).tolist()[i]<=11:
-            newlist.append(0)
-        elif np.average(layer0[j],axis=1).tolist()[i]>11:
-            if signal == 0:
-                signal = signal + 1
-                newlist.append(signal)
-            elif newlist[i-1]==signal:
-                newlist.append(signal)
+def signal_check(layer):
+    
+    zero_signal = []
+    ok_signal = []
+    dodgy_signal = []
+    
+    for j in range(len(layer)):
+        
+        if type(layer[j])==type(None):
+            zero_signal.append(j)
+            
+        else:
+            newlist = []
+            
+            L = len(np.average(layer[j],axis=1).tolist())
+            
+            signal = 0
+            
+            for i in range(L):
+                if i == 0 and np.average(layer[j],axis=1).tolist()[i]<=11:
+                    newlist.append(0)
+                elif i == 0:
+                    if signal == 0:
+                        signal = signal+1
+                        newlist.append(signal)
+                else:
+                    if np.average(layer[j],axis=1).tolist()[i]<=11:
+                        newlist.append(0)
+                    elif np.average(layer[j],axis=1).tolist()[i]>11:
+                        if signal == 0:
+                            signal = signal + 1
+                            newlist.append(signal)
+                        elif newlist[i-1]==signal:
+                            newlist.append(signal)
+                        else:
+                            signal = signal +1
+                            newlist.append(signal)
+            
+            if max(newlist)==0:
+                zero_signal.append(j)
+            
+            elif max(newlist)==1:
+                ok_signal.append(j)
+            
             else:
-                signal = signal +1
-                newlist.append(signal)
+                dodgy_signal.append(j)
+            
+    a = (ok_signal,dodgy_signal,zero_signal)
+            
+    return(a)
+
+#check signal for layer 0 
+           
+layer0_signal = signal_check(layer=layer0)
+
+layer0_ok_signal = layer0_signal[0]
+layer0_dodgy_signal = layer0_signal[1]
+layer0_zero_signal = layer0_signal[2]
+
+#check signal for layer 1
+
+layer1_signal = signal_check(layer=layer1)
+
+layer1_ok_signal = layer1_signal[0]
+layer1_dodgy_signal = layer1_signal[1]
+layer1_zero_signal = layer1_signal[2]
+
+#check signal for layer 2
+
+layer2_signal = signal_check(layer=layer2)
+
+layer2_ok_signal = layer2_signal[0]
+layer2_dodgy_signal = layer2_signal[1]
+layer2_zero_signal = layer2_signal[2]
+
+#check signal for layer 3
+
+layer3_signal = signal_check(layer=layer3)
+
+layer3_ok_signal = layer3_signal[0]
+layer3_dodgy_signal = layer3_signal[1]
+layer3_zero_signal = layer3_signal[2]
 
 
-a[0]
+#check signal for layer 4
 
-len(a)
+layer4_signal = signal_check(layer=layer4)
+
+layer4_ok_signal = layer4_signal[0]
+layer4_dodgy_signal = layer4_signal[1]
+layer4_zero_signal = layer4_signal[2]
+
+#check signal for layer 5
+
+layer5_signal = signal_check(layer=layer5)
+
+layer5_ok_signal = layer5_signal[0]
+layer5_dodgy_signal = layer5_signal[1]
+layer5_zero_signal = layer5_signal[2]
+
+#len(layer0_ok_signal)+len(layer1_ok_signal)+len(layer2_ok_signal)+len(layer3_ok_signal)+len(layer4_ok_signal)+len(layer5_ok_signal)
+
+import keras
+
+keras.backend.backend()
 
 
-layer1[15]
-layer2[15]
-layer3[13]
-layer4[13]
-layer5[13]
 
-layer0[16]
-layer0[17]
-layer0[18]
-layer0[19]
-layer0[20]
-layer0[21]
+
+
+
+
+
 
 
 
