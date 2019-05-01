@@ -161,7 +161,7 @@ def signal_check(layer):
     
     for j in range(len(layer)):
         
-        if type(layer[j])==type(None):
+        if type(layer[j])==type(None) or np.array(layer[j]).shape==(17,0):
             zero_signal.append(j)
             
         else:
@@ -172,16 +172,16 @@ def signal_check(layer):
             signal = 0
             
             for i in range(L):
-                if i == 0 and np.average(layer[j],axis=1).tolist()[i]<=11:
+                if i == 0 and np.average(layer[j],axis=1).tolist()[i]==0:
                     newlist.append(0)
                 elif i == 0:
                     if signal == 0:
                         signal = signal+1
                         newlist.append(signal)
                 else:
-                    if np.average(layer[j],axis=1).tolist()[i]<=11:
+                    if np.average(layer[j],axis=1).tolist()[i]==0:
                         newlist.append(0)
-                    elif np.average(layer[j],axis=1).tolist()[i]>11:
+                    elif np.average(layer[j],axis=1).tolist()[i]>0:
                         if signal == 0:
                             signal = signal + 1
                             newlist.append(signal)
@@ -266,8 +266,100 @@ K.tensorflow_backend._get_available_gpus()
 
 with tf.device('/device:GPU:0'):
     print(keras.backend.backend())
+    
 
-type(electron)
+#this is just to get the first non-null element to initialize the x and y arrays
+
+for i in range(len(layer0)):
+    if(i in layer0_ok_signal):
+        x = np.array(layer0[i])
+        y = np.array(electron[i])
+        beg=i
+        break
+    
+for i in range(beg+1,len(layer0)):
+    print(i)
+    if i in layer0_ok_signal:
+        xi = np.array(layer0[i])
+        yi = electron[i]
+        x = np.concatenate((x,xi))
+        y = np.append(y,yi)
+        
+x = np.array(x)
+y = np.array(y)
+
+x = np.reshape(x,(len(y),17,24,1))
+
+y = np.array(y)
+
+
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Activation, Flatten
+from keras.layers import Conv2D, MaxPooling2D
+
+import os
+
+batch_size = 32
+num_classes = 2
+epochs = 100
+
+save_dir = os.path.join(os.getcwd(), 'saved_models')
+model_name = 'keras_cifar10_trained_model.h5'
+
+with tf.device('/device:GPU:0'):
+
+    y = keras.utils.to_categorical(y, num_classes)
+    
+    
+    model = Sequential()
+    model.add(Conv2D(32, (3, 3), padding='same',
+                     input_shape=x.shape[1:]))
+    model.add(Activation('relu'))
+    model.add(Conv2D(32, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+    
+    model.add(Conv2D(64, (3, 3), padding='same'))
+    model.add(Activation('relu'))
+    model.add(Conv2D(64, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+    
+    model.add(Flatten())
+    model.add(Dense(512))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(num_classes))
+    model.add(Activation('softmax'))
+    
+    # initiate RMSprop optimizer
+    opt = keras.optimizers.rmsprop(lr=0.0001, decay=1e-6)
+    
+    # Let's train the model using RMSprop
+    model.compile(loss='categorical_crossentropy',
+                  optimizer=opt,
+                  metrics=['accuracy'])
+    
+    x = x.astype('float32')
+    
+    mu = np.mean(x)
+    
+    x /= mu
+    
+    model.fit(x, y,
+                  batch_size=batch_size,
+                  epochs=epochs,
+                  validation_split=0.75,
+                  shuffle=True)
+
+
+
+
+
+
+
 
 
 
