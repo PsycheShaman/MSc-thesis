@@ -66,13 +66,58 @@ dEdX = []
 
 pdgCode = []
 
+nSigmaElectron = []
+
+nSigmaPion = []
+
+
+layer0 = []
+
+layer1 = []
+
+layer2 = []
+
+layer3 = []
+
+layer4 = []
+
+layer5 = []
+
 for i in k:
     Eta_i = d.get(i).get('Eta')
-    Pi = d.get(i).get('P')
-    pdg_i = d.get(i).get('pdgCode')
+    P_i = d.get(i).get('P')
+    PT_i = d.get(i).get('PT')
+    Phi_i = d.get(i).get('Phi')
+    Theta_i = d.get(i).get('Theta')
+    dEdX_i = d.get(i).get('dEdX')
+    pdgCode_i = d.get(i).get('pdgCode')
+    nSigmaElectron_i = d.get(i).get('nSigmaElectron')
+    nSigmaPion_i = d.get(i).get('nSigmaPion')
     
-    P.append(Pi)
-    pdgCode.append(pdg_i)
+    layer0_i = d.get(i).get('layer 0')
+    layer1_i = d.get(i).get('layer 1')
+    layer2_i = d.get(i).get('layer 2')
+    layer3_i = d.get(i).get('layer 3')
+    layer4_i = d.get(i).get('layer 4')
+    layer5_i = d.get(i).get('layer 5')
+    
+    Eta.append(Eta_i)
+    P.append(P_i)
+    PT.append(PT_i)
+    Phi.append(Phi_i)
+    Theta.append(Theta_i)
+    dEdX.append(dEdX_i)
+    pdgCode.append(pdgCode_i)
+    nSigmaElectron.append(nSigmaElectron_i)
+    nSigmaPion.append(nSigmaPion_i)
+    
+    layer0.append(layer0_i)
+    layer1.append(layer1_i)
+    layer2.append(layer2_i)
+    layer3.append(layer3_i)
+    layer4.append(layer4_i)
+    layer5.append(layer5_i)
+    
     
 electron = []
 
@@ -93,11 +138,96 @@ for i in range(0,len(electron)):
     else:
         pi_dist.append(P[i])
         
-    
-print(P)
 
 import matplotlib.pyplot as plt
 
 colors = ['red','blue']
 
-plt.hist([el_dist, pi_dist], density=False, bins=30, color = colors)
+plt.xlabel('Momentum (GeV)')
+plt.ylabel('Entries')
+plt.title('Histogram of Electron/ Pion Momentum')
+
+plt.hist([el_dist, pi_dist], density=False, bins=30, color = colors, label = ['electron','pion'])
+
+import numpy as np
+
+layer0[1]
+layer0[2]
+layer0[3]
+layer0[4]
+layer0[5]
+layer0[6]
+layer0[7]
+layer0[8]
+layer0[9]
+type(layer0[10])
+type(layer0[11])
+layer0[12]
+layer0[13]
+layer0[14]
+
+layer0[15]
+
+a =[]
+
+a.append(np.average(layer0[15],axis=1).tolist())
+a.append(np.average(layer1[15],axis=1).tolist())
+
+
+
+j=15
+newlist = []
+
+L = len(np.average(layer0[j],axis=1).tolist())
+
+signal = 0
+
+for i in range(L):
+    if i == 0 and np.average(layer0[j],axis=1).tolist()[i]<=10:
+        newlist.append(0)
+    elif i == 0:
+        if signal == 0:
+            signal = signal+1
+            newlist.append(signal)
+    else:
+        if np.average(layer0[j],axis=1).tolist()[i]<=11:
+            newlist.append(0)
+        elif np.average(layer0[j],axis=1).tolist()[i]>11:
+            if signal == 0:
+                signal = signal + 1
+                newlist.append(signal)
+            elif newlist[i-1]==signal:
+                newlist.append(signal)
+            else:
+                signal = signal +1
+                newlist.append(signal)
+
+
+a[0]
+
+len(a)
+
+
+layer1[15]
+layer2[15]
+layer3[13]
+layer4[13]
+layer5[13]
+
+layer0[16]
+layer0[17]
+layer0[18]
+layer0[19]
+layer0[20]
+layer0[21]
+
+
+
+
+
+
+
+
+
+
+
