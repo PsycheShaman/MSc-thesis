@@ -273,6 +273,7 @@ with tf.device('/device:GPU:0'):
 for i in range(len(layer0)):
     if(i in layer0_ok_signal):
         x = np.array(layer0[i])
+        x = np.sum(x,axis=0)
         y = np.array(electron[i])
         beg=i
         break
@@ -281,6 +282,7 @@ for i in range(beg+1,len(layer0)):
     print(i)
     if i in layer0_ok_signal:
         xi = np.array(layer0[i])
+        xi = np.sum(xi,axis=0)
         yi = electron[i]
         x = np.concatenate((x,xi))
         y = np.append(y,yi)
@@ -288,71 +290,64 @@ for i in range(beg+1,len(layer0)):
 x = np.array(x)
 y = np.array(y)
 
-x = np.reshape(x,(len(y),17,24,1))
+x = np.reshape(x,(len(y),24))
+x = x.astype('float32')
 
-y = np.array(y)
+mu = np.mean(x)
+x /= mu
+
+from sklearn.model_selection import train_test_split
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 
-import os
-
-batch_size = 32
+#batch_size = 32
 num_classes = 2
 epochs = 100
 
-save_dir = os.path.join(os.getcwd(), 'saved_models')
-model_name = 'keras_cifar10_trained_model.h5'
+y_train = keras.utils.to_categorical(y_train, num_classes)
+y_test = keras.utils.to_categorical(y_test, num_classes)
 
-with tf.device('/device:GPU:0'):
+#import os
 
-    y = keras.utils.to_categorical(y, num_classes)
+
+
+#save_dir = os.path.join(os.getcwd(), 'new_models')
+#model_name = 'keras_cifar10_trained_model.h5'
+
+#with tf.device('/device:GPU:0'):
     
-    
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), padding='same',
-                     input_shape=x.shape[1:]))
-    model.add(Activation('relu'))
-    model.add(Conv2D(32, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-    
-    model.add(Conv2D(64, (3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Conv2D(64, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-    
-    model.add(Flatten())
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(num_classes))
-    model.add(Activation('softmax'))
+model1 = Sequential([
+    Dense(256, input_shape=(24,)),
+    Activation('relu'),
+    Dense(128),
+    Activation('relu'),
+    Dense(64),
+    Activation('relu'),
+    Dense(2),
+    Activation('softmax')
+])
     
     # initiate RMSprop optimizer
-    opt = keras.optimizers.rmsprop(lr=0.0001, decay=1e-6)
+    #opt = keras.optimizers.rmsprop(lr=0.0001, decay=1e-6)
     
     # Let's train the model using RMSprop
-    model.compile(loss='categorical_crossentropy',
-                  optimizer=opt,
-                  metrics=['accuracy'])
-    
-    x = x.astype('float32')
-    
-    mu = np.mean(x)
-    
-    x /= mu
-    
-    model.fit(x, y,
-                  batch_size=batch_size,
-                  epochs=epochs,
-                  validation_split=0.75,
-                  shuffle=True)
+model1.compile(loss='categorical_crossentropy',
+              optimizer='rmsprop',
+              metrics=['accuracy'])
+
+
+history = model1.fit(x_train, y_train,
+              #batch_size=batch_size,
+              epochs=epochs,
+              validation_split=0.15,
+              shuffle=True)
+
+
 
 
 

@@ -1,6 +1,16 @@
 #clear R session
 rm(list=ls())
 
+require(reticulate)
+
+use_condaenv(condaenv = "py35",required=T)
+
+py_config()
+
+system("source activate py35")
+
+py_run_string("import tensorflow")
+
 #function to read in json files, extract layers, keep only particles in the [2,4)
 #GeV range and remove tracks that have any layers with no signal
 
