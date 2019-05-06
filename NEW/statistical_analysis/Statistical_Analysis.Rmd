@@ -1,0 +1,116 @@
+---
+title: "Statistical Analysis of Thesis Data"
+author: "CG Viljoen - VLJCHR004"
+date: "06/05/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = F,warning = F)
+```
+
+```{r}
+dirX = "C:/Users/gerhard/Documents/msc-thesis-data/processed/000265309"
+
+wrangle <- function(dirX){
+  
+  require(jsonlite)
+  
+  files <- list.files(path=paste0(dirX),
+                      pattern="*json",
+                      full.names=T,
+                      recursive=TRUE)
+  
+  j <- fromJSON(files[1])
+  
+  #print("---------------------------------------------------------------------------------")
+  #print(paste0("Processing jsons to list:"))
+  
+  L <- length(files)
+  
+  for(i in 2:L){
+    #print(100*(i/L))
+    
+    f <- fromJSON(files[i])
+    j <- c(j,f)
+  }
+  
+  j
+  
+}
+
+dat <- wrangle(dirX)
+```
+
+```{r}
+names(dat[[1]])
+```
+
+```{r}
+Eta.265309 <- sapply(dat, `[[`,"Eta")
+P.265309 <- sapply(dat, `[[`,"P")
+PT.265309 <- sapply(dat, `[[`,"PT")
+Phi.265309 <- sapply(dat, `[[`,"Phi")
+Theta.265309 <- sapply(dat, `[[`,"Theta")
+dEdX.265309 <- sapply(dat, `[[`,"dEdX")
+nSigmaElectron.265309 <- sapply(dat, `[[`,"nSigmaElectron")
+nSigmaPion.265309 <- sapply(dat, `[[`,"nSigmaPion")
+pdgCode.265309 <- sapply(dat, `[[`,"pdgCode")
+
+dat265309 <- data.frame(cbind(Eta.265309,P.265309,PT.265309,
+                              Phi.265309,Theta.265309,dEdX.265309,
+                              nSigmaElectron.265309,nSigmaPion.265309,
+                              pdgCode.265309))
+
+dat265309$particleID <- ifelse(abs(dat265309$pdgCode.265309)==211,"pion","electron")
+```
+
+
+
+```{r}
+require(ggplot2)
+
+ggplot(dat265309,aes(x=factor(particleID),colour=factor(particleID)))+geom_bar()+ggtitle("Number of Electrons and Pions: Run #000265309")
+```
+
+
+
+```{r}
+ggplot(dat265309,aes(x=P.265309,y=PT.265309,colour=factor(particleID),alpha=0.2))+geom_violin()
+```
+
+
+```{r}
+ggplot(dat265309,aes(x=P.265309,y=dEdX.265309,colour=factor(particleID),alpha=0.2))+geom_line()
+```
+
+```{r}
+ggplot(dat265309,aes(x=PT.265309,y=dEdX.265309,colour=factor(particleID),alpha=0.2))+geom_line()
+```
+
+
+```{r}
+ggplot(dat265309,aes(x=Theta.265309,y=Eta.265309,fill=factor(particleID),alpha=0.2))+geom_violin()
+```
+
+
+```{r}
+ggplot(dat265309[dat265309$nSigmaElectron.265309!=-999,],aes(x=P.265309[dat265309$nSigmaElectron.265309!=-999],
+                     y=nSigmaElectron.265309[dat265309$nSigmaElectron.265309!=-999],
+                     colour=factor(particleID[dat265309$nSigmaElectron.265309!=-999]),
+                     alpha=0.1))+geom_line()
+
+
+
+```
+
+
+
+
+```{r}
+ggplot(dat265309[dat265309$nSigmaPion.265309!=-999,],aes(x=P.265309[dat265309$nSigmaElectron.265309!=-999],
+                     y=nSigmaPion.265309[dat265309$nSigmaElectron.265309!=-999],
+                     colour=factor(particleID[dat265309$nSigmaPion.265309!=-999]),
+                     alpha=0.1))+geom_line()
+```
+
