@@ -7,9 +7,13 @@ Created on Wed May  1 11:37:05 2019
 
 import glob
 
+#runs used for model1:
+
+#265309,265332,265334,265225,265336,265338,265339,265342,265343,265344,265377,265378,265381,265383,265385,265388
+
 #list python dictionary files in specified directory
 
-files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\unprocessed\\000265309" + '/**/*.txt', recursive=True)
+files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\unprocessed\\" + '\\**\\*.txt', recursive=True)
 
 #make an iterator variable to loop through files
 
@@ -35,9 +39,12 @@ for i in range(0,len(files_in_order)):
             print(files_in_order[i])
             di = open(files_in_order[i])
             di = di.read()
-            di = di + "}"
-            di = literal_eval(di)
-            d.update(di)
+            if di == "}":
+                continue
+            else:
+                di = di + "}"
+                di = literal_eval(di)
+                d.update(di)
             
 #get a list of the available variables in each dictionary
 names = list(d.get(1).keys())
@@ -326,6 +333,8 @@ model1 = Sequential([
     Activation('relu'),
     Dense(128),
     Activation('relu'),
+    Dense(128),
+    Activation('relu'),
     Dense(64),
     Activation('relu'),
     Dense(2),
@@ -347,7 +356,7 @@ history = model1.fit(x_train, y_train,
               validation_split=0.15,
               shuffle=True)
 
-
+model1.probs = model1.predict_proba(x_test)
 
 
 

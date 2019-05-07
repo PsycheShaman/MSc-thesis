@@ -10,8 +10,6 @@ knitr::opts_chunk$set(echo = TRUE,message = F,warning = F)
 ```
 
 ```{r}
-dirX = "C:/Users/gerhard/Documents/msc-thesis-data/processed/000265309"
-
 wrangle <- function(dirX){
   
   require(jsonlite)
@@ -39,30 +37,71 @@ wrangle <- function(dirX){
   
 }
 
-dat <- wrangle(dirX)
 ```
+
+```{r}
+#define a function to recursively add actual run numbers and concatenate lists
+recursive_add <- function(run_number){
+  run_number <- paste0("000",run_number)
+  
+  dirX <- paste0("C:/Users/gerhard/Documents/msc-thesis-data/processed/",run_number)
+  dat_ <- wrangle(dirX)
+  
+  for(i in 1:length(dat_)){
+  
+  dat_[[i]]$RunNumber <- run_number
+  }
+  
+  dat <- c(dat,dat_)
+}
+
+#add first run to initialize dataset
+
+dirX = "C:/Users/gerhard/Documents/msc-thesis-data/processed/000265309"
+dat <- wrangle(dirX)
+
+for(i in 1:length(dat)){
+  
+  dat[[i]]$RunNumber <- "000265309"
+  
+}
+
+runs <- c("000265332","000265334","000265335",
+          "000265336","000265338","000265339",
+          "000265342","000265343","000265344",
+          "000265377","000265378","00026581",
+          "00026583","00026585","000265388")
+
+for(i in runs){
+  recursive_add(i)
+}
+```
+
 
 ```{r}
 names(dat[[1]])
 ```
 
 ```{r}
-Eta.265309 <- sapply(dat, `[[`,"Eta")
-P.265309 <- sapply(dat, `[[`,"P")
-PT.265309 <- sapply(dat, `[[`,"PT")
-Phi.265309 <- sapply(dat, `[[`,"Phi")
-Theta.265309 <- sapply(dat, `[[`,"Theta")
-dEdX.265309 <- sapply(dat, `[[`,"dEdX")
-nSigmaElectron.265309 <- sapply(dat, `[[`,"nSigmaElectron")
-nSigmaPion.265309 <- sapply(dat, `[[`,"nSigmaPion")
-pdgCode.265309 <- sapply(dat, `[[`,"pdgCode")
+Eta <- sapply(dat, `[[`,"Eta")
+P <- sapply(dat, `[[`,"P")
+PT <- sapply(dat, `[[`,"PT")
+Phi <- sapply(dat, `[[`,"Phi")
+Theta <- sapply(dat, `[[`,"Theta")
+dEdX <- sapply(dat, `[[`,"dEdX")
+nSigmaElectron <- sapply(dat, `[[`,"nSigmaElectron")
+nSigmaPion <- sapply(dat, `[[`,"nSigmaPion")
+pdgCode <- sapply(dat, `[[`,"pdgCode")
 
-dat265309 <- data.frame(cbind(Eta.265309,P.265309,PT.265309,
-                              Phi.265309,Theta.265309,dEdX.265309,
-                              nSigmaElectron.265309,nSigmaPion.265309,
-                              pdgCode.265309))
+dat <- data.frame(cbind(Eta,P,PT,
+                              Phi,Theta,dEdX,
+                              nSigmaElectron,nSigmaPion,
+                              pdgCode))
 
-dat265309$particleID <- ifelse(abs(dat265309$pdgCode.265309)==211,"pion","electron")
+dat$particleID <- ifelse(abs(dat$pdgCode)==211,"pion","electron")
+
+dat$RunNumber <-  sapply(dat, `[[`,"RunNumber")
+dat$RunNumber <- as.factor(dat$RunNumber)
 ```
 
 
@@ -70,35 +109,37 @@ dat265309$particleID <- ifelse(abs(dat265309$pdgCode.265309)==211,"pion","electr
 ```{r}
 require(ggplot2)
 
-ggplot(dat265309,aes(x=factor(particleID),colour=factor(particleID)))+geom_bar()+ggtitle("Number of Electrons and Pions: Run #000265309")
+ggplot(dat,aes(x=factor(particleID),colour=factor(particleID),fill="white"))+
+  geom_bar()+
+  ggtitle("Number of Electrons and Pions")+facet_wrap(~RunNumber)
 ```
 
 
 
 ```{r}
-ggplot(dat265309,aes(x=P.265309,y=PT.265309,colour=factor(particleID),alpha=0.2))+geom_violin()
+ggplot(dat,aes(x=P,y=PT,colour=factor(particleID),alpha=0.2))+geom_violin()+facet_wrap(~RunNumber)
 ```
 
 
 ```{r}
-ggplot(dat265309,aes(x=P.265309,y=dEdX.265309,colour=factor(particleID),alpha=0.2))+geom_line()
+ggplot(dat,aes(x=P,y=dEdX,colour=factor(particleID),alpha=0.2))+geom_line()+facet_wrap(~RunNumber)
 ```
 
 ```{r}
-ggplot(dat265309,aes(x=PT.265309,y=dEdX.265309,colour=factor(particleID),alpha=0.2))+geom_line()
-```
-
-
-```{r}
-ggplot(dat265309,aes(x=Theta.265309,y=Eta.265309,fill=factor(particleID),alpha=0.2))+geom_violin()
+ggplot(dat,aes(x=PT,y=dEdX,colour=factor(particleID),alpha=0.2))+geom_line()+facet_wrap(~RunNumber)
 ```
 
 
 ```{r}
-ggplot(dat265309[dat265309$nSigmaElectron.265309!=-999,],aes(x=P.265309[dat265309$nSigmaElectron.265309!=-999],
-                     y=nSigmaElectron.265309[dat265309$nSigmaElectron.265309!=-999],
-                     colour=factor(particleID[dat265309$nSigmaElectron.265309!=-999]),
-                     alpha=0.1))+geom_line()
+ggplot(dat,aes(x=Theta,y=Eta,fill=factor(particleID),alpha=0.2))+geom_violin()+facet_wrap(~RunNumber)
+```
+
+
+```{r}
+ggplot(dat[dat$nSigmaElectron!=-999,],aes(x=P[dat$nSigmaElectron!=-999],
+                     y=nSigmaElectron[dat$nSigmaElectron!=-999],
+                     colour=factor(particleID[dat$nSigmaElectron!=-999]),
+                     alpha=0.1))+geom_line()+facet_wrap(~RunNumber)
 
 
 
@@ -108,9 +149,41 @@ ggplot(dat265309[dat265309$nSigmaElectron.265309!=-999,],aes(x=P.265309[dat26530
 
 
 ```{r}
-ggplot(dat265309[dat265309$nSigmaPion.265309!=-999,],aes(x=P.265309[dat265309$nSigmaElectron.265309!=-999],
-                     y=nSigmaPion.265309[dat265309$nSigmaElectron.265309!=-999],
-                     colour=factor(particleID[dat265309$nSigmaPion.265309!=-999]),
-                     alpha=0.1))+geom_line()
+ggplot(dat[dat$nSigmaPion!=-999,],aes(x=P[dat$nSigmaPion!=-999],
+                     y=nSigmaPion[dat$nSigmaPion!=-999],
+                     colour=factor(particleID[dat$nSigmaPion!=-999]),
+                     alpha=0.1))+geom_line()+facet_wrap(~RunNumber)
 ```
+
+```{r}
+ggplot(dat[dat$nSigmaElectron!=-999,],aes(x=dEdX[dat$nSigmaElectron!=-999],
+                     y=nSigmaElectron[dat$nSigmaElectron!=-999],
+                     colour=factor(particleID[dat$nSigmaElectron!=-999]),
+                     alpha=0.1))+geom_line()+facet_wrap(~RunNumber)
+```
+
+
+
+```{r}
+ggplot(dat[dat$nSigmaPion!=-999,],aes(x=dEdX[dat$nSigmaPion!=-999],
+                     y=nSigmaPion[dat$nSigmaPion!=-999],
+                     colour=factor(particleID[dat$nSigmaPion!=-999]),
+                     alpha=0.1))+geom_line()+facet_wrap(~RunNumber)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
