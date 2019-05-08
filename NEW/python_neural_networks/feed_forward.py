@@ -7,10 +7,6 @@ Created on Wed May  1 11:37:05 2019
 
 import glob
 
-#runs used for model1:
-
-#265309,265332,265334,265225,265336,265338,265339,265342,265343,265344,265377,265378,265381,265383,265385,265388
-
 #list python dictionary files in specified directory
 
 files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\unprocessed\\" + '\\**\\*.txt', recursive=True)
@@ -49,7 +45,7 @@ for i in range(0,len(files_in_order)):
                 ki = di.keys()
                 j = len(d)
                 for k in ki:
-                    j += 1
+                    j += 1000000000000000000000000000000
                     print(str(j)+" : "+str(k))
                     di[j] = di.pop(k)
                     print("length of di after pop: "+str(len(di)))
@@ -298,13 +294,42 @@ for i in range(len(layer0)):
         break
     
 for i in range(beg+1,len(layer0)):
-    print(i)
     if i in layer0_ok_signal:
         xi = np.array(layer0[i])
         xi = np.sum(xi,axis=0)
         yi = electron[i]
         x = np.concatenate((x,xi))
         y = np.append(y,yi)
+    if i in layer1_ok_signal:
+        xi = np.array(layer1[i])
+        xi = np.sum(xi,axis=0)
+        #yi = electron[i]
+        x = np.concatenate((x,xi))
+        #y = np.append(y,yi)
+    if i in layer2_ok_signal:
+        xi = np.array(layer2[i])
+        xi = np.sum(xi,axis=0)
+        #yi = electron[i]
+        x = np.concatenate((x,xi))
+        #y = np.append(y,yi)
+    if i in layer3_ok_signal:
+        xi = np.array(layer3[i])
+        xi = np.sum(xi,axis=0)
+        #yi = electron[i]
+        x = np.concatenate((x,xi))
+        #y = np.append(y,yi)
+    if i in layer4_ok_signal:
+        xi = np.array(layer4[i])
+        xi = np.sum(xi,axis=0)
+        #yi = electron[i]
+        x = np.concatenate((x,xi))
+        #y = np.append(y,yi)
+    if i in layer5_ok_signal:
+        xi = np.array(layer5[i])
+        xi = np.sum(xi,axis=0)
+        #yi = electron[i]
+        x = np.concatenate((x,xi))
+        #y = np.append(y,yi)
         
 x = np.array(x)
 y = np.array(y)
