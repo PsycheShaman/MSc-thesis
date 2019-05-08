@@ -6,7 +6,7 @@
 
 import glob
 
-files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\unprocessed\\000265338" + '/**/*.txt', recursive=True)
+files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\unprocessed\\000265343" + '/**/*.txt', recursive=True)
 
 a = list(range(1,len(files)-1))
 
