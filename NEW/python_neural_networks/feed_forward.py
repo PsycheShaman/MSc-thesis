@@ -40,11 +40,23 @@ for i in range(0,len(files_in_order)):
             di = open(files_in_order[i])
             di = di.read()
             if di == "}":
+                print(di)
                 continue
             else:
                 di = di + "}"
                 di = literal_eval(di)
+                print("length of di: "+str(len(di)))
+                ki = di.keys()
+                j = len(d)
+                for k in ki:
+                    j += 1
+                    print(str(j)+" : "+str(k))
+                    di[j] = di.pop(k)
+                    print("length of di after pop: "+str(len(di)))
+                
+                print(len(di))
                 d.update(di)
+            print(len(d))
             
 #get a list of the available variables in each dictionary
 names = list(d.get(1).keys())
