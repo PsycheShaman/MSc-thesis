@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = TRUE,message = F,warning = F)
 ```
 
 ```{r}
+rm(list=ls())
+
 wrangle <- function(dirX){
   
   require(jsonlite)
@@ -51,10 +53,13 @@ recursive_add <- function(run_number){
   
   dat_[[i]]$RunNumber <- run_number
   }
-  
-  dat <- c(dat,dat_)
+  gc()
+  return(dat_)
 }
 
+```
+
+```{r}
 #add first run to initialize dataset
 
 dirX = "C:/Users/gerhard/Documents/msc-thesis-data/processed/000265309"
@@ -66,14 +71,24 @@ for(i in 1:length(dat)){
   
 }
 
-runs <- c("000265332","000265334","000265335",
-          "000265336","000265338","000265339",
-          "000265342","000265343","000265344",
-          "000265377","000265378","00026581",
-          "00026583","00026585","000265388")
+runs1 <- c("265332","265334","265335")
+runs2 <- c("265336","265338","265339")
+runs3 <- c("265342","265343","265344")
+runs4 <- c("265377","265378","265381")
+runs5 <- c("265383","265385","265388")
+runs6 <- c("265419","265420","265425")
+runs7 <- c("265426","265499")
 
-for(i in runs){
-  recursive_add(i)
+```
+
+# RUNS 1
+
+```{r}
+
+for(i in runs1){
+  print(paste0("RUN: ", i))
+  dat <- c(dat,recursive_add(i))
+  print(length(dat))
 }
 ```
 
@@ -92,16 +107,21 @@ dEdX <- sapply(dat, `[[`,"dEdX")
 nSigmaElectron <- sapply(dat, `[[`,"nSigmaElectron")
 nSigmaPion <- sapply(dat, `[[`,"nSigmaPion")
 pdgCode <- sapply(dat, `[[`,"pdgCode")
+RunNumber <-  sapply(dat, `[[`,"RunNumber")
 
 dat <- data.frame(cbind(Eta,P,PT,
                               Phi,Theta,dEdX,
                               nSigmaElectron,nSigmaPion,
-                              pdgCode))
+                              pdgCode,RunNumber))
 
-dat$particleID <- ifelse(abs(dat$pdgCode)==211,"pion","electron")
-
-dat$RunNumber <-  sapply(dat, `[[`,"RunNumber")
+dat$particleID <- ifelse(abs(as.numeric(as.character(dat$pdgCode)))==211,"pion","electron")
 dat$RunNumber <- as.factor(dat$RunNumber)
+
+for(i in 1:8){
+  dat[,i] <- as.numeric(as.character(dat[,i]))
+}
+
+dat$particleID <- as.factor(dat$particleID)
 ```
 
 
@@ -109,67 +129,501 @@ dat$RunNumber <- as.factor(dat$RunNumber)
 ```{r}
 require(ggplot2)
 
-ggplot(dat,aes(x=factor(particleID),colour=factor(particleID),fill="white"))+
+ggplot(dat,aes(x=factor(particleID),colour=factor(particleID),fill=factor(particleID)))+
   geom_bar()+
   ggtitle("Number of Electrons and Pions")+facet_wrap(~RunNumber)
 ```
 
-
+```{r}
+ggplot(dat,aes(x=P,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
 
 ```{r}
-ggplot(dat,aes(x=P,y=PT,colour=factor(particleID),alpha=0.2))+geom_violin()+facet_wrap(~RunNumber)
+ggplot(dat,aes(x=PT,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
 ```
 
 
 ```{r}
-ggplot(dat,aes(x=P,y=dEdX,colour=factor(particleID),alpha=0.2))+geom_line()+facet_wrap(~RunNumber)
+ggplot(dat[dat$nSigmaElectron!=-999,],aes(x=nSigmaElectron,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
 ```
 
 ```{r}
-ggplot(dat,aes(x=PT,y=dEdX,colour=factor(particleID),alpha=0.2))+geom_line()+facet_wrap(~RunNumber)
+ggplot(dat[dat$nSigmaPion!=-999,],aes(x=nSigmaPion,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+# RUNS 2
+
+```{r}
+rm(dat)
+dat <- c()
+
+for(i in runs2){
+  print(paste0("RUN: ", i))
+  dat <- c(dat,recursive_add(i))
+  print(length(dat))
+}
 ```
 
 
 ```{r}
-ggplot(dat,aes(x=Theta,y=Eta,fill=factor(particleID),alpha=0.2))+geom_violin()+facet_wrap(~RunNumber)
+names(dat[[1]])
+```
+
+```{r}
+Eta <- sapply(dat, `[[`,"Eta")
+P <- sapply(dat, `[[`,"P")
+PT <- sapply(dat, `[[`,"PT")
+Phi <- sapply(dat, `[[`,"Phi")
+Theta <- sapply(dat, `[[`,"Theta")
+dEdX <- sapply(dat, `[[`,"dEdX")
+nSigmaElectron <- sapply(dat, `[[`,"nSigmaElectron")
+nSigmaPion <- sapply(dat, `[[`,"nSigmaPion")
+pdgCode <- sapply(dat, `[[`,"pdgCode")
+RunNumber <-  sapply(dat, `[[`,"RunNumber")
+
+dat <- data.frame(cbind(Eta,P,PT,
+                              Phi,Theta,dEdX,
+                              nSigmaElectron,nSigmaPion,
+                              pdgCode,RunNumber))
+
+dat$particleID <- ifelse(abs(as.numeric(as.character(dat$pdgCode)))==211,"pion","electron")
+dat$RunNumber <- as.factor(dat$RunNumber)
+
+for(i in 1:8){
+  dat[,i] <- as.numeric(as.character(dat[,i]))
+}
+
+dat$particleID <- as.factor(dat$particleID)
+```
+
+
+
+```{r}
+require(ggplot2)
+
+ggplot(dat,aes(x=factor(particleID),colour=factor(particleID),fill=factor(particleID)))+
+  geom_bar()+
+  ggtitle("Number of Electrons and Pions")+facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat,aes(x=P,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat,aes(x=PT,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
 ```
 
 
 ```{r}
-ggplot(dat[dat$nSigmaElectron!=-999,],aes(x=P[dat$nSigmaElectron!=-999],
-                     y=nSigmaElectron[dat$nSigmaElectron!=-999],
-                     colour=factor(particleID[dat$nSigmaElectron!=-999]),
-                     alpha=0.1))+geom_line()+facet_wrap(~RunNumber)
-
-
-
+ggplot(dat[dat$nSigmaElectron!=-999,],aes(x=nSigmaElectron,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
 ```
 
+```{r}
+ggplot(dat[dat$nSigmaPion!=-999,],aes(x=nSigmaPion,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+# RUNS 3
+
+```{r}
+rm(dat)
+dat <- c()
+
+for(i in runs3){
+  print(paste0("RUN: ", i))
+  dat <- c(dat,recursive_add(i))
+  print(length(dat))
+}
+```
+
+
+```{r}
+names(dat[[1]])
+```
+
+```{r}
+Eta <- sapply(dat, `[[`,"Eta")
+P <- sapply(dat, `[[`,"P")
+PT <- sapply(dat, `[[`,"PT")
+Phi <- sapply(dat, `[[`,"Phi")
+Theta <- sapply(dat, `[[`,"Theta")
+dEdX <- sapply(dat, `[[`,"dEdX")
+nSigmaElectron <- sapply(dat, `[[`,"nSigmaElectron")
+nSigmaPion <- sapply(dat, `[[`,"nSigmaPion")
+pdgCode <- sapply(dat, `[[`,"pdgCode")
+RunNumber <-  sapply(dat, `[[`,"RunNumber")
+
+dat <- data.frame(cbind(Eta,P,PT,
+                              Phi,Theta,dEdX,
+                              nSigmaElectron,nSigmaPion,
+                              pdgCode,RunNumber))
+
+dat$particleID <- ifelse(abs(as.numeric(as.character(dat$pdgCode)))==211,"pion","electron")
+dat$RunNumber <- as.factor(dat$RunNumber)
+
+for(i in 1:8){
+  dat[,i] <- as.numeric(as.character(dat[,i]))
+}
+
+dat$particleID <- as.factor(dat$particleID)
+```
 
 
 
 ```{r}
-ggplot(dat[dat$nSigmaPion!=-999,],aes(x=P[dat$nSigmaPion!=-999],
-                     y=nSigmaPion[dat$nSigmaPion!=-999],
-                     colour=factor(particleID[dat$nSigmaPion!=-999]),
-                     alpha=0.1))+geom_line()+facet_wrap(~RunNumber)
+require(ggplot2)
+
+ggplot(dat,aes(x=factor(particleID),colour=factor(particleID),fill=factor(particleID)))+
+  geom_bar()+
+  ggtitle("Number of Electrons and Pions")+facet_wrap(~RunNumber)
 ```
 
 ```{r}
-ggplot(dat[dat$nSigmaElectron!=-999,],aes(x=dEdX[dat$nSigmaElectron!=-999],
-                     y=nSigmaElectron[dat$nSigmaElectron!=-999],
-                     colour=factor(particleID[dat$nSigmaElectron!=-999]),
-                     alpha=0.1))+geom_line()+facet_wrap(~RunNumber)
+ggplot(dat,aes(x=P,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat,aes(x=PT,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
+
+
+```{r}
+ggplot(dat[dat$nSigmaElectron!=-999,],aes(x=nSigmaElectron,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat[dat$nSigmaPion!=-999,],aes(x=nSigmaPion,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+# RUNS 4
+
+```{r}
+rm(dat)
+dat <- c()
+
+for(i in runs4){
+  print(paste0("RUN: ", i))
+  dat <- c(dat,recursive_add(i))
+  print(length(dat))
+}
+```
+
+
+```{r}
+names(dat[[1]])
+```
+
+```{r}
+Eta <- sapply(dat, `[[`,"Eta")
+P <- sapply(dat, `[[`,"P")
+PT <- sapply(dat, `[[`,"PT")
+Phi <- sapply(dat, `[[`,"Phi")
+Theta <- sapply(dat, `[[`,"Theta")
+dEdX <- sapply(dat, `[[`,"dEdX")
+nSigmaElectron <- sapply(dat, `[[`,"nSigmaElectron")
+nSigmaPion <- sapply(dat, `[[`,"nSigmaPion")
+pdgCode <- sapply(dat, `[[`,"pdgCode")
+RunNumber <-  sapply(dat, `[[`,"RunNumber")
+
+dat <- data.frame(cbind(Eta,P,PT,
+                              Phi,Theta,dEdX,
+                              nSigmaElectron,nSigmaPion,
+                              pdgCode,RunNumber))
+
+dat$particleID <- ifelse(abs(as.numeric(as.character(dat$pdgCode)))==211,"pion","electron")
+dat$RunNumber <- as.factor(dat$RunNumber)
+
+for(i in 1:8){
+  dat[,i] <- as.numeric(as.character(dat[,i]))
+}
+
+dat$particleID <- as.factor(dat$particleID)
 ```
 
 
 
 ```{r}
-ggplot(dat[dat$nSigmaPion!=-999,],aes(x=dEdX[dat$nSigmaPion!=-999],
-                     y=nSigmaPion[dat$nSigmaPion!=-999],
-                     colour=factor(particleID[dat$nSigmaPion!=-999]),
-                     alpha=0.1))+geom_line()+facet_wrap(~RunNumber)
+require(ggplot2)
+
+ggplot(dat,aes(x=factor(particleID),colour=factor(particleID),fill=factor(particleID)))+
+  geom_bar()+
+  ggtitle("Number of Electrons and Pions")+facet_wrap(~RunNumber)
 ```
+
+```{r}
+ggplot(dat,aes(x=P,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat,aes(x=PT,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
+
+
+```{r}
+ggplot(dat[dat$nSigmaElectron!=-999,],aes(x=nSigmaElectron,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat[dat$nSigmaPion!=-999,],aes(x=nSigmaPion,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+
+# RUNS 5
+
+```{r}
+rm(dat)
+dat <- c()
+
+for(i in runs5){
+  print(paste0("RUN: ", i))
+  dat <- c(dat,recursive_add(i))
+  print(length(dat))
+}
+```
+
+
+```{r}
+names(dat[[1]])
+```
+
+```{r}
+Eta <- sapply(dat, `[[`,"Eta")
+P <- sapply(dat, `[[`,"P")
+PT <- sapply(dat, `[[`,"PT")
+Phi <- sapply(dat, `[[`,"Phi")
+Theta <- sapply(dat, `[[`,"Theta")
+dEdX <- sapply(dat, `[[`,"dEdX")
+nSigmaElectron <- sapply(dat, `[[`,"nSigmaElectron")
+nSigmaPion <- sapply(dat, `[[`,"nSigmaPion")
+pdgCode <- sapply(dat, `[[`,"pdgCode")
+RunNumber <-  sapply(dat, `[[`,"RunNumber")
+
+dat <- data.frame(cbind(Eta,P,PT,
+                              Phi,Theta,dEdX,
+                              nSigmaElectron,nSigmaPion,
+                              pdgCode,RunNumber))
+
+dat$particleID <- ifelse(abs(as.numeric(as.character(dat$pdgCode)))==211,"pion","electron")
+dat$RunNumber <- as.factor(dat$RunNumber)
+
+for(i in 1:8){
+  dat[,i] <- as.numeric(as.character(dat[,i]))
+}
+
+dat$particleID <- as.factor(dat$particleID)
+```
+
+
+
+```{r}
+require(ggplot2)
+
+ggplot(dat,aes(x=factor(particleID),colour=factor(particleID),fill=factor(particleID)))+
+  geom_bar()+
+  ggtitle("Number of Electrons and Pions")+facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat,aes(x=P,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat,aes(x=PT,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
+
+
+```{r}
+ggplot(dat[dat$nSigmaElectron!=-999,],aes(x=nSigmaElectron,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat[dat$nSigmaPion!=-999,],aes(x=nSigmaPion,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+
+# RUNS 6
+
+```{r}
+rm(dat)
+dat <- c()
+
+for(i in runs6){
+  print(paste0("RUN: ", i))
+  dat <- c(dat,recursive_add(i))
+  print(length(dat))
+}
+```
+
+
+```{r}
+names(dat[[1]])
+```
+
+```{r}
+Eta <- sapply(dat, `[[`,"Eta")
+P <- sapply(dat, `[[`,"P")
+PT <- sapply(dat, `[[`,"PT")
+Phi <- sapply(dat, `[[`,"Phi")
+Theta <- sapply(dat, `[[`,"Theta")
+dEdX <- sapply(dat, `[[`,"dEdX")
+nSigmaElectron <- sapply(dat, `[[`,"nSigmaElectron")
+nSigmaPion <- sapply(dat, `[[`,"nSigmaPion")
+pdgCode <- sapply(dat, `[[`,"pdgCode")
+RunNumber <-  sapply(dat, `[[`,"RunNumber")
+
+dat <- data.frame(cbind(Eta,P,PT,
+                              Phi,Theta,dEdX,
+                              nSigmaElectron,nSigmaPion,
+                              pdgCode,RunNumber))
+
+dat$particleID <- ifelse(abs(as.numeric(as.character(dat$pdgCode)))==211,"pion","electron")
+dat$RunNumber <- as.factor(dat$RunNumber)
+
+for(i in 1:8){
+  dat[,i] <- as.numeric(as.character(dat[,i]))
+}
+
+dat$particleID <- as.factor(dat$particleID)
+```
+
+
+
+```{r}
+require(ggplot2)
+
+ggplot(dat,aes(x=factor(particleID),colour=factor(particleID),fill=factor(particleID)))+
+  geom_bar()+
+  ggtitle("Number of Electrons and Pions")+facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat,aes(x=P,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat,aes(x=PT,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
+
+
+```{r}
+ggplot(dat[dat$nSigmaElectron!=-999,],aes(x=nSigmaElectron,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat[dat$nSigmaPion!=-999,],aes(x=nSigmaPion,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+
+# RUNS 7
+
+```{r}
+rm(dat)
+dat <- c()
+
+for(i in runs7){
+  print(paste0("RUN: ", i))
+  dat <- c(dat,recursive_add(i))
+  print(length(dat))
+}
+```
+
+
+```{r}
+names(dat[[1]])
+```
+
+```{r}
+Eta <- sapply(dat, `[[`,"Eta")
+P <- sapply(dat, `[[`,"P")
+PT <- sapply(dat, `[[`,"PT")
+Phi <- sapply(dat, `[[`,"Phi")
+Theta <- sapply(dat, `[[`,"Theta")
+dEdX <- sapply(dat, `[[`,"dEdX")
+nSigmaElectron <- sapply(dat, `[[`,"nSigmaElectron")
+nSigmaPion <- sapply(dat, `[[`,"nSigmaPion")
+pdgCode <- sapply(dat, `[[`,"pdgCode")
+RunNumber <-  sapply(dat, `[[`,"RunNumber")
+
+dat <- data.frame(cbind(Eta,P,PT,
+                              Phi,Theta,dEdX,
+                              nSigmaElectron,nSigmaPion,
+                              pdgCode,RunNumber))
+
+dat$particleID <- ifelse(abs(as.numeric(as.character(dat$pdgCode)))==211,"pion","electron")
+dat$RunNumber <- as.factor(dat$RunNumber)
+
+for(i in 1:8){
+  dat[,i] <- as.numeric(as.character(dat[,i]))
+}
+
+dat$particleID <- as.factor(dat$particleID)
+```
+
+
+
+```{r}
+require(ggplot2)
+
+ggplot(dat,aes(x=factor(particleID),colour=factor(particleID),fill=factor(particleID)))+
+  geom_bar()+
+  ggtitle("Number of Electrons and Pions")+facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat,aes(x=P,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat,aes(x=PT,y=dEdX,colour=factor(particleID),alpha=0))+geom_point()+facet_wrap(~RunNumber)
+```
+
+
+```{r}
+ggplot(dat[dat$nSigmaElectron!=-999,],aes(x=nSigmaElectron,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+```{r}
+ggplot(dat[dat$nSigmaPion!=-999,],aes(x=nSigmaPion,fill=particleID,alpha=0),position=position_dodge())+
+  geom_histogram(bins = 1000)+
+  facet_wrap(~RunNumber)
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -269,18 +269,6 @@ layer5_dodgy_signal = layer5_signal[1]
 layer5_zero_signal = layer5_signal[2]
 
 #len(layer0_ok_signal)+len(layer1_ok_signal)+len(layer2_ok_signal)+len(layer3_ok_signal)+len(layer4_ok_signal)+len(layer5_ok_signal)
-
-
-
-import keras
-
-import tensorflow as tf
-
-from keras import backend as K
-K.tensorflow_backend._get_available_gpus()
-
-with tf.device('/device:GPU:0'):
-    print(keras.backend.backend())
     
 
 #this is just to get the first non-null element to initialize the x and y arrays
@@ -343,10 +331,10 @@ x /= mu
 # Step 1
 import pickle
  
-with open('x.full', 'wb') as x_file:
+with open('C:\\Users\\gerhard\\Documents\\msc-thesis-data\\x.full', 'wb') as x_file:
   pickle.dump(x, x_file)
   
-with open('y.full', 'wb') as y_file:
+with open('C:\\Users\\gerhard\\Documents\\msc-thesis-data\\y.full', 'wb') as y_file:
   pickle.dump(y, y_file)
 
 
