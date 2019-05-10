@@ -1,0 +1,107 @@
+---
+title: 'SVM: P vs dEdX'
+author: "CG Viljoen - VLJCHR004"
+date: "10/05/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+rm(list=ls())
+
+wrangle <- function(dirX){
+  
+  require(jsonlite)
+  
+  files <- list.files(path=paste0(dirX),
+                      pattern="*json",
+                      full.names=T,
+                      recursive=TRUE)
+  
+  j <- fromJSON(files[1])
+  
+  #print("---------------------------------------------------------------------------------")
+  #print(paste0("Processing jsons to list:"))
+  
+  L <- length(files)
+  
+  for(i in 2:L){
+    print(100*(i/L))
+    
+    f <- fromJSON(files[i])
+    j <- c(j,f)
+  }
+  
+  j
+  
+}
+
+recursive_add <- function(run_number){
+  run_number <- paste0("000",run_number)
+  
+  dirX <- paste0("C:/Users/gerhard/Documents/msc-thesis-data/processed/",run_number)
+  dat_ <- wrangle(dirX)
+  
+  dEdX <- sapply(dat_, `[[`, "dEdX")
+  P <- sapply(dat_, `[[`, "P")
+  pdgCode <- sapply(dat_, `[[`, "pdgCode")
+  
+  
+  return_dat <- data.frame(cbind(dEdX,P,pdgCode))
+  
+  return(return_dat)
+}
+
+dat <- recursive_add(265309)
+
+runs1 <- c("265332","265334","265335")
+runs2 <- c("265336","265338","265339")
+runs3 <- c("265342","265343","265344")
+runs4 <- c("265377","265378","265381")
+runs5 <- c("265383","265385","265388")
+runs6 <- c("265419","265420","265425")
+runs7 <- c("265426","265499")
+
+runs <- c(runs1,runs2,runs3,runs4,runs5,runs6,runs7)
+
+for(i in runs){
+  dat <- data.frame(rbind(dat,recursive_add(i)))
+}
+
+
+```
+
+
+
+
+```{r}
+require(e1071)
+
+
+dat$pdgCode <- as.factor(dat$pdgCode)
+
+
+svm_model1 <- svm(pdgCode ~ ., data=dat, scale =T, kernel="linear")
+
+plot(svm_model1,dat)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
