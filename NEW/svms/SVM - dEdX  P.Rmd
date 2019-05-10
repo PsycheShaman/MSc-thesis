@@ -88,6 +88,19 @@ dat$pdgCode <- as.factor(dat$pdgCode)
 svm_model1 <- svm(pdgCode ~ ., data=dat, scale =T, kernel="linear")
 
 plot(svm_model1,dat)
+
+svm_model2 <- svm(pdgCode ~ ., data=dat, scale =T, kernel="polynomial", degree=2)
+
+plot(svm_model2,dat)
+
+svm_model3 <- svm(pdgCode ~ ., data=dat, scale =T, kernel="polynomial", degree=3)
+
+plot(svm_model3,dat)
+
+svm_model4 <- svm(pdgCode ~ ., data=dat, scale =T, kernel="polynomial", degree=4)
+
+plot(svm_model4,dat)
+
 ```
 
 
