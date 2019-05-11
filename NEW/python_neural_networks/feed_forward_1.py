@@ -29,24 +29,12 @@ with tf.device('/device:GPU:0'):
     print(keras.backend.backend())
 
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten
-#from keras.layers import Conv2D, MaxPooling2D
-
-#batch_size = 32
+from keras.layers import Dense, Dropout, Activation
 num_classes = 2
 epochs = 100
 
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
-
-#import os
-
-
-
-#save_dir = os.path.join(os.getcwd(), 'new_models')
-#model_name = 'keras_cifar10_trained_model.h5'
-
-#with tf.device('/device:GPU:0'):
     
 model1 = Sequential([
     Dense(256, input_shape=(24,)),
@@ -60,11 +48,7 @@ model1 = Sequential([
     Dense(2),
     Activation('softmax')
 ])
-    
-    # initiate RMSprop optimizer
-    #opt = keras.optimizers.rmsprop(lr=0.0001, decay=1e-6)
-    
-    # Let's train the model using RMSprop
+
 model1.compile(loss='categorical_crossentropy',
               optimizer='rmsprop',
               metrics=['accuracy'])
