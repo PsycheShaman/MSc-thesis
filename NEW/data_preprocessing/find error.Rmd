@@ -1,0 +1,59 @@
+---
+title: "find_error"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+rm(list=ls())
+
+
+wrangle <- function(run){
+  
+  print("function: wrangle()")
+  print(paste0("RUN: ", run))
+  
+  require(jsonlite)
+  
+  files <- list.files(path=paste0("C:/Users/gerhard/Documents/msc-thesis-data-master/msc-thesis-data-master/processed/000",run),
+                      pattern="*json",
+                      full.names=T,
+                      recursive=TRUE)
+  
+  j <- fromJSON(files[1])
+  
+  for(i in 2:length(files)){
+    print(paste0("FILE: ",i))
+    
+    f <- fromJSON(files[i])
+    j <- c(j,f)
+  }
+  
+  j
+  
+}
+
+dat265309 <- wrangle("265342")
+
+pdg <- sapply(dat265309,`[[`,"pdgCode")
+
+layer0 <- sapply(dat265309,`[[`,"layer 0")
+
+length(layer0)==length(pdg)
+
+any(is.null(layer0))
+
+is.null(layer0[[4]])
+
+length(layer0[[32]])
+
+unique(pdg)
+
+any(!pdg %in% unique(pdg))
+
+```
+
