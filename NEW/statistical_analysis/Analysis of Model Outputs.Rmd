@@ -1,0 +1,67 @@
+---
+title: "Analysis of Model Outputs"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Feedforward Model 1
+
+```{r}
+getwd()
+preds <- read.csv("C:/Users/Gerhard/Documents/msc-hpc/feedforward_python/results/feed_forward_1_results.csv",header = F,sep="")
+
+actuals <- read.fwf("C:/Users/Gerhard/Documents/msc-hpc/feedforward_python/results/feed_forward_1_y_test.csv",
+                    widths = c(3,3),header = F)
+
+actuals <- na.omit(actuals)
+
+model1 <- data.frame(cbind(preds[,2],actuals[,2]))
+```
+
+```{r}
+names(model1) <- c("prediction","actual")
+
+hist(model1$prediction,breaks = 1000,main="Histogram of first feedforward model's prediction probabilities",
+     xlab="First Feedforward Model's Predictions")
+
+unique(model1$prediction)
+
+summary(model1$prediction)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
