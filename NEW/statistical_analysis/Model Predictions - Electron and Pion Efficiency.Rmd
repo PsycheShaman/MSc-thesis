@@ -1,0 +1,50 @@
+---
+title: "Model Predictions: Electron and Pion Efficiency"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(keras)
+
+model <- load_model_hdf5('C:/Users/Gerhard/Documents/msc-hpc/round3/feedforward/local/round3_model1_.h5', custom_objects = NULL, compile = TRUE)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
