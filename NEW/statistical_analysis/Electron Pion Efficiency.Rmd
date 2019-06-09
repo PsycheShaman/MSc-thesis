@@ -1,0 +1,671 @@
+---
+title: "Electron Pion Efficiency"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Feedforward Neural Networks
+
+## Model 1
+
+```{r}
+rm(list=ls())
+
+model_1.preds <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/feedforward/round3_model1_results.csv",header=F, sep="")
+
+model_1.labels <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/feedforward/round3_model1_y_test.csv",header=F, sep="")
+
+model_1 <- data.frame(cbind(model_1.preds[,2],model_1.labels[,2]))
+
+model_1.electrons <- which(model_1[,2]==1)
+
+electrons <- model_1[model_1.electrons,]
+
+pions <- model_1[-as.numeric(model_1.electrons),]
+
+electrons <- data.frame(electrons)
+
+names(electrons) <- c("prediction","label")
+
+pions <- data.frame(pions)
+
+names(pions) <- c("prediction","label")
+
+
+electron_efficiency <- function(electrons.,par){
+  
+  electrons <- electrons.
+  
+  electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+  
+  correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+  
+  error_metric <- sum(correct)/nrow(electrons)
+  
+  error_metric <- (error_metric-0.9)^2
+  
+  return(error_metric)
+  
+}
+
+res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+
+require(ggplot2)
+
+ggplot(model_1,aes(X1,colour=factor(X2)))+geom_histogram(bins = 1000)+facet_wrap(factor(model_1$X2))
+
+hist(model_1[,1],breaks=1000)
+abline(v=res$par,col="red")
+
+electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+
+sum(electrons$predicted_label)/nrow(electrons)
+
+pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+
+pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+
+sum(pions$misclassified_as_electron)/nrow(pions)
+
+model_1$final_pred <- ifelse(model_1$X1>=res$par,1,0)
+
+require(caret)
+
+caret::confusionMatrix(data=factor(model_1$final_pred),reference = factor(model_1$X2))
+```
+
+## Model 2
+
+```{r}
+rm(list=ls())
+
+model_1.preds <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/feedforward/local/round3_model1_results.csv",header=F, sep="")
+
+model_1.labels <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/feedforward/local/round3_model1_y_test.csv",header=F, sep="")
+
+model_1 <- data.frame(cbind(model_1.preds[,2],model_1.labels[,2]))
+
+model_1.electrons <- which(model_1[,2]==1)
+
+electrons <- model_1[model_1.electrons,]
+
+pions <- model_1[-as.numeric(model_1.electrons),]
+
+electrons <- data.frame(electrons)
+
+names(electrons) <- c("prediction","label")
+
+pions <- data.frame(pions)
+
+names(pions) <- c("prediction","label")
+
+
+electron_efficiency <- function(electrons.,par){
+  
+  electrons <- electrons.
+  
+  electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+  
+  correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+  
+  error_metric <- sum(correct)/nrow(electrons)
+  
+  error_metric <- (error_metric-0.9)^2
+  
+  return(error_metric)
+  
+}
+
+res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+
+require(ggplot2)
+
+ggplot(model_1,aes(X1,colour=factor(X2)))+geom_histogram(bins = 1000)+facet_wrap(factor(model_1$X2))
+
+hist(model_1[,1],breaks=1000)
+abline(v=res$par,col="red")
+
+electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+
+sum(electrons$predicted_label)/nrow(electrons)
+
+pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+
+pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+
+sum(pions$misclassified_as_electron)/nrow(pions)
+
+model_1$final_pred <- ifelse(model_1$X1>=res$par,1,0)
+
+require(caret)
+
+caret::confusionMatrix(data=factor(model_1$final_pred),reference = factor(model_1$X2))
+```
+
+## Model 3
+
+```{r}
+rm(list=ls())
+
+model_1.preds <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/feedforward/local/round3_model2_results.csv",header=F, sep="")
+
+model_1.labels <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/feedforward/local/round3_model2_y_test.csv",header=F, sep="")
+
+model_1 <- data.frame(cbind(model_1.preds[,2],model_1.labels[,2]))
+
+model_1.electrons <- which(model_1[,2]==1)
+
+electrons <- model_1[model_1.electrons,]
+
+pions <- model_1[-as.numeric(model_1.electrons),]
+
+electrons <- data.frame(electrons)
+
+names(electrons) <- c("prediction","label")
+
+pions <- data.frame(pions)
+
+names(pions) <- c("prediction","label")
+
+
+electron_efficiency <- function(electrons.,par){
+  
+  electrons <- electrons.
+  
+  electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+  
+  correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+  
+  error_metric <- sum(correct)/nrow(electrons)
+  
+  error_metric <- (error_metric-0.9)^2
+  
+  return(error_metric)
+  
+}
+
+res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+
+require(ggplot2)
+
+ggplot(model_1,aes(X1,colour=factor(X2)))+geom_histogram(bins = 1000)+facet_wrap(factor(model_1$X2))
+
+hist(model_1[,1],breaks=1000)
+abline(v=res$par,col="red")
+
+electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+
+sum(electrons$predicted_label)/nrow(electrons)
+
+pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+
+pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+
+sum(pions$misclassified_as_electron)/nrow(pions)
+
+model_1$final_pred <- ifelse(model_1$X1>=res$par,1,0)
+
+require(caret)
+
+caret::confusionMatrix(data=factor(model_1$final_pred),reference = factor(model_1$X2))
+```
+
+
+## Model 4
+
+```{r}
+rm(list=ls())
+
+model_1.preds <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/feedforward/local/round3_model3_results.csv",header=F, sep="")
+
+model_1.labels <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/feedforward/local/round3_model3_y_test.csv",header=F, sep="")
+
+model_1 <- data.frame(cbind(model_1.preds[,2],model_1.labels[,2]))
+
+model_1.electrons <- which(model_1[,2]==1)
+
+electrons <- model_1[model_1.electrons,]
+
+pions <- model_1[-as.numeric(model_1.electrons),]
+
+electrons <- data.frame(electrons)
+
+names(electrons) <- c("prediction","label")
+
+pions <- data.frame(pions)
+
+names(pions) <- c("prediction","label")
+
+
+electron_efficiency <- function(electrons.,par){
+  
+  electrons <- electrons.
+  
+  electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+  
+  correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+  
+  error_metric <- sum(correct)/nrow(electrons)
+  
+  error_metric <- (error_metric-0.9)^2
+  
+  return(error_metric)
+  
+}
+
+res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+
+require(ggplot2)
+
+ggplot(model_1,aes(X1,colour=factor(X2)))+geom_histogram(bins = 1000)+facet_wrap(factor(model_1$X2))
+
+hist(model_1[,1],breaks=1000)
+abline(v=res$par,col="red")
+
+electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+
+sum(electrons$predicted_label)/nrow(electrons)
+
+pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+
+pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+
+sum(pions$misclassified_as_electron)/nrow(pions)
+
+model_1$final_pred <- ifelse(model_1$X1>=res$par,1,0)
+
+require(caret)
+
+caret::confusionMatrix(data=factor(model_1$final_pred),reference = factor(model_1$X2))
+```
+
+# Convolutional Neural Networks
+
+## Model 1
+
+```{r}
+rm(list=ls())
+
+model_1.preds <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/conv/round3_model1_results.csv",header=F, sep="")
+
+model_1.labels <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/conv/round3_model1_y_test.csv",header=F, sep="")
+
+model_1 <- data.frame(cbind(model_1.preds[,2],model_1.labels[,2]))
+
+model_1.electrons <- which(model_1[,2]==1)
+
+electrons <- model_1[model_1.electrons,]
+
+pions <- model_1[-as.numeric(model_1.electrons),]
+
+electrons <- data.frame(electrons)
+
+names(electrons) <- c("prediction","label")
+
+pions <- data.frame(pions)
+
+names(pions) <- c("prediction","label")
+
+
+electron_efficiency <- function(electrons.,par){
+  
+  electrons <- electrons.
+  
+  electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+  
+  correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+  
+  error_metric <- sum(correct)/nrow(electrons)
+  
+  error_metric <- (error_metric-0.9)^2
+  
+  return(error_metric)
+  
+}
+
+res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+
+require(ggplot2)
+
+ggplot(model_1,aes(X1,colour=factor(X2)))+geom_histogram(bins = 1000)+facet_wrap(factor(model_1$X2))
+
+hist(model_1[,1],breaks=1000)
+abline(v=res$par,col="red")
+
+electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+
+sum(electrons$predicted_label)/nrow(electrons)
+
+pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+
+pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+
+sum(pions$misclassified_as_electron)/nrow(pions)
+
+model_1$final_pred <- ifelse(model_1$X1>=res$par,1,0)
+
+require(caret)
+
+caret::confusionMatrix(data=factor(model_1$final_pred),reference = factor(model_1$X2))
+```
+
+## Model 2
+
+```{r}
+rm(list=ls())
+
+model_1.preds <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/conv/round3_model2_results.csv",header=F, sep="")
+
+model_1.labels <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/conv/round3_model2_y_test.csv",header=F, sep="")
+
+model_1 <- data.frame(cbind(model_1.preds[,2],model_1.labels[,2]))
+
+model_1.electrons <- which(model_1[,2]==1)
+
+electrons <- model_1[model_1.electrons,]
+
+pions <- model_1[-as.numeric(model_1.electrons),]
+
+electrons <- data.frame(electrons)
+
+names(electrons) <- c("prediction","label")
+
+pions <- data.frame(pions)
+
+names(pions) <- c("prediction","label")
+
+
+electron_efficiency <- function(electrons.,par){
+  
+  electrons <- electrons.
+  
+  electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+  
+  correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+  
+  error_metric <- sum(correct)/nrow(electrons)
+  
+  error_metric <- (error_metric-0.9)^2
+  
+  return(error_metric)
+  
+}
+
+res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+
+require(ggplot2)
+
+ggplot(model_1,aes(X1,colour=factor(X2)))+geom_histogram(bins = 1000)+facet_wrap(factor(model_1$X2))
+
+hist(model_1[,1],breaks=1000)
+abline(v=res$par,col="red")
+
+electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+
+sum(electrons$predicted_label)/nrow(electrons)
+
+pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+
+pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+
+sum(pions$misclassified_as_electron)/nrow(pions)
+
+model_1$final_pred <- ifelse(model_1$X1>=res$par,1,0)
+
+require(caret)
+
+caret::confusionMatrix(data=factor(model_1$final_pred),reference = factor(model_1$X2))
+```
+
+
+## Model 3
+
+```{r}
+rm(list=ls())
+
+model_1.preds <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/conv/round3_model3_results.csv",header=F, sep="")
+
+model_1.labels <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/conv/round3_model3_y_test.csv",header=F, sep="")
+
+model_1 <- data.frame(cbind(model_1.preds[,2],model_1.labels[,2]))
+
+model_1.electrons <- which(model_1[,2]==1)
+
+electrons <- model_1[model_1.electrons,]
+
+pions <- model_1[-as.numeric(model_1.electrons),]
+
+electrons <- data.frame(electrons)
+
+names(electrons) <- c("prediction","label")
+
+pions <- data.frame(pions)
+
+names(pions) <- c("prediction","label")
+
+
+electron_efficiency <- function(electrons.,par){
+  
+  electrons <- electrons.
+  
+  electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+  
+  correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+  
+  error_metric <- sum(correct)/nrow(electrons)
+  
+  error_metric <- (error_metric-0.9)^2
+  
+  return(error_metric)
+  
+}
+
+res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+
+require(ggplot2)
+
+ggplot(model_1,aes(X1,colour=factor(X2)))+geom_histogram(bins = 1000)+facet_wrap(factor(model_1$X2))
+
+hist(model_1[,1],breaks=1000)
+abline(v=res$par,col="red")
+
+electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+
+sum(electrons$predicted_label)/nrow(electrons)
+
+pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+
+pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+
+sum(pions$misclassified_as_electron)/nrow(pions)
+
+model_1$final_pred <- ifelse(model_1$X1>=res$par,1,0)
+
+require(caret)
+
+caret::confusionMatrix(data=factor(model_1$final_pred),reference = factor(model_1$X2))
+```
+
+## Model 4
+
+```{r}
+
+```
+
+
+## Model 5
+
+```{r}
+rm(list=ls())
+
+model_1.preds <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/conv/round3_model5_results.csv",header=F, sep="")
+
+model_1.labels <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/conv/round3_model5_y_test.csv",header=F, sep="")
+
+model_1 <- data.frame(cbind(model_1.preds[,2],model_1.labels[,2]))
+
+model_1.electrons <- which(model_1[,2]==1)
+
+electrons <- model_1[model_1.electrons,]
+
+pions <- model_1[-as.numeric(model_1.electrons),]
+
+electrons <- data.frame(electrons)
+
+names(electrons) <- c("prediction","label")
+
+pions <- data.frame(pions)
+
+names(pions) <- c("prediction","label")
+
+
+electron_efficiency <- function(electrons.,par){
+  
+  electrons <- electrons.
+  
+  electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+  
+  correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+  
+  error_metric <- sum(correct)/nrow(electrons)
+  
+  error_metric <- (error_metric-0.9)^2
+  
+  return(error_metric)
+  
+}
+
+res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+
+require(ggplot2)
+
+ggplot(model_1,aes(X1,colour=factor(X2)))+geom_histogram(bins = 1000)+facet_wrap(factor(model_1$X2))
+
+hist(model_1[,1],breaks=1000)
+abline(v=res$par,col="red")
+
+electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+
+sum(electrons$predicted_label)/nrow(electrons)
+
+pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+
+pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+
+sum(pions$misclassified_as_electron)/nrow(pions)
+
+model_1$final_pred <- ifelse(model_1$X1>=res$par,1,0)
+
+require(caret)
+
+caret::confusionMatrix(data=factor(model_1$final_pred),reference = factor(model_1$X2))
+```
+
+
+# Recurrent Neural Networks
+
+## Model 1
+
+```{r}
+rm(list=ls())
+
+model_1.preds <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/lstm/round3_model1_results.csv",header=F, sep="")
+
+model_1.labels <- read.csv("C:/USers/gerhard/Documents/msc-hpc/round3/lstm/round3_model1_y_test.csv",header=F, sep="")
+
+model_1 <- data.frame(cbind(model_1.preds[,2],model_1.labels[,2]))
+
+model_1.electrons <- which(model_1[,2]==1)
+
+electrons <- model_1[model_1.electrons,]
+
+pions <- model_1[-as.numeric(model_1.electrons),]
+
+electrons <- data.frame(electrons)
+
+names(electrons) <- c("prediction","label")
+
+pions <- data.frame(pions)
+
+names(pions) <- c("prediction","label")
+
+
+electron_efficiency <- function(electrons.,par){
+  
+  electrons <- electrons.
+  
+  electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+  
+  correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+  
+  error_metric <- sum(correct)/nrow(electrons)
+  
+  error_metric <- (error_metric-0.9)^2
+  
+  return(error_metric)
+  
+}
+
+res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+
+require(ggplot2)
+
+ggplot(model_1,aes(X1,colour=factor(X2)))+geom_histogram(bins = 1000)+facet_wrap(factor(model_1$X2))
+
+hist(model_1[,1],breaks=1000)
+abline(v=res$par,col="red")
+
+electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+
+sum(electrons$predicted_label)/nrow(electrons)
+
+pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+
+pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+
+sum(pions$misclassified_as_electron)/nrow(pions)
+
+model_1$final_pred <- ifelse(model_1$X1>=res$par,1,0)
+
+require(caret)
+
+caret::confusionMatrix(data=factor(model_1$final_pred),reference = factor(model_1$X2))
+```
+
+## Model 2: Convolutional + Recurrent Neural Network
+
+```{r}
+
+```
+
+# Gradient Boosting Machines
+
+## Model 1
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
