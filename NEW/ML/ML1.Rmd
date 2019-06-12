@@ -1,0 +1,3298 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list=ls())
+
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265309", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265309 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265309 <- as.numeric(unlist(y_265309))
+
+y_265309 <- ifelse(abs(y_265309)==11,1,0)
+
+elec <- which(y_265309==1)
+pion <- which(y_265309==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265309 <- y_265309[keep]
+
+require(abind)
+
+x_265309 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265309 <- x_265309[keep,,]
+
+m <- apply(x_265309, 1, max)
+
+for(i in 1:dim(x_265309)[1]){
+  x_265309[i,,] <- x_265309[i,,]/m[i]
+}
+
+save(x_265309,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265309.rdata")
+save(y_265309,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265309.rdata")
+```
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265332", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265332 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265332 <- as.numeric(unlist(y_265332))
+
+y_265332 <- ifelse(abs(y_265332)==11,1,0)
+
+elec <- which(y_265332==1)
+pion <- which(y_265332==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265332 <- y_265332[keep]
+
+require(abind)
+
+x_265332 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265332 <- x_265332[keep,,]
+
+m <- apply(x_265332, 1, max)
+
+for(i in 1:dim(x_265332)[1]){
+  x_265332[i,,] <- x_265332[i,,]/m[i]
+}
+
+save(x_265332,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265332.rdata")
+save(y_265332,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265332.rdata")
+```
+
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265334", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265334 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265334 <- as.numeric(unlist(y_265334))
+
+y_265334 <- ifelse(abs(y_265334)==11,1,0)
+
+elec <- which(y_265334==1)
+pion <- which(y_265334==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265334 <- y_265334[keep]
+
+require(abind)
+
+x_265334 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265334 <- x_265334[keep,,]
+
+m <- apply(x_265334, 1, max)
+
+for(i in 1:dim(x_265334)[1]){
+  x_265334[i,,] <- x_265334[i,,]/m[i]
+}
+
+save(x_265334,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265334.rdata")
+save(y_265334,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265334.rdata")
+```
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265335", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265335 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265335 <- as.numeric(unlist(y_265335))
+
+y_265335 <- ifelse(abs(y_265335)==11,1,0)
+
+elec <- which(y_265335==1)
+pion <- which(y_265335==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265335 <- y_265335[keep]
+
+require(abind)
+
+x_265335 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265335 <- x_265335[keep,,]
+
+m <- apply(x_265335, 1, max)
+
+for(i in 1:dim(x_265335)[1]){
+  x_265335[i,,] <- x_265335[i,,]/m[i]
+}
+
+save(x_265335,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265335.rdata")
+save(y_265335,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265335.rdata")
+```
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265336", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265336 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265336 <- as.numeric(unlist(y_265336))
+
+y_265336 <- ifelse(abs(y_265336)==11,1,0)
+
+elec <- which(y_265336==1)
+pion <- which(y_265336==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265336 <- y_265336[keep]
+
+require(abind)
+
+x_265336 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265336 <- x_265336[keep,,]
+
+m <- apply(x_265336, 1, max)
+
+for(i in 1:dim(x_265336)[1]){
+  x_265336[i,,] <- x_265336[i,,]/m[i]
+}
+
+save(x_265336,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265336.rdata")
+save(y_265336,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265336.rdata")
+```
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265338", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265338 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265338 <- as.numeric(unlist(y_265338))
+
+y_265338 <- ifelse(abs(y_265338)==11,1,0)
+
+elec <- which(y_265338==1)
+pion <- which(y_265338==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265338 <- y_265338[keep]
+
+require(abind)
+
+x_265338 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265338 <- x_265338[keep,,]
+
+m <- apply(x_265338, 1, max)
+
+for(i in 1:dim(x_265338)[1]){
+  x_265338[i,,] <- x_265338[i,,]/m[i]
+}
+
+save(x_265338,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265338.rdata")
+save(y_265338,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265338.rdata")
+```
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265339", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265339 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265339 <- as.numeric(unlist(y_265339))
+
+y_265339 <- ifelse(abs(y_265339)==11,1,0)
+
+elec <- which(y_265339==1)
+pion <- which(y_265339==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265339 <- y_265339[keep]
+
+require(abind)
+
+x_265339 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265339 <- x_265339[keep,,]
+
+m <- apply(x_265339, 1, max)
+
+for(i in 1:dim(x_265339)[1]){
+  x_265339[i,,] <- x_265339[i,,]/m[i]
+}
+
+save(x_265339,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265339.rdata")
+save(y_265339,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265339.rdata")
+```
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265342", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265342 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265342 <- as.numeric(unlist(y_265342))
+
+y_265342 <- ifelse(abs(y_265342)==11,1,0)
+
+elec <- which(y_265342==1)
+pion <- which(y_265342==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265342 <- y_265342[keep]
+
+require(abind)
+
+x_265342 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265342 <- x_265342[keep,,]
+
+m <- apply(x_265342, 1, max)
+
+for(i in 1:dim(x_265342)[1]){
+  x_265342[i,,] <- x_265342[i,,]/m[i]
+}
+
+save(x_265342,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265342.rdata")
+save(y_265342,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265342.rdata")
+```
+
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265343", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265343 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265343 <- as.numeric(unlist(y_265343))
+
+y_265343 <- ifelse(abs(y_265343)==11,1,0)
+
+elec <- which(y_265343==1)
+pion <- which(y_265343==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265343 <- y_265343[keep]
+
+require(abind)
+
+x_265343 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265343 <- x_265343[keep,,]
+
+m <- apply(x_265343, 1, max)
+
+for(i in 1:dim(x_265343)[1]){
+  x_265343[i,,] <- x_265343[i,,]/m[i]
+}
+
+save(x_265343,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265343.rdata")
+save(y_265343,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265343.rdata")
+```
+
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265344", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265344 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265344 <- as.numeric(unlist(y_265344))
+
+y_265344 <- ifelse(abs(y_265344)==11,1,0)
+
+elec <- which(y_265344==1)
+pion <- which(y_265344==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265344 <- y_265344[keep]
+
+require(abind)
+
+x_265344 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265344 <- x_265344[keep,,]
+
+m <- apply(x_265344, 1, max)
+
+for(i in 1:dim(x_265344)[1]){
+  x_265344[i,,] <- x_265344[i,,]/m[i]
+}
+
+save(x_265344,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265344.rdata")
+save(y_265344,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265344.rdata")
+```
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265377", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265377 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265377 <- as.numeric(unlist(y_265377))
+
+y_265377 <- ifelse(abs(y_265377)==11,1,0)
+
+elec <- which(y_265377==1)
+pion <- which(y_265377==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265377 <- y_265377[keep]
+
+require(abind)
+
+x_265377 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265377 <- x_265377[keep,,]
+
+m <- apply(x_265377, 1, max)
+
+for(i in 1:dim(x_265377)[1]){
+  x_265377[i,,] <- x_265377[i,,]/m[i]
+}
+
+save(x_265377,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265377.rdata")
+save(y_265377,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265377.rdata")
+```
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265378", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265378 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265378 <- as.numeric(unlist(y_265378))
+
+y_265378 <- ifelse(abs(y_265378)==11,1,0)
+
+elec <- which(y_265378==1)
+pion <- which(y_265378==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265378 <- y_265378[keep]
+
+require(abind)
+
+x_265378 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265378 <- x_265378[keep,,]
+
+m <- apply(x_265378, 1, max)
+
+for(i in 1:dim(x_265378)[1]){
+  x_265378[i,,] <- x_265378[i,,]/m[i]
+}
+
+save(x_265378,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265378.rdata")
+save(y_265378,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265378.rdata")
+```
+
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265381", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265381 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265381 <- as.numeric(unlist(y_265381))
+
+y_265381 <- ifelse(abs(y_265381)==11,1,0)
+
+elec <- which(y_265381==1)
+pion <- which(y_265381==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265381 <- y_265381[keep]
+
+require(abind)
+
+x_265381 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265381 <- x_265381[keep,,]
+
+m <- apply(x_265381, 1, max)
+
+for(i in 1:dim(x_265381)[1]){
+  x_265381[i,,] <- x_265381[i,,]/m[i]
+}
+
+save(x_265381,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265381.rdata")
+save(y_265381,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265381.rdata")
+```
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265383", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265383 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265383 <- as.numeric(unlist(y_265383))
+
+y_265383 <- ifelse(abs(y_265383)==11,1,0)
+
+elec <- which(y_265383==1)
+pion <- which(y_265383==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265383 <- y_265383[keep]
+
+require(abind)
+
+x_265383 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265383 <- x_265383[keep,,]
+
+m <- apply(x_265383, 1, max)
+
+for(i in 1:dim(x_265383)[1]){
+  x_265383[i,,] <- x_265383[i,,]/m[i]
+}
+
+save(x_265383,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265383.rdata")
+save(y_265383,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265383.rdata")
+```
+
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265385", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265385 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265385 <- as.numeric(unlist(y_265385))
+
+y_265385 <- ifelse(abs(y_265385)==11,1,0)
+
+elec <- which(y_265385==1)
+pion <- which(y_265385==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265385 <- y_265385[keep]
+
+require(abind)
+
+x_265385 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265385 <- x_265385[keep,,]
+
+m <- apply(x_265385, 1, max)
+
+for(i in 1:dim(x_265385)[1]){
+  x_265385[i,,] <- x_265385[i,,]/m[i]
+}
+
+save(x_265385,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265385.rdata")
+save(y_265385,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265385.rdata")
+```
+
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265388", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265388 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265388 <- as.numeric(unlist(y_265388))
+
+y_265388 <- ifelse(abs(y_265388)==11,1,0)
+
+elec <- which(y_265388==1)
+pion <- which(y_265388==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265388 <- y_265388[keep]
+
+require(abind)
+
+x_265388 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265388 <- x_265388[keep,,]
+
+m <- apply(x_265388, 1, max)
+
+for(i in 1:dim(x_265388)[1]){
+  x_265388[i,,] <- x_265388[i,,]/m[i]
+}
+
+save(x_265388,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265388.rdata")
+save(y_265388,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265388.rdata")
+```
+
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265419", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265419 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265419 <- as.numeric(unlist(y_265419))
+
+y_265419 <- ifelse(abs(y_265419)==11,1,0)
+
+elec <- which(y_265419==1)
+pion <- which(y_265419==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265419 <- y_265419[keep]
+
+require(abind)
+
+x_265419 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265419 <- x_265419[keep,,]
+
+m <- apply(x_265419, 1, max)
+
+for(i in 1:dim(x_265419)[1]){
+  x_265419[i,,] <- x_265419[i,,]/m[i]
+}
+
+save(x_265419,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265419.rdata")
+save(y_265419,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265419.rdata")
+```
+
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265420", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265420 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265420 <- as.numeric(unlist(y_265420))
+
+y_265420 <- ifelse(abs(y_265420)==11,1,0)
+
+elec <- which(y_265420==1)
+pion <- which(y_265420==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265420 <- y_265420[keep]
+
+require(abind)
+
+x_265420 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265420 <- x_265420[keep,,]
+
+m <- apply(x_265420, 1, max)
+
+for(i in 1:dim(x_265420)[1]){
+  x_265420[i,,] <- x_265420[i,,]/m[i]
+}
+
+save(x_265420,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265420.rdata")
+save(y_265420,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265420.rdata")
+```
+
+
+
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265425", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265425 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265425 <- as.numeric(unlist(y_265425))
+
+y_265425 <- ifelse(abs(y_265425)==11,1,0)
+
+elec <- which(y_265425==1)
+pion <- which(y_265425==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265425 <- y_265425[keep]
+
+require(abind)
+
+x_265425 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265425 <- x_265425[keep,,]
+
+m <- apply(x_265425, 1, max)
+
+for(i in 1:dim(x_265425)[1]){
+  x_265425[i,,] <- x_265425[i,,]/m[i]
+}
+
+save(x_265425,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265425.rdata")
+save(y_265425,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265425.rdata")
+```
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265426", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265426 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265426 <- as.numeric(unlist(y_265426))
+
+y_265426 <- ifelse(abs(y_265426)==11,1,0)
+
+elec <- which(y_265426==1)
+pion <- which(y_265426==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265426 <- y_265426[keep]
+
+require(abind)
+
+x_265426 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265426 <- x_265426[keep,,]
+
+m <- apply(x_265426, 1, max)
+
+for(i in 1:dim(x_265426)[1]){
+  x_265426[i,,] <- x_265426[i,,]/m[i]
+}
+
+save(x_265426,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265426.rdata")
+save(y_265426,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265426.rdata")
+```
+
+
+```{r}
+rm(list=ls())
+require(jsonlite)
+require(readtext)
+
+#PDG codes
+pdg.elec <- c(11,-11)
+pdg.pion <- c(-211,211)
+
+files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265499", pattern="*json", full.names=T, recursive=T)
+
+j <- fromJSON(files[1])
+
+for(i in 2:length(files)){
+
+  f <- fromJSON(files[i])
+  j <- c(j,f)
+}
+
+names(j[[2]])
+
+
+
+P <- sapply(j, `[[`,"P")
+# track <- data.frame(sapply(j, `[[`,"track"))
+# names(track) <- c("track")
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null)),which(P<=1.5|P>=2.5)))
+
+length(n)
+
+layer0 <- layer0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# track0 <- sapply(j, `[[`,"track")
+# track0 <- data.frame(cbind(track0,1))
+# names(track0) <- c("track","layer0")
+
+# nrow(track0)
+
+# track0 <- track0[-n,]
+# 
+# nrow(track0)
+
+layer0 <- do.call(rbind,layer0)
+dim(layer0) <- c(dim(layer0)[1]/17,17,24)
+n <- which(apply(layer0, 1, sum)==0)
+layer0 <- layer0[-n,,]
+pdgCode0 <- pdgCode0[-n]
+# track0 <- track0[-n,]
+
+require(dplyr)
+
+# names(track0) <- c("track","layer0")
+
+# track <- left_join(track,track0)
+
+# which(is.na(track))
+
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null)),which(P<=1.5|P>=2.5)))
+layer1 <- layer1[-n]
+pdgCode1 <- pdgCode1[-n]
+layer1 <- do.call(rbind,layer1)
+dim(layer1) <- c(dim(layer1)[1]/17,17,24)
+n <- which(apply(layer1, 1, sum)==0)
+layer1 <- layer1[-n,,]
+pdgCode1 <- pdgCode1[-n]
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null)),which(P<=1.5|P>=2.5)))
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+layer2 <- do.call(rbind,layer2)
+dim(layer2) <- c(dim(layer2)[1]/17,17,24)
+n <- which(apply(layer2, 1, sum)==0)
+layer2 <- layer2[-n,,]
+pdgCode2 <- pdgCode2[-n]
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null)),which(P<=1.5|P>=2.5)))
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+layer3 <- do.call(rbind,layer3)
+dim(layer3) <- c(dim(layer3)[1]/17,17,24)
+n <- which(apply(layer3, 1, sum)==0)
+layer3 <- layer3[-n,,]
+pdgCode3 <- pdgCode3[-n]
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null)),which(P<=1.5|P>=2.5)))
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+layer4 <- do.call(rbind,layer4)
+dim(layer4) <- c(dim(layer4)[1]/17,17,24)
+n <- which(apply(layer4, 1, sum)==0)
+layer4 <- layer4[-n,,]
+pdgCode4 <- pdgCode4[-n]
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null)),which(P<=1.5|P>=2.5)))
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+layer5 <- do.call(rbind,layer5)
+dim(layer5) <- c(dim(layer5)[1]/17,17,24)
+n <- which(apply(layer5, 1, sum)==0)
+layer5 <- layer5[-n,,]
+pdgCode5 <- pdgCode5[-n]
+
+
+y_265499 <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+y_265499 <- as.numeric(unlist(y_265499))
+
+y_265499 <- ifelse(abs(y_265499)==11,1,0)
+
+elec <- which(y_265499==1)
+pion <- which(y_265499==0)
+pion <- pion[1:length(elec)]
+
+keep <- c(pion,elec)
+
+y_265499 <- y_265499[keep]
+
+require(abind)
+
+x_265499 <- abind(layer0,layer1,layer2,layer3,layer4,layer5,along=1)
+
+x_265499 <- x_265499[keep,,]
+
+m <- apply(x_265499, 1, max)
+
+for(i in 1:dim(x_265499)[1]){
+  x_265499[i,,] <- x_265499[i,,]/m[i]
+}
+
+save(x_265499,file="C:/Users/gerhard/Documents/msc-thesis-data/x_265499.rdata")
+save(y_265499,file="C:/Users/gerhard/Documents/msc-thesis-data/y_265499.rdata")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
