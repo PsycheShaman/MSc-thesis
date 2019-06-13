@@ -1,0 +1,298 @@
+---
+title: "ML2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list=ls())
+
+x_files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/", pattern="x*.rdata", full.names=T, recursive=F)
+
+y_files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/", pattern="y*.rdata", full.names=T, recursive=F)
+
+for(i in x_files){
+  load(i)
+}
+
+for(i in y_files){
+  load(i)
+}
+
+require(abind)
+
+x <- abind(x_265309,x_265332,x_265334,x_265335,x_265336,x_265338,x_265339,x_265342,x_265343,x_265344,x_265377,x_265378,x_265381,x_265383,x_265385,x_265388,x_265419,x_265420,x_265425,x_265426,x_265499,along=1)
+
+rm(x_265309,x_265332,x_265334,x_265335,x_265336,x_265338,x_265339,x_265342,x_265343,x_265344,x_265377,x_265378,x_265381,x_265383,x_265385,x_265388,x_265419,x_265420,x_265425,x_265426,x_265499)
+
+y <- c(y_265309,y_265332,y_265334,y_265335,y_265336,y_265338,y_265339,y_265342,y_265343,y_265344,y_265377,y_265378,y_265381,y_265383,y_265385,y_265388,y_265419,y_265420,y_265425,y_265426,y_265499)
+
+rm(y_265309,y_265332,y_265334,y_265335,y_265336,y_265338,y_265339,y_265342,y_265343,y_265344,y_265377,y_265378,y_265381,y_265383,y_265385,y_265388,y_265419,y_265420,y_265425,y_265426,y_265499)
+
+rm(x_files,y_files,i)
+
+```
+
+```{r}
+require(keras)
+
+y <- to_categorical(y)
+
+train_ind <- sample(1:nrow(y),size = round(nrow(y)*.75))
+test_ind <- 1:nrow(y)
+test_ind <- test_ind[-train_ind]
+
+x_train <- x[train_ind,,]
+x_test <- x[test_ind,,]
+
+
+y_train <- y[train_ind,]
+y_test <- y[test_ind,]
+
+rm(x,y,train_ind,test_ind)
+
+dim(x_train) <- c(dim(x_train),1)
+dim(x_test) <- c(dim(x_test),1)
+```
+
+
+```{r,eval=F}
+rm(model1)
+
+model1 <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32,kernel_size = c(4,4),input_shape = c(17,24,1),
+                activation = "relu",data_format = "channels_last") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=64,kernel_size = c(3,3)) %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_flatten() %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(2,activation = "softmax")
+
+model1 %>%
+  compile(
+    loss="categorical_crossentropy",
+    optimizer_sgd(momentum = 0.9,nesterov = T,decay = 1e-6),
+    metrics="acc"
+    
+  )
+  
+history <- model1 %>%
+  fit(x_train,
+      y_train,
+      batch_size=1,
+      verbose=2,
+      epochs=10,
+      validation_split=0.2)
+```
+
+![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/model1.png)
+
+```{r,eval=F}
+rm( model2)
+model2 <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32,kernel_size = c(3,3),input_shape = c(17,24,1),
+                activation = "relu",data_format = "channels_last") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=64,kernel_size = c(3,3),activation="relu") %>%
+  # layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=128,kernel_size = c(3,3),activation="relu") %>%
+  layer_conv_2d(filters=128,kernel_size = c(2,2),activation="relu") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_flatten() %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(2,activation = "softmax")
+
+model2 %>%
+  compile(
+    loss="categorical_crossentropy",
+    optimizer_sgd(),
+    metrics="acc"
+    
+  )
+  
+history <- model2 %>%
+  fit(x_train,
+      y_train,
+      batch_size=10000,
+      verbose=2,
+      epochs=10,
+      validation_split=0.2)
+```
+
+![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/model2.png)
+
+
+```{r,eval=F}
+rm( model3)
+model3 <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32,kernel_size = c(3,3),input_shape = c(17,24,1),
+                activation = "relu",data_format = "channels_last",padding = "same") #%>%
+
+summary(model3)
+
+model3 <- model3 %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=64,kernel_size = c(3,3),activation="relu",padding="same") %>%
+  layer_max_pooling_2d(c(2,2)) #
+
+summary(model3)
+
+model3 <- model3 %>%
+  layer_conv_2d(filters=128,kernel_size = c(3,3),activation="relu",padding="same") %>%
+  layer_max_pooling_2d(c(2,2)) #%>%
+
+summary(model3)
+
+model3 <- model3 %>%
+  layer_conv_2d(filters=128,kernel_size = c(3,3),activation="relu",padding = "same") %>%
+  layer_max_pooling_2d(c(2,2)) 
+
+summary(model3)
+
+model3 <- model3 %>%
+  layer_flatten() %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(2,activation = "softmax")
+
+model3 %>%
+  compile(
+    loss="categorical_crossentropy",
+    optimizer_sgd(),
+    metrics="acc"
+    
+  )
+  
+history <- model3 %>%
+  fit(x_train,
+      y_train,
+      batch_size=100000,
+      verbose=2,
+      epochs=10,
+      validation_split=0.2)
+```
+
+![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/model3.png)
+
+
+```{r}
+rm( model3)
+model4 <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32,kernel_size = c(3,3),input_shape = c(17,24,1),
+                activation = "tanh",data_format = "channels_last",padding = "same") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=64,kernel_size = c(3,3),activation="tanh",padding="same") %>%
+  layer_max_pooling_2d(c(2,2))  %>%
+  layer_conv_2d(filters=128,kernel_size = c(3,3),activation="tanh",padding="same") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=128,kernel_size = c(3,3),activation="tanh",padding = "same") %>%
+  layer_max_pooling_2d(c(2,2))%>%
+  layer_flatten() %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(2,activation = "softmax")
+
+model4 %>%
+  compile(
+    loss="categorical_crossentropy",
+    optimizer_sgd(momentum = 0.95),
+    metrics="acc"
+    
+  )
+  
+history <- model4 %>%
+  fit(x_train,
+      y_train,
+      batch_size=1000,
+      verbose=2,
+      epochs=20,
+      validation_split=0.2)
+```
+
+
+![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/model4.png)
+
+
+
+```{r}
+rm( model5)
+model5 <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32,kernel_size = c(3,3),input_shape = c(17,24,1),
+                activation = "tanh",data_format = "channels_last",padding = "same") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=64,kernel_size = c(3,3),activation="tanh",padding="same") %>%
+  layer_max_pooling_2d(c(2,2))  %>%
+  layer_conv_2d(filters=128,kernel_size = c(3,3),activation="tanh",padding="same") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=128,kernel_size = c(3,3),activation="tanh",padding = "same") %>%
+  layer_max_pooling_2d(c(2,2))%>%
+  layer_flatten() %>%
+  layer_dense(512,activation = "tanh") %>%
+  layer_dense(512,activation = "tanh") %>%
+  layer_dense(512,activation = "tanh") %>%
+  layer_dense(512,activation = "tanh") %>%
+  layer_dense(512,activation = "tanh") %>%
+  layer_dense(512,activation = "tanh") %>%
+  layer_dense(512,activation = "tanh") %>%
+  layer_dense(512,activation = "hard_sigmoid") %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(2,activation = "softmax")
+
+model5 %>%
+  compile(
+    loss="categorical_crossentropy",
+    optimizer_sgd(momentum = 0.95),
+    metrics="acc"
+    
+  )
+  
+history <- model5 %>%
+  fit(x_train,
+      y_train,
+      batch_size=500,
+      verbose=2,
+      epochs=50,
+      validation_split=0.2)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
