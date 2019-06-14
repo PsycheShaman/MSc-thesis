@@ -276,7 +276,7 @@ history <- model5 %>%
 ![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/model5.png)
 
 
-```{r}
+```{r,eval=FALSE}
 rm( model5)
 model6 <- keras_model_sequential() %>%
   layer_conv_2d(filters = 32,kernel_size = c(3,3),input_shape = c(17,24,1),
@@ -311,18 +311,175 @@ history <- model6 %>%
       validation_split=0.2)
 ```
 
+![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/model6.png)
+
+```{r,eval=F}
+rm( model6)
+model7 <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32,kernel_size = c(3,3),input_shape = c(17,24,1),
+                activation = "tanh",data_format = "channels_last",padding = "same") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=64,kernel_size = c(3,3),activation="tanh",padding="same") %>%
+  layer_max_pooling_2d(c(2,2))  %>%
+  layer_conv_2d(filters=128,kernel_size = c(3,3),activation="tanh",padding="same") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=256,kernel_size = c(3,3),activation="tanh",padding = "same") %>%
+  layer_max_pooling_2d(c(2,2))%>%
+  layer_flatten() %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(512,activation = "relu") %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(2,activation = "softmax")
+
+model7 %>%
+  compile(
+    loss="categorical_crossentropy",
+    optimizer_sgd(momentum = 0.99),
+    metrics="acc"
+    
+  )
+  
+history <- model7 %>%
+  fit(x_train,
+      y_train,
+      batch_size=32,
+      verbose=2,
+      epochs=20,
+      validation_split=0.2)
+```
+
+![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/model7.png)
 
 
+```{r,eval=F}
+model8 <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32,kernel_size = c(3,3),input_shape = c(17,24,1),
+                activation = "tanh",data_format = "channels_last",padding = "same") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=64,kernel_size = c(3,3),activation="tanh",padding="same") %>%
+  layer_max_pooling_2d(c(2,2))  %>%
+  layer_flatten() %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(2,activation = "softmax")
+
+model8 %>%
+  compile(
+    loss="categorical_crossentropy",
+    optimizer_sgd(momentum = 0.9),
+    metrics="acc"
+    
+  )
+  
+history <- model8 %>%
+  fit(x_train,
+      y_train,
+      batch_size=32,
+      verbose=2,
+      epochs=20,
+      validation_split=0.2)
+```
+
+![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/model8.png)
 
 
+```{r,eval=F}
+model9 <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32,kernel_size = c(3,3),input_shape = c(17,24,1),
+                activation = "tanh",data_format = "channels_last",padding = "same") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=64,kernel_size = c(3,3),activation="tanh",padding="same") %>%
+  layer_max_pooling_2d(c(2,2))  %>%
+  layer_conv_2d(filters=64,kernel_size = c(3,3),activation="tanh",padding="same") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_flatten() %>%
+  layer_dense(256,activation = "tanh") %>%
+  layer_dense(128,activation = "elu") %>%
+  layer_dense(128,activation = "elu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(2,activation = "softmax")
+
+model9 %>%
+  compile(
+    loss="categorical_crossentropy",
+    optimizer_adadelta(),
+    #optimizer_sgd(momentum = 0.9),
+    metrics="acc"
+    
+  )
+  
+history <- model9 %>%
+  fit(x_train,
+      y_train,
+      batch_size=16,
+      verbose=2,
+      epochs=100,
+      validation_split=0.2)
+```
 
 
+![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/model9.png)
 
+```{r}
+model10 <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32,kernel_size = c(3,3),input_shape = c(17,24,1),
+                activation = "tanh",data_format = "channels_last",padding = "same") %>%
+  layer_max_pooling_2d(c(2,2)) %>%
+  layer_conv_2d(filters=64,kernel_size = c(3,3),activation="tanh",padding="same") %>%
+  layer_max_pooling_2d(c(2,2))  %>%
+  layer_flatten() %>%
+  layer_dense(256,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(128,activation = "relu") %>%
+  layer_dense(2,activation = "softmax")
 
+model10 %>%
+  compile(
+    loss="categorical_crossentropy",
+    optimizer_sgd(momentum = 0.9),
+    metrics="acc"
+    
+  )
+  
+history <- model8 %>%
+  fit(x_train,
+      y_train,
+      batch_size=32,
+      verbose=2,
+      epochs=100,
+      validation_split=0.2)
 
-
-
-
+```
 
 
 
