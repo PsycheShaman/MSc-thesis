@@ -62,6 +62,10 @@ http://rpubs.com/PsycheShaman/479110
 
 http://rpubs.com/PsycheShaman/sbatch
 
+### Various NN architectures for PID:
+
+http://rpubs.com/PsycheShaman/playground
+
 # Previous Thesis drafts:
 https://docs.google.com/document/d/1hObRn3Hdpw62AnmTrFjp70P_UdV0ntQOk6IIW8ZjjIQ/edit?usp=sharing
 
