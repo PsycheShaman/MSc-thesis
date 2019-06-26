@@ -66,6 +66,10 @@ http://rpubs.com/PsycheShaman/sbatch
 
 http://rpubs.com/PsycheShaman/playground
 
+### An Illustration of GAN distributions during training and at convergence:
+
+http://rpubs.com/PsycheShaman/GanViz
+
 # Previous Thesis drafts:
 https://docs.google.com/document/d/1hObRn3Hdpw62AnmTrFjp70P_UdV0ntQOk6IIW8ZjjIQ/edit?usp=sharing
 
