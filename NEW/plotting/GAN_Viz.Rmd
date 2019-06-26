@@ -1,0 +1,44 @@
+---
+title: "GAN_Viz"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+set.seed(123456)
+
+
+p_data = rnorm(1000,0,2)
+
+
+plot(density(p_data),col="blue",ylim=c(0,0.25),main="GAN Densities of P(x)-->black, G(z)-->blue, D(G(z))-->red",xaxt="n",yaxt="n",xlab="",ylab="",sub="During training: close to convergence")
+
+p_gen = tanh(-7:7)
+
+lines(x=-9:5,y=rev(0.1+(p_gen/10)),col="red",lwd=2)
+
+lines(density(rnorm(1000,-5,2)),lwd=4,lty="dotted")
+```
+
+
+
+```{r}
+
+set.seed(123456)
+
+
+p_data = rnorm(1000,0,2)
+
+
+plot(density(p_data),col="blue",ylim=c(0,0.25),main="GAN Densities of P(x)-->black, G(z)-->blue, D(G(z))-->red",xaxt="n",yaxt="n",xlab="",ylab="",sub="Algorithm has converged: G(z) matches P(x) perfectly and D(G(z)) outputs 0.5 everywhere")
+
+abline(h=0.1,col="red",lwd=2)
+
+set.seed(123456)
+
+lines(density(rnorm(1000,0,2)),lwd=4,lty="dotted")
+```
