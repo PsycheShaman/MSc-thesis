@@ -1,0 +1,124 @@
+---
+title: "Elec_Pi_Eff_HPC_Mini"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = F,warning = F)
+```
+
+
+```{r}
+rm(list=ls())
+
+elec_pi_eff_func <- function(model_1.preds,model_1.labels){
+  
+    model_1.preds <- read.csv(model_1.preds,header=F, sep="")
+    
+    model_1.labels <- read.csv(model_1.labels,header=F, sep="")
+    
+    model_1 <- data.frame(cbind(model_1.preds,model_1.labels))
+    
+    model_1.electrons <- which(model_1[,2]==1)
+    
+    electrons <- model_1[model_1.electrons,]
+    
+    pions <- model_1[-as.numeric(model_1.electrons),]
+    
+    electrons <- data.frame(electrons)
+    
+    names(electrons) <- c("prediction","label")
+    
+    pions <- data.frame(pions)
+    
+    names(pions) <- c("prediction","label")
+    
+    electron_efficiency <- function(electrons.,par){
+  
+    electrons <- electrons.
+    
+    electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+    
+    correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+    
+    error_metric <- sum(correct)/nrow(electrons)
+    
+    error_metric <- (error_metric-0.9)^2
+    
+    return(error_metric)
+  
+}
+
+  res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+  
+  require(ggplot2)
+  
+  g <- ggplot(model_1,aes(V1,colour=factor(V1.1)))+geom_histogram(bins = 1000)+facet_wrap(factor(model_1[,2]))
+  print(g)
+  
+  hist(model_1[,1],breaks=1000)
+  abline(v=res$par,col="red")
+  
+  electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+  
+  print(paste0("Electron Efficiency: ",sum(electrons$predicted_label)/nrow(electrons)))
+  
+  pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+  
+  pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+  
+  print(paste0("Pion Efficiency: ",sum(pions$misclassified_as_electron)/nrow(pions)))
+  
+  model_1$final_pred <- ifelse(model_1$V1>=res$par,1,0)
+  
+  require(caret)
+  
+  print(caret::confusionMatrix(data=factor(model_1$final_pred),reference = factor(model_1$V1.1)))
+  
+  
+}
+
+```
+
+
+```{r}
+for(result in c("C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model6_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model7_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model8_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model9_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model10_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model11_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model12_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model13_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model14_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model15_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model16_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model17_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model18_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model19_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model20_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model21_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model22_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model23_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model24_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model25_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model26_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model27_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model28_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model29_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model30_results.csv")){
+  elec_pi_eff_func(result,"C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model30_y_test.csv")
+  
+}
+
+
+
+```
+
+
+
+
+
+
+
+
