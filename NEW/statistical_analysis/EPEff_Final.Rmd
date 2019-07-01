@@ -106,7 +106,19 @@ for(result in c("C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/mode
                 "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model27_results.csv",
                 "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model28_results.csv",
                 "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model29_results.csv",
-                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model30_results.csv")){
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model30_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model31_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model32_results.csv",
+                # "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model33_results.csv",
+                # "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model34_results.csv",
+                # "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model35_results.csv",
+                # "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model36_results.csv",
+                # "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model37_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model38_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model39_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model40_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model41_results.csv",
+                "C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model42results.csv")){
   elec_pi_eff_func(result,"C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model30_y_test.csv")
   
 }
