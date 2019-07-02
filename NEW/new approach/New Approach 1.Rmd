@@ -8,6 +8,120 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+rm(list=ls())
+f <- list.files(path = "C:/Users/gerhard/Documents/msc-thesis-data/", pattern = "*.rdata")
+
+for(i in f){
+  load(paste0("C:/Users/gerhard/Documents/msc-thesis-data/",i))
+}
+```
+
+
+```{r}
+y <- c(y_265309,y_265332,y_265334,y_265335,y_265336,y_265338,y_265339,y_265342,y_265343,y_265344,y_265377,y_265378,
+       y_265381,y_265383,y_265385,y_265388,y_265419,y_265420,y_265425,y_265426,y_265499)
+
+x <- c(x_265309,x_265332,x_265334,x_265335,x_265336,x_265338,x_265339,x_265342,x_265343,x_265344,x_265377,x_265378,
+       x_265381,x_265383,x_265385,x_265388,x_265419,x_265420,x_265425,x_265426,x_265499)
+
+rm(y_265309,y_265332,y_265334,y_265335,y_265336,y_265338,y_265339,y_265342,y_265343,y_265344,y_265377,y_265378,
+       y_265381,y_265383,y_265385,y_265388,y_265419,y_265420,y_265425,y_265426,y_265499)
+
+rm(x_265309,x_265332,x_265334,x_265335,x_265336,x_265338,x_265339,x_265342,x_265343,x_265344,x_265377,x_265378,
+       x_265381,x_265383,x_265385,x_265388,x_265419,x_265420,x_265425,x_265426,x_265499)
+```
+
+
+```{r}
+barplot(table(y))
+
+length(which(y==0))==length(which(y==1))
+```
+
+```{r}
+length(x)/(17*24)==length(y)
+
+dim(x) <- c(length(y),17,24)
+
+x_new <- matrix(ncol=dim(x)[3],nrow=dim(x)[1])
+
+for(i in 1:dim(x)[1]){
+  xi <- colSums(x[i,,])
+  x_new[i,] <- xi
+
+}
+# 
+# x_new[1,]
+# 
+# rs <- apply(x,1,rowSums)
+# rs <- t(rs)
+# rs <- data.frame(rs)
+# 
+# z_count <- c()
+# 
+# for(i in 1:nrow(rs)){
+#   c_nz <- length(which(rs[i,1:17]==0))
+#   z_count <- c(z_count,c_nz)
+# }
+# 
+# x_new <- data.frame(cbind(x_new,z_count))
+# 
+# names(x_new) <- c(paste("col",1:17),"non_zero_pads")
+# 
+# x_new$mean <- apply(x,1,mean)
+# 
+# x_new$sd <- apply(x,1,sd)
+
+elec_ind <- which(y==1)
+pion_ind <- which(y==0)
+
+elec <- x_new[elec_ind,]
+pion <- x_new[pion_ind,]
+
+require(muti)
+
+mt <- c()
+
+for(i in 1:10){
+  mti <- muti(elec[i,],pion[i,],normal = T)
+  mt <- c(mt,mti)
+}
 
 ```
+
+
+```{r}
+require(infotheo)
+
+mt <- c()
+
+for(i in 1:nrow(elec)){
+    mti <- mutinformation(X=discretize(elec[i,]),Y=discretize(pion[i,]),method = "emp")
+    mt <- c(mt,mti)
+    
+}
+
+
+mutinformation(X=c( ))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
