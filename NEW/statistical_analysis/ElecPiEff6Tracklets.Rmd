@@ -9,20 +9,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 rm(list=ls())
-pred <- read.csv("C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model23_results.csv",header=F)
-act <- read.csv("C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model23_y_test.csv",header=F)
-```
+for(model in c(paste0("model",c(6:33,35,36)))){
+  print(model)
 
 
-```{r}
+pred <- read.csv(paste0("C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/",model,"_results.csv"),header=F)
+act <- read.csv(paste0("C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model24_y_test.csv"),header=F)
+
 names(pred) <- "pred"
 names(act) <- "act"
 
 pred_act <- data.frame(cbind(pred,act))
-```
 
-
-```{r}
 six_tracklet_pred <- c()
 
 for(i in seq(1,nrow(pred),6)){
@@ -35,9 +33,7 @@ for(i in seq(1,nrow(pred),6)){
 six_tracklet_pred <- data.frame(six_tracklet_pred)
 
 six_tracklet_pred <- na.omit(six_tracklet_pred)
-```
 
-```{r}
 six_tracklet_real <- c()
 
 for(i in seq(1,nrow(act),6)){
@@ -49,13 +45,9 @@ for(i in seq(1,nrow(act),6)){
 six_tracklet_real <- data.frame(six_tracklet_real)
 
 which(is.na(six_tracklet_real))
-```
 
-```{r}
 pred_act <- data.frame(cbind(six_tracklet_pred,six_tracklet_real))
-```
 
-```{r}
 elec_pi_eff_func <- function(model_1.preds,model_1.labels){
   
     # model_1.preds <- read.csv(model_1.preds,header=F, sep="")
@@ -122,10 +114,10 @@ elec_pi_eff_func <- function(model_1.preds,model_1.labels){
   
   
 }
-```
 
-```{r}
 elec_pi_eff_func(pred_act[,1],pred_act[,2])
+
+}
 ```
 
 
