@@ -1,0 +1,216 @@
+---
+title: "GManGAN"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list=ls())
+library(keras)
+use_implementation("tensorflow")
+
+library(tensorflow)
+tfe_enable_eager_execution(device_policy = "silent")
+
+library(tfdatasets)
+
+model <- keras::load_model_hdf5("C:/Users/gerhard/Documents/model25_.h5")
+
+summary(model)
+
+weights <- get_weights(model)
+
+length(weights)
+
+layer1 <- get_layer(model, index=1)
+layer2 <- get_layer(model, index=2)
+layer3 <- get_layer(model, index=3)
+layer4 <- get_layer(model, index=4)
+layer5 <- get_layer(model, index=5)
+layer6 <- get_layer(model, index=6)
+layer7 <- get_layer(model, index=7)
+layer8 <- get_layer(model, index=8)
+layer9 <- get_layer(model, index=9)
+layer10 <- get_layer(model, index=10)
+layer11 <- get_layer(model, index=11)
+```
+
+```{r}
+require(tensorflow)
+
+generator <- keras_model_sequential(layers=list(layer_reshape(target_shape = c(17,24,1),input_shape=408),layer1,layer2,layer3,layer4,layer5,layer6,layer7,layer8,layer9,layer10,layer_dense(units=408,activation = "relu",name="image_out")))
+
+summary(generator)
+
+discriminator <- keras_model_sequential() %>%
+  layer_flatten() %>%
+  layer_dense(units=512,activation = 'relu') %>%
+  layer_dense(units=256,activation = "relu") %>%
+  layer_dense(units=128, activation = "relu") %>%
+  layer_dense(units=1,activation = "sigmoid")
+
+
+generator$call = tf$contrib$eager$defun(generator$call)
+discriminator$call = tf$contrib$eager$defun(discriminator$call)
+
+discriminator_loss <- function(real_output, generated_output) {
+  real_loss <- tf$losses$sigmoid_cross_entropy(
+    multi_class_labels = k_ones_like(real_output),
+    logits = real_output)
+  generated_loss <- tf$losses$sigmoid_cross_entropy(
+    multi_class_labels = k_zeros_like(generated_output),
+    logits = generated_output)
+  real_loss + generated_loss
+}
+
+generator_loss <- function(generated_output) {
+  tf$losses$sigmoid_cross_entropy(
+    tf$ones_like(generated_output),
+    generated_output)
+}
+
+discriminator_optimizer <- tf$train$AdamOptimizer(1e-4)
+generator_optimizer <- tf$train$AdamOptimizer(1e-4)
+
+noise_dim <- 408
+
+
+
+train <- function(dataset, epochs, noise_dim) {
+  for (epoch in seq_len(num_epochs)) {
+    start <- Sys.time()
+    total_loss_gen <- 0
+    total_loss_disc <- 0
+    iter <- make_iterator_one_shot(train_dataset)
+    
+    until_out_of_range({
+      batch <- iterator_get_next(iter)
+      noise <- k_random_normal(c(batch_size, noise_dim))
+      with(tf$GradientTape() %as% gen_tape, { with(tf$GradientTape() %as% disc_tape, {
+        generated_images <- generator(noise)
+        disc_real_output <- discriminator(batch)#, training = TRUE)
+        disc_generated_output <-
+          discriminator(generated_images)#, training = TRUE)
+        gen_loss <- generator_loss(disc_generated_output)
+        disc_loss <-
+          discriminator_loss(disc_real_output, disc_generated_output)
+      }) })
+      
+      gradients_of_generator <-
+        gen_tape$gradient(gen_loss, generator$variables)
+      gradients_of_discriminator <-
+        disc_tape$gradient(disc_loss, discriminator$variables)
+      
+      generator_optimizer$apply_gradients(purrr::transpose(
+        list(gradients_of_generator, generator$variables)
+      ))
+      discriminator_optimizer$apply_gradients(purrr::transpose(
+        list(gradients_of_discriminator, discriminator$variables)
+      ))
+      
+      total_loss_gen <- total_loss_gen + gen_loss
+      total_loss_disc <- total_loss_disc + disc_loss
+      
+    })
+    
+    cat("Time for epoch ", epoch, ": ", Sys.time() - start, "\n")
+    cat("Generator loss: ", total_loss_gen$numpy() / batches_per_epoch, "\n")
+    cat("Discriminator loss: ", total_loss_disc$numpy() / batches_per_epoch, "\n\n")
+    if (epoch %% 10 == 0)
+      generate_and_save_images(generator,
+                               epoch=10,test_input =k_random_normal(c(25,408)))
+    
+  }
+}
+
+generate_and_save_images <- function(model, epoch, test_input) {
+  predictions <- model(test_input)#, training = FALSE)
+  png(paste0("images_epoch_", epoch, ".png"))
+  par(mfcol = c(5, 5))
+  par(mar = c(0.5, 0.5, 0.5, 0.5),
+      xaxs = 'i',
+      yaxs = 'i')
+  for (i in 1:25) {
+    img <- predictions[i,]
+    img <- t(apply(img, 2, rev))
+    # png(filename=as.character())
+    image(
+      1:17,
+      1:24,
+      img * sd(x_265309) + mean(x_265309),
+      col = gray((0:255) / 255),
+      xaxt = 'n',
+      yaxt = 'n'
+    )
+  }
+  dev.off()
+}
+
+library(RcppCNPy)
+
+load("C:/Users/gerhard/Documents/msc-thesis-data/x_265309.rdata")
+
+train_images <- x_265309
+
+
+
+# train_images <- npyLoad("C:/Users/gerhard/Documents/msc-thesis-data/jeremy/6_tracklets_large_calib_train/0_tracks.npy", dotranspose=FALSE)
+
+train_images <- train_images %>% 
+  k_expand_dims() %>%
+  k_cast(dtype = "float32")
+
+train_images <- (train_images - max(x_265309)) / sd(x_265309)
+
+# rm(x_265309)
+
+buffer_size <- 60000
+batch_size <- 256
+batches_per_epoch <- (buffer_size / batch_size) %>% round()
+
+
+
+train_dataset <- tensor_slices_dataset(train_images) %>%
+  dataset_shuffle(buffer_size) %>%
+  dataset_batch(batch_size)
+
+num_epochs <- 150
+train(train_dataset, num_epochs, noise_dim)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
