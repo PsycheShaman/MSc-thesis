@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 real_x = np.load("C:/Users/gerhard/Documents/msc-thesis-data/cnn/x_000265343.npy")
 
-plt.imshow(real_x[1],cmap='grey')
+plt.imshow(real_x[1000],cmap='gray')
 
 
 
