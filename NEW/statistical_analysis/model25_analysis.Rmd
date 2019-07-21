@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE,message=F,warning = F)
 
 ```{r}
 rm(list=ls())
-for(model in c(paste0("model",c(6:33,35,36)))){
+for(model in c(paste0("model",c(25)))){
   print(model)
 
 
