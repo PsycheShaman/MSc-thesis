@@ -94,9 +94,9 @@ elec_pi_eff_func <- function(model_1.preds,model_1.labels){
   
   pred_act <- data.frame(pred_act)
   
-  names(pred_act)[2] <- "Particle_ID"
+  # names(pred_act)[2] <- "Particle_ID"
   
-  pred_act$Particle_ID <- ifelse(pred_act$ParticleID==1,"electron","pion")
+  pred_act$Particle_ID <- ifelse(pred_act[,2]==1,"electron","pion")
   
   pred_act$Particle_ID <- as.factor(pred_act$Particle_ID)
   
