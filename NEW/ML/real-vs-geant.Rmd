@@ -364,11 +364,11 @@ load("C:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/sim_x_full.rdata")
 load("C:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_x_full.rdata")
 load("C:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/sim_nsig.rdata")
 
-real_nsig <- nsigmaPion
+sim_nsig <- nsigmaPion
 
 load("C:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_nsig.rdata")
 
-sim_nsig <- nsigmaPion
+real_nsig <- nsigmaPion
 
 rm(nsigmaPion)
 ```
@@ -384,9 +384,35 @@ par(mfrow=c(1,2))
 hist(real_nsig,breaks=100.)
 hist(sim_nsig,breaks=100.)
 
-nsigmaPion <- 
+nsigmaPion <- data.frame(rbind(cbind(real_nsig,"real"),cbind(sim_nsig,"sim")))
+
+names(nsigmaPion) <- c("nsigmaPion","real_or_fake")
+
+nsigmaPion$nsigmaPion <- as.numeric(as.character(nsigmaPion$nsigmaPion))
+nsigmaPion$real_or_fake <- as.factor(nsigmaPion$real_or_fake)
+
+ggplot(nsigmaPion,aes(nsigmaPion,fill=real_or_fake,colour=real_or_fake,alpha=0.2
+                      ))+geom_freqpoly(bins=1000)
 ```
 
+```{r}
+selector <- sample(1:length(real_nsig),length(sim_nsig),replace=F)
+
+real_nsig <- real_nsig[selector]
+
+real_x <- real_x[selector,,]
+
+nsigmaPion <- data.frame(rbind(cbind(real_nsig,"real"),cbind(sim_nsig,"sim")))
+
+names(nsigmaPion) <- c("nsigmaPion","real_or_fake")
+
+nsigmaPion$nsigmaPion <- as.numeric(as.character(nsigmaPion$nsigmaPion))
+nsigmaPion$real_or_fake <- as.factor(nsigmaPion$real_or_fake)
+
+ggplot(nsigmaPion,aes(nsigmaPion,fill=real_or_fake,colour=real_or_fake,alpha=0.2
+                      ))+geom_freqpoly(bins=1000)
+
+```
 
 
 
