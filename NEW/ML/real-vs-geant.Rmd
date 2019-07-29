@@ -1,0 +1,423 @@
+---
+title: "Geant vs Real"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, eval=FALSE}
+rm(list=ls())
+
+sim_files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/", pattern="*.json", full.names=T, recursive=T)
+
+require(jsonlite)
+
+j <- list()
+
+count=0
+for(i in sim_files){
+  # count=count+1
+  # print(print(count/length(sim_files)))
+  j <- c(j,fromJSON(i))
+  # print(length(j))
+}
+
+
+##
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+nSigmaPion0 <- sapply(j, `[[`,"nSigmaPion")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null))))
+
+length(n)
+
+layer0 <- layer0[-n]
+nSigmaPion0 <- nSigmaPion0[-n]
+
+for(i in 1:length(layer0)){
+  layer0[[i]][which(layer0[[i]]==-7169)] <- 0
+}
+
+##
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+nSigmaPion1 <- sapply(j, `[[`,"nSigmaPion")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null))))
+
+length(n)
+
+layer1 <- layer1[-n]
+nSigmaPion1 <- nSigmaPion1[-n]
+
+for(i in 1:length(layer1)){
+  layer1[[i]][which(layer1[[i]]==-7169)] <- 0
+}
+
+##
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+nSigmaPion2 <- sapply(j, `[[`,"nSigmaPion")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null))))
+
+length(n)
+
+layer2 <- layer2[-n]
+nSigmaPion2 <- nSigmaPion2[-n]
+
+for(i in 1:length(layer2)){
+  layer2[[i]][which(layer2[[i]]==-7169)] <- 0
+}
+
+##
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+nSigmaPion3 <- sapply(j, `[[`,"nSigmaPion")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null))))
+
+length(n)
+
+layer3 <- layer3[-n]
+nSigmaPion3 <- nSigmaPion3[-n]
+
+for(i in 1:length(layer3)){
+  layer3[[i]][which(layer3[[i]]==-7169)] <- 0
+}
+
+##
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+nSigmaPion4 <- sapply(j, `[[`,"nSigmaPion")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null))))
+
+length(n)
+
+layer4 <- layer4[-n]
+nSigmaPion4 <- nSigmaPion4[-n]
+
+for(i in 1:length(layer4)){
+  layer4[[i]][which(layer4[[i]]==-7169)] <- 0
+}
+
+##
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+nSigmaPion5 <- sapply(j, `[[`,"nSigmaPion")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null))))
+
+length(n)
+
+layer5 <- layer5[-n]
+nSigmaPion5 <- nSigmaPion5[-n]
+
+for(i in 1:length(layer5)){
+  layer5[[i]][which(layer5[[i]]==-7169)] <- 0
+}
+
+##
+
+rm(j)
+
+sim_x <- c(layer0,layer1,layer2,layer3,layer4,layer5)
+
+rm(layer0,layer1,layer2,layer3,layer4,layer5)
+
+for(i in 1:length(sim_x)){
+  dim(sim_x[[i]]) <- c(1,17,24)
+  # print(i/length(sim_x))
+  
+}
+
+require(abind)
+
+sim_x <- abind(sim_x,along=1)
+
+
+
+nsigmaPion <- c(nSigmaPion0,nSigmaPion1,nSigmaPion2,nSigmaPion3,nSigmaPion4,nSigmaPion5)
+nsigmaPion <- as.numeric(unlist(nsigmaPion))
+
+length(nsigmaPion)==dim(sim_x)[1]
+
+rm(nSigmaPion0,nSigmaPion1,nSigmaPion2,nSigmaPion3,nSigmaPion4,nSigmaPion5)
+
+# 
+# hist(nsigmaPion)
+# 
+# min(nsigmaPion)
+
+ridiculous <- which(nsigmaPion==-999)
+
+nsigmaPion <- nsigmaPion[-ridiculous]
+
+sim_x <- sim_x[-ridiculous,,]
+
+# hist(nsigmaPion)
+
+high <- which(nsigmaPion>=10)
+
+nsigmaPion <- nsigmaPion[-high]
+
+sim_x <- sim_x[-high,,]
+
+hist(nsigmaPion,breaks = 100)
+
+save(sim_x,file="c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/sim_x_full.rdata")
+save(nsigmaPion,file="C:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/sim_nsig.rdata")
+
+rm(list=ls())
+
+real_files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/000265343/", pattern="*.json", full.names=T, recursive=T)
+
+require(jsonlite)
+
+j <- list()
+count <- 0
+for(i in real_files){
+  # count=count+1
+  # print(count/length(real_files))
+  j <- c(j,fromJSON(i))
+  # print(length(j))
+}
+
+
+##
+
+layer0 <- sapply(j, `[[`,"layer 0")
+
+nSigmaPion0 <- sapply(j, `[[`,"nSigmaPion")
+pdgCode0 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer0,typeof)=="list"),which(sapply(layer0, is.null))))
+
+length(n)
+
+layer0 <- layer0[-n]
+nSigmaPion0 <- nSigmaPion0[-n]
+pdgCode0 <- pdgCode0[-n]
+
+# for(i in 1:length(layer0)){
+#   layer0[[i]][which(layer0[[i]]==-7169)] <- 0
+# }
+
+##
+
+layer1 <- sapply(j, `[[`,"layer 1")
+
+nSigmaPion1 <- sapply(j, `[[`,"nSigmaPion")
+pdgCode1 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer1,typeof)=="list"),which(sapply(layer1, is.null))))
+
+length(n)
+
+layer1 <- layer1[-n]
+nSigmaPion1 <- nSigmaPion1[-n]
+pdgCode1 <- pdgCode1[-n]
+
+# for(i in 1:length(layer1)){
+#   layer1[[i]][which(layer1[[i]]==-7169)] <- 0
+# }
+
+##
+
+layer2 <- sapply(j, `[[`,"layer 2")
+
+nSigmaPion2 <- sapply(j, `[[`,"nSigmaPion")
+pdgCode2 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer2,typeof)=="list"),which(sapply(layer2, is.null))))
+
+length(n)
+
+layer2 <- layer2[-n]
+pdgCode2 <- pdgCode2[-n]
+nSigmaPion2 <- nSigmaPion2[-n]
+
+# for(i in 1:length(layer2)){
+#   layer2[[i]][which(layer2[[i]]==-7169)] <- 0
+# }
+
+##
+
+layer3 <- sapply(j, `[[`,"layer 3")
+
+nSigmaPion3 <- sapply(j, `[[`,"nSigmaPion")
+pdgCode3 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer3,typeof)=="list"),which(sapply(layer3, is.null))))
+
+length(n)
+
+layer3 <- layer3[-n]
+pdgCode3 <- pdgCode3[-n]
+nSigmaPion3 <- nSigmaPion3[-n]
+
+# for(i in 1:length(layer3)){
+#   layer3[[i]][which(layer3[[i]]==-7169)] <- 0
+# }
+
+##
+
+layer4 <- sapply(j, `[[`,"layer 4")
+
+nSigmaPion4 <- sapply(j, `[[`,"nSigmaPion")
+pdgCode4 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer4,typeof)=="list"),which(sapply(layer4, is.null))))
+
+length(n)
+
+layer4 <- layer4[-n]
+pdgCode4 <- pdgCode4[-n]
+nSigmaPion4 <- nSigmaPion4[-n]
+
+# for(i in 1:length(layer4)){
+#   layer4[[i]][which(layer4[[i]]==-7169)] <- 0
+# }
+
+##
+
+layer5 <- sapply(j, `[[`,"layer 5")
+
+nSigmaPion5 <- sapply(j, `[[`,"nSigmaPion")
+pdgCode5 <- sapply(j, `[[`,"pdgCode")
+n <- unique(c(which(sapply(layer5,typeof)=="list"),which(sapply(layer5, is.null))))
+
+length(n)
+
+layer5 <- layer5[-n]
+pdgCode5 <- pdgCode5[-n]
+nSigmaPion5 <- nSigmaPion5[-n]
+
+# for(i in 1:length(layer5)){
+#   layer5[[i]][which(layer5[[i]]==-7169)] <- 0
+# }
+
+##
+
+rm(j)
+
+real_x <- c(layer0,layer1,layer2,layer3,layer4,layer5)
+
+rm(layer0,layer1,layer2,layer3,layer4,layer5)
+
+for(i in 1:length(real_x)){
+  dim(real_x[[i]]) <- c(1,17,24)
+  # print(i/length(real_x))
+  
+}
+
+require(abind)
+
+real_x <- abind(real_x,along=1)
+
+
+
+nsigmaPion <- c(nSigmaPion0,nSigmaPion1,nSigmaPion2,nSigmaPion3,nSigmaPion4,nSigmaPion5)
+nsigmaPion <- as.numeric(unlist(nsigmaPion))
+
+pdgCode <- c(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+pdgCode <- as.numeric(unlist(pdgCode))
+
+rm(nSigmaPion0,nSigmaPion1,nSigmaPion2,nSigmaPion3,nSigmaPion4,nSigmaPion5)
+rm(pdgCode0,pdgCode1,pdgCode2,pdgCode3,pdgCode4,pdgCode5)
+
+ridiculous <- which(nsigmaPion==-999)
+
+nsigmaPion <- nsigmaPion[-ridiculous]
+
+real_x <- real_x[-ridiculous,,]
+
+pdgCode <-pdgCode[-ridiculous]
+
+# hist(nsigmaPion)
+
+high <- which(nsigmaPion>=10)
+
+nsigmaPion <- nsigmaPion[-high]
+
+real_x <- real_x[-high,,]
+
+pdgCode <- pdgCode[-high]
+
+pions <- which(abs(pdgCode)==211)
+
+nsigmaPion <- nsigmaPion[pions]
+real_x <- real_x[pions,,]
+
+length(nsigmaPion)==dim(real_x)[1]
+
+save(real_x,file="c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_x_full.rdata")
+save(nsigmaPion,file="C:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_nsig.rdata")
+
+
+```
+
+
+```{r}
+rm(list=ls())
+
+load("C:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/sim_x_full.rdata")
+load("C:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_x_full.rdata")
+load("C:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/sim_nsig.rdata")
+
+real_nsig <- nsigmaPion
+
+load("C:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_nsig.rdata")
+
+sim_nsig <- nsigmaPion
+
+rm(nsigmaPion)
+```
+
+
+```{r}
+require(ggplot2)
+
+# ggplot(data.frame(real_nsig),aes(x=data.frame(real_nsig)))+geom_freqpoly(stat='identity')
+
+par(mfrow=c(1,2))
+
+hist(real_nsig,breaks=100.)
+hist(sim_nsig,breaks=100.)
+
+nsigmaPion <- 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

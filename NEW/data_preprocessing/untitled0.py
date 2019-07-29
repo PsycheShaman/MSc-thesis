@@ -12,8 +12,8 @@ import glob
 
 files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\hijing-sim/**/pythonDict.txt", recursive=True)
  
-j=0   
-for i in files[120:]:
+j=629   
+for i in files:
     j=j+1
     d = open(i)
     d = d.read()
