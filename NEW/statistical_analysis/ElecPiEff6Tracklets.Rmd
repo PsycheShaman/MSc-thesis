@@ -1,6 +1,8 @@
 ---
 title: "ElecPiEff6Tracklets"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -9,9 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 rm(list=ls())
-for(model in c(paste0("model",c(6:33,35,36)))){
+for(model in c(paste0("model",c(1:25,paste0("25_1_",1:7,sep=""),paste("25_",1:3,sep=""),26:45,47:48)))){
+  print("--------------------------------------------------------------------------------------------------")
   print(model)
-
+  print("--------------------------------------------------------------------------------------------------")
 
 pred <- read.csv(paste0("C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/",model,"_results.csv"),header=F)
 act <- read.csv(paste0("C:/Users/gerhard/Documents/hpc-mini/chamber_gain_corrected/model24_y_test.csv"),header=F)
@@ -111,7 +114,7 @@ elec_pi_eff_func <- function(model_1.preds,model_1.labels){
   require(caret)
   
   print(caret::confusionMatrix(data=factor(pred_act$final_pred),reference = factor(pred_act[,2])))
-  
+  print("--------------------------------------------------------------------------------------------------")
   
 }
 
