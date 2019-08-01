@@ -501,107 +501,232 @@ ggplot(P1,aes(P,fill=real_or_fake,colour=real_or_fake,alpha=0.2))+geom_freqpoly(
 ```
 
 ```{r}
-summary(real_P)
-summary(sim_P)
-
-summary(real_Eta)
-summary(sim_Eta)
-```
-
-```{r}
-selector <- sample(1:length(real_P),length(sim_P),replace = F)
-
-real_Eta <- real_Eta[selector]
-real_nsig <- real_nsig[selector]
-real_P <- real_P[selector]
-real_x <- real_x[selector,,]
-```
-
-
-
-```{r}
 require(ggplot2)
 
-P <- data.frame(rbind(cbind(real_P,"real"),cbind(sim_P,"sim")))
+nsig <- data.frame(rbind(cbind(real_nsig,"real"),cbind(sim_nsig,"sim")))
 
-names(P) <- c("P","real_or_fake")
+names(nsig) <- c("nsig","real_or_fake")
 
-P$P <- as.numeric(as.character(P$P))
-P$real_or_fake <- as.factor(P$real_or_fake)
+nsig$nsig <- as.numeric(as.character(nsig$nsig))
+nsig$real_or_fake <- as.factor(nsig$real_or_fake)
 
-ggplot(P,aes(P,fill=real_or_fake,colour=real_or_fake,alpha=0.2))+geom_freqpoly(bins=1000)
-
-P <- data.frame(P)
-
-P1 <- P[P$P<=20,]
-
-ggplot(P1,aes(P,fill=real_or_fake,colour=real_or_fake,alpha=0.2))+geom_freqpoly(bins=1000)
-```
-
-
-
-```{r}
-require(ggplot2)
-
-Eta <- data.frame(rbind(cbind(real_Eta,"real"),cbind(sim_Eta,"sim")))
-
-names(Eta) <- c("Eta","real_or_fake")
-
-Eta$Eta <- as.numeric(as.character(Eta$Eta))
-Eta$real_or_fake <- as.factor(Eta$real_or_fake)
-
-ggplot(Eta,aes(Eta,fill=real_or_fake,colour=real_or_fake,alpha=0.2
+ggplot(nsig,aes(nsig,fill=real_or_fake,colour=real_or_fake,alpha=0.2
                       ))+geom_freqpoly(bins=1000)
 ```
 
 ```{r}
+require(abind)
 x <- abind(real_x,sim_x,along=1)
-y <- c(rep(1,length(real_Eta)),rep(0,length(sim_Eta)))
+y <- c(rep(1,dim(real_x)[1]),rep(0,dim(sim_x)[1]))
 
-```
+x <- x[abs(Eta$Eta)<=.9,,]
+
+nsig <- nsig[(abs(Eta$Eta))<=.9,]
+
+P <- P[(abs(Eta$Eta))<=.9,]
+
+y <- y[(abs(Eta$Eta))<=.9]
+
+x <- x[P$P<=20,,]
+
+nsig <- nsig[P$P<=20,]
+
+y <- y[P$P<=20]
+
+x <- x[abs(nsig$nsig)<=3,,]
+
+y <- y[abs(nsig$nsig)<=3]
 
 
-```{r}
+rm(real_Eta,real_nsig,real_P,sim_Eta,sim_nsig,sim_P,real_x,sim_x,Eta,nsig,P,P1)
 
-rm(real_Eta,real_nsig,real_P,selector,sim_Eta,sim_nsig,sim_P,real_x,sim_x)
+rm(real_x,sim_x)
 
 require(keras)
 
 dim(x) <- c(dim(x),1)
 
+x <- (x-max(x))/max(x)
+
+train_ind <- sample(1:length(y),size=round(0.75*length(y)))
+
+x_train <- x[train_ind,,,]
+y_train <- y[train_ind]
+
+x_test <- x[-train_ind,,,]
+y_test <- y[-train_ind]
+
+dim(x_train) <- c(dim(x_train),1)
+dim(x_test) <- c(dim(x_test),1)
+
+```
+
+```{r,eval=F}
+
 model <- keras_model_sequential() %>%
-  layer_conv_2d(filters=16,kernel_size=c(2,3)) %>%
-  layer_conv_2d(filters=32,kernel_size=c(3,3)) %>%
-  layer_max_pooling_2d() %>%
+  layer_conv_2d(filters=1,kernel_size=c(17,24))%>%#,activation="relu") %>%
+  # layer_max_pooling_2d() %>%
+  # layer_dropout(rate=0.2) %>%
+  # layer_conv_2d(filters=32,kernel_size=c(3,3),activation="relu") %>%
+  # layer_max_pooling_2d() %>%
+  # layer_dropout(rate=0.2) %>%
   layer_flatten() %>%
-  layer_dense(256,"sigmoid") %>%
-  layer_dense(128,"sigmoid") %>%
-  layer_dense(1,"sigmoid")
+  layer_dense(1,"softmax")
 
 model %>%
   compile(
-    loss="categorical_crossentropy",
-    optimizer_adam(),
+    loss="binary_crossentropy",
+    optimizer_sgd(0.000001),
     metrics="acc"
     
   )
   
 history <- model %>%
-  fit(x,
-      y,
+  fit(x_train,
+      y_train,
       batch_size=32,
       verbose=2,
-      epochs=100,
-      validation_split=0.2)
+      epochs=20,
+      validation_data=list(x_test,y_test),
+      shuffle=TRUE)
+
+png("C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real1.png")
+plot(history)
+dev.off()
   
 ```
 
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real1.png)
+
+```{r,eval=F}
+rm(model)
 
 
+model <- keras_model_sequential() %>%
+  layer_flatten() %>%
+  layer_dense(512,"relu") %>%
+  layer_dense(256,"relu") %>%
+  layer_dense(128,"relu") %>%
+  layer_dense(1,"sigmoid")
+
+model %>%
+  compile(
+    loss="binary_crossentropy",
+    optimizer_sgd(0.000001),
+    metrics="acc"
+    
+  )
+  
+history <- model %>%
+  fit(x_train,
+      y_train,
+      batch_size=32,
+      verbose=2,
+      epochs=20,
+      validation_data=list(x_test,y_test),
+      shuffle=TRUE)
+
+png("C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real2.png")
+plot(history)
+dev.off()
+```
 
 
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real2.png)
 
 
+```{r,eval=F}
+rm(model)
+
+
+model <- keras_model_sequential() %>%
+  layer_flatten() %>%
+  layer_dense(32,"relu") %>%
+  layer_dense(1,"sigmoid")
+
+model %>%
+  compile(
+    loss="binary_crossentropy",
+    optimizer_sgd(0.01),
+    metrics="acc"
+    
+  )
+  
+history <- model %>%
+  fit(x_train,
+      y_train,
+      batch_size=8,
+      verbose=2,
+      epochs=20,
+      validation_data=list(x_test,y_test),
+      shuffle=TRUE)
+
+png("C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real3.png")
+plot(history)
+dev.off()
+```
+
+```{r}
+barplot(table(y_train))
+barplot(table(y_test))
+```
+
+```{r}
+real <- which(y==1)
+fake <- which(y!=1)
+
+i <- c(fake,sample(real,length(fake),replace=F))
+
+x <- x[i,,,]
+y <- y[i]
+dim(x) <- c(dim(x),1)
+
+barplot(table(y))
+
+
+train_ind <- sample(1:length(y),size=round(0.75*length(y)))
+
+x_train <- x[train_ind,,,]
+y_train <- y[train_ind]
+
+x_test <- x[-train_ind,,,]
+y_test <- y[-train_ind]
+
+dim(x_train) <- c(dim(x_train),1)
+dim(x_test) <- c(dim(x_test),1)
+```
+
+```{r,eval=F}
+model <- keras_model_sequential() %>%
+  layer_conv_2d(32, kernel_size = c(3,2)) %>%
+  layer_max_pooling_2d() %>%
+  layer_flatten() %>%
+  layer_dense(128,"tanh") %>%
+  layer_dense(1, "sigmoid")
+
+model %>%
+  compile(
+    loss="binary_crossentropy",
+    optimizer_adam(0.001),
+    metrics="acc"
+    
+  )
+  
+history <- model %>%
+  fit(x_train,
+      y_train,
+      batch_size=8,
+      verbose=2,
+      epochs=20,
+      validation_data=list(x_test,y_test),
+      shuffle=TRUE)
+
+png("C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real4.png")
+plot(history)
+dev.off()
+```
+
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real4.png)
 
 
 
