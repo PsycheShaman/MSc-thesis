@@ -692,8 +692,20 @@ y_train <- y[train_ind]
 x_test <- x[-train_ind,,,]
 y_test <- y[-train_ind]
 
+final_test_ind <- sample(1:length(y_train),size=round(0.1*length(y_train)))
+
+x_train <- x[-final_test_ind,,,]
+y_train <- y[-final_test_ind]
+
+x_final_test <- x[final_test_ind,,,]
+y_final_test <- y[final_test_ind]
+
+
 dim(x_train) <- c(dim(x_train),1)
 dim(x_test) <- c(dim(x_test),1)
+dim(x_final_test) <- c(dim(x_final_test),1)
+
+rm(x,y)
 ```
 
 ```{r,eval=F}
@@ -730,7 +742,7 @@ dev.off()
 
 
 
-```{r}
+```{r,eval=F}
 model <- keras_model_sequential() %>%
   layer_conv_2d(16, kernel_size = c(2,3)) %>%
   layer_max_pooling_2d() %>%
@@ -757,10 +769,60 @@ history <- model %>%
       validation_data=list(x_test,y_test),
       shuffle=TRUE)
 
-png("C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real4.png")
+png("C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real5.png")
 plot(history)
 dev.off()
 ```
+
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real5.png)
+
+```{r,eval=F}
+model <- keras_model_sequential() %>%
+  layer_conv_2d(16, kernel_size = c(3,3),input_shape=c(17,24,1)) %>%
+  layer_max_pooling_2d() %>%
+  layer_conv_2d(32, kernel_size = c(3,3)) %>%
+  layer_max_pooling_2d() %>%
+  layer_flatten() %>%
+  layer_dense(256,"tanh") %>%
+  layer_dense(128,"tanh") %>%
+  layer_dense(1, "sigmoid")
+
+model %>%
+  compile(
+    loss="binary_crossentropy",
+    optimizer_adam(0.001),
+    metrics="acc"
+    
+  )
+  
+history <- model %>%
+  fit(x_train,
+      y_train,
+      batch_size=8,
+      verbose=2,
+      epochs=20,
+      validation_data=list(x_test,y_test),
+      shuffle=TRUE)
+
+png("C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real6.png")
+plot(history,"C:/Users/gerhard/documents/MSc-thesis/NEW/ML/model6.h5")
+dev.off()
+```
+
+
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real6.png)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
