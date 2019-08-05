@@ -123,4 +123,16 @@ elec_pi_eff_func(pred_act[,1],pred_act[,2])
 }
 ```
 
+```{r}
+mse <- (pred_act$six_tracklet_pred-pred_act$six_tracklet_real)^2
+
+mse <- data.frame(mse)
+
+mse$num <- 1:nrow(mse)
+
+require(dplyr)
+
+mse <- mse %>%
+  arrange(mse)
+```
 
