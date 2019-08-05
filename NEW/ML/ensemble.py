@@ -56,8 +56,22 @@ model8 = tensorflow.keras.models.load_model('C:/Users/gerhard/Documents/hpc-mini
 
 model8.probs = model8.predict_proba(train)
 
+test = model1.probs*model2.probs*model3.probs*model4.probs*model5.probs*model6.probs*model7.probs*model8.probs
 
+np.max(test)
+np.min(test)
 
+test2 = (model1.probs+model2.probs+model3.probs+model4.probs+model5.probs+model6.probs+model7.probs+model8.probs)/8
+
+import matplotlib.pyplot as plt
+
+plt.hist(test)
+
+plt.hist(test2)
+
+np.savetxt("c:/Users/gerhard/Documents/MSc-thesis/NEW/ML/ensemble1_out.csv",test)
+
+np.savetxt("c:/Users/gerhard/Documents/MSc-thesis/NEW/ML/ensemble2_out.csv",test2)
 
 
 
