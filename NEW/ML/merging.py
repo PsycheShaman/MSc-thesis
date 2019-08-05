@@ -116,13 +116,15 @@ model.compile(optimizer=Adam(lr=0.000001),loss='binary_crossentropy',metrics=['a
 
 model.fit([X_train,LSTM_X_train,collapse_X_train,flatten_X_train],y_train,epochs=20,batch_size=32,validation_split=0.1,shuffle=True)
 
+#validation accuracy after 20 epochs = 0.7076
 
 
+model.probs = model.predict([X_test,LSTM_X_test,collapse_X_test,flatten_X_test])
 
 
+np.savetxt("C:/Users/Gerhard/Documents/MSc-thesis/NEW/ML/merging1_results.csv", np.array(model.probs), fmt="%s")
 
-
-
+np.savetxt("C:/Users/Gerhard/Documents/MSc-thesis/NEW/ML/merging1_y_test.csv", np.array(y_test), fmt="%s")
 
 
 
