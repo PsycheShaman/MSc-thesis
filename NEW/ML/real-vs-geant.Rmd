@@ -666,6 +666,8 @@ plot(history)
 dev.off()
 ```
 
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real3.png)
+
 ```{r}
 barplot(table(y_train))
 barplot(table(y_test))
@@ -813,11 +815,47 @@ dev.off()
 ![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real6.png)
 
 
+```{r,eval=T}
+model <- keras_model_sequential() %>%
+  layer_conv_2d(16, kernel_size = c(2,3),activation = "tanh") %>%
+  layer_max_pooling_2d() %>%
+  layer_conv_2d(32, kernel_size = c(3,3),activation = "tanh") %>%
+  layer_max_pooling_2d() %>%
+  layer_flatten() %>%
+  layer_dense(128,"tanh") %>%
+  layer_dropout(rate=0.1) %>%
+  layer_dense(128,"tanh") %>%
+  layer_dense(1, "sigmoid")
+
+model %>%
+  compile(
+    loss="binary_crossentropy",
+    optimizer_adam(0.001),
+    metrics="acc"
+    
+  )
+  
+history <- model %>%
+  fit(x_train,
+      y_train,
+      batch_size=8,
+      verbose=2,
+      epochs=20,
+      validation_data=list(x_test,y_test),
+      shuffle=TRUE)
+
+png("C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real7.png")
+plot(history)
+dev.off()
+```
 
 
 
 
-
+```{r}
+preds <- model %>%
+  predict(x_final_test)
+```
 
 
 
