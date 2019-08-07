@@ -1,10 +1,12 @@
 ---
 title: "Geant vs Real"
-output: html_document
+output:
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,eval=F)
 ```
 
 ```{r, eval=F}
@@ -481,6 +483,8 @@ ggplot(Eta,aes(Eta,fill=real_or_fake,colour=real_or_fake,alpha=0.2
                       ))+geom_freqpoly(bins=1000)
 ```
 
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/Eta.png)
+
 ```{r}
 require(ggplot2)
 
@@ -500,6 +504,10 @@ P1 <- P[P$P<=20,]
 ggplot(P1,aes(P,fill=real_or_fake,colour=real_or_fake,alpha=0.2))+geom_freqpoly(bins=1000)
 ```
 
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/P_before_cut.png)
+
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/P_after_cut.png)
+
 ```{r}
 require(ggplot2)
 
@@ -512,7 +520,16 @@ nsig$real_or_fake <- as.factor(nsig$real_or_fake)
 
 ggplot(nsig,aes(nsig,fill=real_or_fake,colour=real_or_fake,alpha=0.2
                       ))+geom_freqpoly(bins=1000)
+
+nsig2 <- nsig[abs(nsig$nsig)<=3,,]
+
+ggplot(nsig2,aes(nsig,fill=real_or_fake,colour=real_or_fake,alpha=0.2
+                      ))+geom_freqpoly(bins=1000)
 ```
+
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/nsig_before.png)
+
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/nsig_after.png)
 
 ```{r}
 require(abind)
@@ -670,8 +687,10 @@ dev.off()
 
 ```{r}
 barplot(table(y_train))
-barplot(table(y_test))
+# barplot(table(y_test))
 ```
+
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/class_imb.png)
 
 ```{r}
 real <- which(y==1)
@@ -709,6 +728,8 @@ dim(x_final_test) <- c(dim(x_final_test),1)
 
 rm(x,y)
 ```
+
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/class_bal.png)
 
 ```{r,eval=F}
 model <- keras_model_sequential() %>%
@@ -815,7 +836,7 @@ dev.off()
 ![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real6.png)
 
 
-```{r,eval=T}
+```{r,eval=F}
 model <- keras_model_sequential() %>%
   layer_conv_2d(16, kernel_size = c(2,3),activation = "tanh") %>%
   layer_max_pooling_2d() %>%
@@ -850,14 +871,24 @@ dev.off()
 ```
 
 
+![](C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real7.png)
 
-
-```{r}
+```{r,eval=F}
 preds <- model %>%
   predict(x_final_test)
+
+pred_act <- data.frame(cbind(preds,y_final_test))
+
+pred_act$pred <- ifelse(pred_act$V1>=0.5,1,0)
+
+require(caret)
+
+require(pander)
+  
+caret::confusionMatrix(data=factor(pred_act$pred),reference = factor(pred_act$y_final_test))
 ```
 
-
+![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/geant-v-real-conf-matrix.png)
 
 
 
