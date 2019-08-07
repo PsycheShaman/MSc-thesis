@@ -70,6 +70,10 @@ http://rpubs.com/PsycheShaman/playground
 
 http://rpubs.com/PsycheShaman/GanViz
 
+### Distinguishing Geant Monte Carlo Simulations from Real Data Using ConvNets:
+
+https://rpubs.com/PsycheShaman/real-v-geant
+
 # Previous Thesis drafts:
 https://docs.google.com/document/d/1hObRn3Hdpw62AnmTrFjp70P_UdV0ntQOk6IIW8ZjjIQ/edit?usp=sharing
 
