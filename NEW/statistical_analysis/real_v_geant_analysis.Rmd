@@ -84,10 +84,19 @@ hist(zrs2)
 
 ```{r}
 
+pm <- apply(sim_x,1,mean)
+
+pm2 <- apply(real_x,1,mean)
+
 ```
 
+```{r}
+hist(pm,breaks=200)
+```
 
-
+```{r}
+hist(pm2,breaks=200)
+```
 
 
 
