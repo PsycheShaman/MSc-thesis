@@ -74,7 +74,7 @@ zrs2 <- c()
 for(i in 1:dim(real_x)[1]){
   rs <- rowSums(real_x[i,,])
   rs <- length(which(rs==0))
-  zrs2 <- c(zrs,rs)
+  zrs2 <- c(zrs2,rs)
 }
 
 hist(zrs2)
@@ -82,6 +82,9 @@ hist(zrs2)
 
 
 
+```{r}
+
+```
 
 
 

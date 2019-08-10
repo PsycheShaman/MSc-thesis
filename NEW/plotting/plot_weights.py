@@ -57,6 +57,16 @@ plot_model(model, to_file='C:/Users/gerhard/Documents/MSc-thesis/encoder.png',sh
 model = tf.keras.Sequential()
 model.add(tf.keras.layers.Dense(32,input_shape=(100,)))
 model.add(tf.keras.layers.Dense(64))
+model.add(tf.keras.layers.Reshape(target_shape=(8,8,1)))
+model.add(tf.keras.layers.Conv2DTranspose(64,kernel_size=4,strides=2,padding='same'))
+model.add(tf.keras.layers.Conv2DTranspose(64,kernel_size=4,strides=2,padding='same'))
+model.add(tf.keras.layers.Conv2DTranspose(64,kernel_size=4,strides=2,padding='same'))
+model.add(tf.keras.layers.Flatten())
+model.add(tf.keras.layers.Dense(17*24))
+model.add(tf.keras.layers.Reshape(target_shape=(17,24)))
+
+from keras.utils import plot_model
+plot_model(model, to_file='C:/Users/gerhard/Documents/MSc-thesis/decoder.png',show_shapes=True,show_layer_names=False)
 
 model = tf.keras.Sequential()
 model.add(tf.keras.layers.Conv2D(filters=16,kernel_size=(2,3),activation="tanh",name="16filters8x2",input_shape=(17,24,1)))
