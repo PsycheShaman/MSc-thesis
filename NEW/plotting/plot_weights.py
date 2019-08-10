@@ -19,14 +19,44 @@ weights[0] = np.reshape(weights[0],(8,12,16))
 
 plt.imshow(weights[0][:,:,1])
 
-fig, axs = plt.subplots(8,4, figsize=(8,8))
-fig.subplots_adjust(hspace = .5, wspace=.001)
+fig, axs = plt.subplots(4,4, figsize=(5,5))
+fig.subplots_adjust(hspace = .5, wspace=.1)
 axs = axs.ravel()
-for i in range(32):
-   axs[i].imshow(W[:,:,i])
+for i in range(16):
+   axs[i].imshow(weights[0][:,:,i])
    axs[i].set_title(str(i))
+   
+  
 
+weights[2] = np.reshape(weights[2],(5,6,16*32))
 
+fig, axs = plt.subplots(32,16, figsize=(5,5))
+fig.subplots_adjust(hspace = .2, wspace=.1)
+axs = axs.ravel()
+for i in range(512):
+    axs[i].set_axis_off()
+    axs[i].imshow(weights[2][:,:,i])
+#   axs[i].set_title(str(i))
+
+weights[4] = np.reshape(weights[4],(3,4,32*64))
+
+fig, axs = plt.subplots(32,64, figsize=(100,100))
+fig.subplots_adjust(hspace = .2, wspace=.1)
+axs = axs.ravel()
+for i in range(2048):
+    axs[i].set_axis_off()
+    axs[i].imshow(weights[4][:,:,i])
+
+weights[6].shape
+
+weights[6] = np.reshape(weights[6],(2,3,64*128))
+
+fig, axs = plt.subplots(64,128, figsize=(100,100))
+fig.subplots_adjust(hspace = .2, wspace=.1)
+axs = axs.ravel()
+for i in range(8192):
+    axs[i].set_axis_off()
+    axs[i].imshow(weights[6][:,:,i])
 
 
 def plot_conv_weights(model, layer):
