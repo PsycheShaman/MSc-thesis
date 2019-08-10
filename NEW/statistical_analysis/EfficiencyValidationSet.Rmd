@@ -202,7 +202,7 @@ for(i in seq(1,nrow(pred),6)){
   j=i+5
   
   # this.dat <- prod(pred[i:j,])/sum(prod(pred[i:j,]),prod(1-pred[i:j,]))
-  this.dat <- mean(pred[i:j])
+  this.dat <- mean(pred[i:j,])
   six_tracklet_pred <- c(six_tracklet_pred,this.dat)
 }
 

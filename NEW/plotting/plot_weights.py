@@ -5,7 +5,71 @@ Created on Fri Aug  9 22:15:58 2019
 @author: gerhard
 """
 
+
 import tensorflow as tf
+
+#def encoder(X_in, keep_prob):
+#    activation = lrelu
+#    with tf.variable_scope("encoder", reuse=None):
+#        X = tf.reshape(X_in, shape=[-1, 17, 24, 1])
+#        x = tf.layers.conv2d(X, filters=64, kernel_size=4, strides=2, padding='same', activation=activation)
+#        x = tf.nn.dropout(x, keep_prob)
+#        x = tf.layers.conv2d(x, filters=64, kernel_size=4, strides=2, padding='same', activation=activation)
+#        x = tf.nn.dropout(x, keep_prob)
+#        x = tf.layers.conv2d(x, filters=64, kernel_size=4, strides=1, padding='same', activation=activation)
+#        x = tf.nn.dropout(x, keep_prob)
+#        x = tf.contrib.layers.flatten(x)
+#        mn = tf.layers.dense(x, units=n_latent)
+#        sd       = 0.5 * tf.layers.dense(x, units=n_latent)            
+#        epsilon = tf.random_normal(tf.stack([tf.shape(x)[0], n_latent])) 
+#        z  = mn + tf.multiply(epsilon, tf.exp(sd))
+#        
+#        return z, mn, sd
+
+model = tf.keras.Sequential()
+model.add(tf.keras.layers.Conv2D(filters=64,kernel_size=4,strides=2,input_shape=(17,24,1),padding='same'))
+model.add(tf.keras.layers.Conv2D(filters=64,kernel_size=4,strides=2,padding='same'))
+model.add(tf.keras.layers.Conv2D(filters=64,kernel_size=4,strides=2,padding='same'))
+model.add(tf.keras.layers.Flatten())
+model.add(tf.keras.layers.Dense(100))
+
+from keras.utils import plot_model
+plot_model(model, to_file='C:/Users/gerhard/Documents/MSc-thesis/encoder.png',show_shapes=True,show_layer_names=False)
+
+#def decoder(sampled_z, keep_prob):
+#    with tf.variable_scope("decoder", reuse=None):
+#        x = tf.layers.dense(sampled_z, units=inputs_decoder, activation=lrelu)
+##        x = tf.layers.dense(x, units=inputs_decoder * 2 + 1, activation=lrelu)
+#        x = tf.layers.dense(x, units=inputs_decoder * 2, activation=lrelu)
+#        x = tf.reshape(x, reshaped_dim)
+#        x = tf.layers.conv2d_transpose(x, filters=64, kernel_size=4, strides=2, padding='same', activation=tf.nn.relu)
+#        x = tf.nn.dropout(x, keep_prob)
+#        x = tf.layers.conv2d_transpose(x, filters=64, kernel_size=4, strides=1, padding='same', activation=tf.nn.relu)
+#        x = tf.nn.dropout(x, keep_prob)
+#        x = tf.layers.conv2d_transpose(x, filters=64, kernel_size=4, strides=1, padding='same', activation=tf.nn.relu)
+#        
+#        x = tf.contrib.layers.flatten(x)
+#        x = tf.layers.dense(x, units=17*24, activation=tf.nn.sigmoid)
+#        img = tf.reshape(x, shape=[-1, 17, 24])
+#        return img
+
+
+model = tf.keras.Sequential()
+model.add(tf.keras.layers.Dense(32,input_shape=(100,)))
+model.add(tf.keras.layers.Dense(64))
+
+model = tf.keras.Sequential()
+model.add(tf.keras.layers.Conv2D(filters=16,kernel_size=(2,3),activation="tanh",name="16filters8x2",input_shape=(17,24,1)))
+model.add(tf.keras.layers.Conv2D(filters=32,kernel_size=(3,3),activation="tanh"))
+model.add(tf.keras.layers.MaxPooling2D())
+model.add(tf.keras.layers.Flatten())
+model.add(tf.keras.layers.Dense(128,activation="tanh"))
+model.add(tf.keras.layers.Dropout(rate=0.1))
+model.add(tf.keras.layers.Dense(128,activation="tanh"))
+model.add(tf.keras.layers.Dense(1,activation="sigmoid"))
+
+from keras.utils import plot_model
+plot_model(model, to_file='C:/Users/gerhard/Documents/MSc-thesis/gvr.png',show_shapes=True,show_layer_names=False)
 
 model = tf.keras.models.load_model("C:/Users/gerhard/Documents/hpc-mini/final/model4_.h5")
 

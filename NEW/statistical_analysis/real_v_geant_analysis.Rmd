@@ -1,0 +1,110 @@
+---
+title: "Real v Geant Analysis"
+author: "Gerhard Viljoen"
+date: "10/08/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+rm(list=ls())
+load("c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/sim_x_full.rdata")
+load("c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_x_full.rdata")
+```
+
+
+
+```{r}
+hist(sim_x,breaks=100)
+```
+
+
+
+```{r}
+hist(real_x,breaks=100)
+```
+
+
+```{r}
+require(pander)
+
+pander(summary(sim_x))
+```
+
+
+```{r}
+pander(summary(real_x))
+```
+
+
+
+```{r}
+sd(sim_x)
+sd(real_x)
+```
+
+```{r}
+library(e1071) 
+
+skewness(sim_x)
+skewness(real_x)
+```
+
+
+
+```{r}
+zrs <- c()
+for(i in 1:dim(sim_x)[1]){
+  rs <- rowSums(sim_x[i,,])
+  rs <- length(which(rs==0))
+  zrs <- c(zrs,rs)
+}
+
+hist(zrs)
+```
+
+
+
+```{r}
+zrs2 <- c()
+for(i in 1:dim(real_x)[1]){
+  rs <- rowSums(real_x[i,,])
+  rs <- length(which(rs==0))
+  zrs2 <- c(zrs,rs)
+}
+
+hist(zrs2)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
