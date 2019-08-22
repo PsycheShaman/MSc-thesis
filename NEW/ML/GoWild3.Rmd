@@ -2,7 +2,9 @@
 title: "Go Wild"
 author: "Gerhard Viljoen"
 date: "21/08/2019"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
