@@ -206,6 +206,8 @@ elec_pi_eff_func <- function(model_1.preds,model_1.labels){
 elec_pi_eff_func(pred_act[,1],pred_act[,2])
 ```
 
+![](C:/Users/gerhard/documents/Msc-thesis/NEW/ML/m15.png)
+
 ![](C:/Users/gerhard/documents/Msc-thesis/NEW/ML/m4.png)
 
 ![](C:/Users/gerhard/documents/Msc-thesis/NEW/ML/m5.png)
@@ -421,6 +423,7 @@ elec_pi_eff_func(pred_act[,1],pred_act[,2])
 
 ![](C:/Users/gerhard/documents/Msc-thesis/NEW/ML/m10.png)
 
+## Without Eta, Theta or Phi, i.e. just rowsums and columnsums
 
 
 ```{r}
@@ -589,10 +592,12 @@ elec_pi_eff_func(pred_act[,1],pred_act[,2])
 
 
 
+![](C:/Users/gerhard/documents/Msc-thesis/NEW/ML/m12.png)
 
 
+![](C:/Users/gerhard/documents/Msc-thesis/NEW/ML/m13.png)
 
-
+![](C:/Users/gerhard/documents/Msc-thesis/NEW/ML/m14.png)
 
 
 
