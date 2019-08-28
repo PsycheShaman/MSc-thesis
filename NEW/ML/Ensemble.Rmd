@@ -73,6 +73,8 @@ y <- as.factor(y)
 dat.hex <- as.h2o(data.frame(cbind(signal,y)))
 
 dat.hex$y <- as.factor(dat.hex$y)
+
+# dat.hex <- dat.hex[,c(1:24,42)]
 ```
 
 ```{r}
@@ -251,6 +253,450 @@ elec_pi_eff_func(pred_act[,1],pred_act[,2])
 ```{r}
 gb <- h2o.gbm(x=1:41,y=42,training_frame = train.hex,model_id = "gb1",nfolds = 10,verbose = TRUE)
 ```
+
+
+
+```{r}
+gb_preds <- h2o.predict(gb,test.hex)
+
+gb_preds <- as.data.frame(gb_preds)
+
+preds <- as.data.frame(gb_preds$p1)
+
+act <- as.data.frame(test.hex$y)
+
+pred_act <- cbind(preds,act)
+
+pred_act$y <- ifelse(pred_act$y==1,1,0)
+
+```
+
+
+```{r}
+pred_act <- data.frame(pred_act)
+
+names(pred_act) <- c("pred","act")
+
+pi <- which(pred_act$act==1)
+el <- which(pred_act$act!=1)
+
+while(length(pi)%%6!=0){
+  #print(length(pi))
+  pi <- pi[-length(pi)]
+  
+}
+
+while(length(el)%%6!=0){
+  #print(length(el))
+  el <- el[-length(el)]
+  
+}
+
+pred_act <- pred_act[c(el,pi),]
+
+six_tracklet_pred <- c()
+
+for(i in seq(1,nrow(pred_act),6)){
+  j=i+5
+  
+  this.dat <- prod(pred_act$pred[i:j])/sum(prod(pred_act$pred[i:j]),prod(1-pred_act$pred[i:j]))
+  
+  six_tracklet_pred <- c(six_tracklet_pred,this.dat)
+}
+
+six_tracklet_pred <- data.frame(six_tracklet_pred)
+
+six_tracklet_pred <- na.omit(six_tracklet_pred)
+
+six_tracklet_real <- c()
+
+for(i in seq(1,nrow(pred_act),6)){
+  this.dat <- pred_act$act[i]
+  six_tracklet_real <- c(six_tracklet_real,this.dat)
+  
+}
+
+six_tracklet_real <- data.frame(six_tracklet_real)
+
+which(is.na(six_tracklet_real))
+
+pred_act <- data.frame(cbind(six_tracklet_pred,six_tracklet_real))
+
+elec_pi_eff_func <- function(model_1.preds,model_1.labels){
+  
+    # model_1.preds <- read.csv(model_1.preds,header=F, sep="")
+    # 
+    # model_1.labels <- read.csv(model_1.labels,header=F, sep="")
+    
+    model_1 <- data.frame(cbind(model_1.preds,model_1.labels))
+    
+    model_1.electrons <- which(model_1[,2]==1)
+    
+    electrons <- model_1[model_1.electrons,]
+    
+    pions <- model_1[-as.numeric(model_1.electrons),]
+    
+    electrons <- data.frame(electrons)
+    
+    names(electrons) <- c("prediction","label")
+    
+    pions <- data.frame(pions)
+    
+    names(pions) <- c("prediction","label")
+    
+    electron_efficiency <- function(electrons.,par){
+  
+    electrons <- electrons.
+    
+    electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+    
+    correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+    
+    error_metric <- sum(correct)/nrow(electrons)
+    
+    error_metric <- (error_metric-0.9)^2
+    
+    return(error_metric)
+  
+}
+
+  res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+  
+  require(ggplot2)
+  
+  g <- ggplot(pred_act,aes(pred_act[,1],colour=factor(pred_act[,2])))+geom_histogram(bins = 1000)+facet_wrap(factor(pred_act[,2]))
+  print(g)
+  
+  hist(pred_act[,1],breaks=1000)
+  abline(v=res$par,col="red")
+  
+  electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+  
+  print(paste0("Electron Efficiency: ",sum(electrons$predicted_label)/nrow(electrons)))
+  
+  pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+  
+  pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+  
+  print(paste0("Pion Efficiency: ",(sum(pions$misclassified_as_electron)/nrow(pions))))
+  
+  pred_act$final_pred <- ifelse(pred_act[,1]>=res$par,1,0)
+  
+  require(caret)
+  
+  print(caret::confusionMatrix(data=factor(pred_act$final_pred),reference = factor(pred_act[,2])))
+  print("--------------------------------------------------------------------------------------------------")
+  
+}
+
+elec_pi_eff_func(pred_act[,1],pred_act[,2])
+```
+
+
+```{r}
+# h2o.shutdown()
+
+require(h2o)
+
+
+
+localH2O = h2o.init(min_mem_size = "20g",nthreads = -1)
+
+
+# sv <- h2o.psvm(x=1:41,y=42,training_frame = train.hex,model_id = "sv1")
+```
+
+```{r}
+nn <- h2o.deeplearning(x=1:24,y=25,training_frame = train.hex,nfolds=10)
+```
+
+```{r}
+nn_preds <- h2o.predict(nn,test.hex)
+
+nn_preds <- as.data.frame(nn_preds)
+
+preds <- as.data.frame(nn_preds$p1)
+
+act <- as.data.frame(test.hex$y)
+
+pred_act <- cbind(preds,act)
+
+pred_act$y <- ifelse(pred_act$y==1,1,0)
+
+```
+
+
+```{r}
+pred_act <- data.frame(pred_act)
+
+names(pred_act) <- c("pred","act")
+
+pi <- which(pred_act$act==1)
+el <- which(pred_act$act!=1)
+
+while(length(pi)%%6!=0){
+  #print(length(pi))
+  pi <- pi[-length(pi)]
+  
+}
+
+while(length(el)%%6!=0){
+  #print(length(el))
+  el <- el[-length(el)]
+  
+}
+
+pred_act <- pred_act[c(el,pi),]
+
+six_tracklet_pred <- c()
+
+for(i in seq(1,nrow(pred_act),6)){
+  j=i+5
+  
+  this.dat <- prod(pred_act$pred[i:j])/sum(prod(pred_act$pred[i:j]),prod(1-pred_act$pred[i:j]))
+  
+  six_tracklet_pred <- c(six_tracklet_pred,this.dat)
+}
+
+six_tracklet_pred <- data.frame(six_tracklet_pred)
+
+six_tracklet_pred <- na.omit(six_tracklet_pred)
+
+six_tracklet_real <- c()
+
+for(i in seq(1,nrow(pred_act),6)){
+  this.dat <- pred_act$act[i]
+  six_tracklet_real <- c(six_tracklet_real,this.dat)
+  
+}
+
+six_tracklet_real <- data.frame(six_tracklet_real)
+
+which(is.na(six_tracklet_real))
+
+pred_act <- data.frame(cbind(six_tracklet_pred,six_tracklet_real))
+
+elec_pi_eff_func <- function(model_1.preds,model_1.labels){
+  
+    # model_1.preds <- read.csv(model_1.preds,header=F, sep="")
+    # 
+    # model_1.labels <- read.csv(model_1.labels,header=F, sep="")
+    
+    model_1 <- data.frame(cbind(model_1.preds,model_1.labels))
+    
+    model_1.electrons <- which(model_1[,2]==1)
+    
+    electrons <- model_1[model_1.electrons,]
+    
+    pions <- model_1[-as.numeric(model_1.electrons),]
+    
+    electrons <- data.frame(electrons)
+    
+    names(electrons) <- c("prediction","label")
+    
+    pions <- data.frame(pions)
+    
+    names(pions) <- c("prediction","label")
+    
+    electron_efficiency <- function(electrons.,par){
+  
+    electrons <- electrons.
+    
+    electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+    
+    correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+    
+    error_metric <- sum(correct)/nrow(electrons)
+    
+    error_metric <- (error_metric-0.9)^2
+    
+    return(error_metric)
+  
+}
+
+  res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+  
+  require(ggplot2)
+  
+  g <- ggplot(pred_act,aes(pred_act[,1],colour=factor(pred_act[,2])))+geom_histogram(bins = 1000)+facet_wrap(factor(pred_act[,2]))
+  print(g)
+  
+  hist(pred_act[,1],breaks=1000)
+  abline(v=res$par,col="red")
+  
+  electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+  
+  print(paste0("Electron Efficiency: ",sum(electrons$predicted_label)/nrow(electrons)))
+  
+  pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+  
+  pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+  
+  print(paste0("Pion Efficiency: ",(sum(pions$misclassified_as_electron)/nrow(pions))))
+  
+  pred_act$final_pred <- ifelse(pred_act[,1]>=res$par,1,0)
+  
+  require(caret)
+  
+  print(caret::confusionMatrix(data=factor(pred_act$final_pred),reference = factor(pred_act[,2])))
+  print("--------------------------------------------------------------------------------------------------")
+  
+}
+
+elec_pi_eff_func(pred_act[,1],pred_act[,2])
+```
+
+
+
+
+```{r}
+ensemble <- data.frame(cbind(gb_preds$p1,rf_preds$p1))
+
+ensemble$preds <- rowMeans(ensemble)
+
+```
+
+```{r}
+preds <- ensemble$preds
+
+act <- as.data.frame(test.hex$y)
+
+pred_act <- cbind(preds,act)
+
+pred_act$y <- ifelse(pred_act$y==1,1,0)
+
+
+```
+
+
+```{r}
+pred_act <- data.frame(pred_act)
+
+names(pred_act) <- c("pred","act")
+
+pi <- which(pred_act$act==1)
+el <- which(pred_act$act!=1)
+
+while(length(pi)%%6!=0){
+  #print(length(pi))
+  pi <- pi[-length(pi)]
+  
+}
+
+while(length(el)%%6!=0){
+  #print(length(el))
+  el <- el[-length(el)]
+  
+}
+
+pred_act <- pred_act[c(el,pi),]
+
+six_tracklet_pred <- c()
+
+for(i in seq(1,nrow(pred_act),6)){
+  j=i+5
+  
+  this.dat <- prod(pred_act$pred[i:j])/sum(prod(pred_act$pred[i:j]),prod(1-pred_act$pred[i:j]))
+  
+  six_tracklet_pred <- c(six_tracklet_pred,this.dat)
+}
+
+six_tracklet_pred <- data.frame(six_tracklet_pred)
+
+six_tracklet_pred <- na.omit(six_tracklet_pred)
+
+six_tracklet_real <- c()
+
+for(i in seq(1,nrow(pred_act),6)){
+  this.dat <- pred_act$act[i]
+  six_tracklet_real <- c(six_tracklet_real,this.dat)
+  
+}
+
+six_tracklet_real <- data.frame(six_tracklet_real)
+
+which(is.na(six_tracklet_real))
+
+pred_act <- data.frame(cbind(six_tracklet_pred,six_tracklet_real))
+
+elec_pi_eff_func <- function(model_1.preds,model_1.labels){
+  
+    # model_1.preds <- read.csv(model_1.preds,header=F, sep="")
+    # 
+    # model_1.labels <- read.csv(model_1.labels,header=F, sep="")
+    
+    model_1 <- data.frame(cbind(model_1.preds,model_1.labels))
+    
+    model_1.electrons <- which(model_1[,2]==1)
+    
+    electrons <- model_1[model_1.electrons,]
+    
+    pions <- model_1[-as.numeric(model_1.electrons),]
+    
+    electrons <- data.frame(electrons)
+    
+    names(electrons) <- c("prediction","label")
+    
+    pions <- data.frame(pions)
+    
+    names(pions) <- c("prediction","label")
+    
+    electron_efficiency <- function(electrons.,par){
+  
+    electrons <- electrons.
+    
+    electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+    
+    correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+    
+    error_metric <- sum(correct)/nrow(electrons)
+    
+    error_metric <- (error_metric-0.9)^2
+    
+    return(error_metric)
+  
+}
+
+  res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+  
+  require(ggplot2)
+  
+  g <- ggplot(pred_act,aes(pred_act[,1],colour=factor(pred_act[,2])))+geom_histogram(bins = 1000)+facet_wrap(factor(pred_act[,2]))
+  print(g)
+  
+  hist(pred_act[,1],breaks=1000)
+  abline(v=res$par,col="red")
+  
+  electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+  
+  print(paste0("Electron Efficiency: ",sum(electrons$predicted_label)/nrow(electrons)))
+  
+  pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+  
+  pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+  
+  print(paste0("Pion Efficiency: ",(sum(pions$misclassified_as_electron)/nrow(pions))))
+  
+  pred_act$final_pred <- ifelse(pred_act[,1]>=res$par,1,0)
+  
+  require(caret)
+  
+  print(caret::confusionMatrix(data=factor(pred_act$final_pred),reference = factor(pred_act[,2])))
+  print("--------------------------------------------------------------------------------------------------")
+  
+}
+
+elec_pi_eff_func(pred_act[,1],pred_act[,2])
+```
+
+
+```{r}
+
+```
+
+
+
+
 
 
 
