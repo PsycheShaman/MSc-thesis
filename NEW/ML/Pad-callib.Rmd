@@ -27,9 +27,9 @@ j <- fromJSON(files[1])
 for(i in 2:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265309"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265309"
+# }
   j <- c(j,f)
 }
 
@@ -40,9 +40,9 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265332"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265332"
+# }
   j <- c(j,f)
 }
 
@@ -51,9 +51,9 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265334"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265334"
+# }
   j <- c(j,f)
 }
 
@@ -62,9 +62,9 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265335"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265335"
+# }
   j <- c(j,f)
 }
 
@@ -74,11 +74,11 @@ for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
   
-  if(length(f)!=0){
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265336"
-}    
-  }
+#   if(length(f)!=0){
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265336"
+# }    
+#   }
   
 
   j <- c(j,f)
@@ -89,9 +89,9 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265338"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265338"
+# }
   j <- c(j,f)
 }
 
@@ -100,9 +100,9 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265339"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265339"
+# }
   j <- c(j,f)
 }
 
@@ -111,9 +111,9 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265342"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265342"
+# }
   j <- c(j,f)
 }
 
@@ -122,9 +122,9 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265343"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265343"
+# }
   j <- c(j,f)
 }
 
@@ -133,9 +133,9 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265344"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265344"
+# }
   j <- c(j,f)
 }
 
@@ -144,9 +144,9 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265377"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265377"
+# }
   j <- c(j,f)
 }
 
@@ -155,9 +155,9 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265378"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265378"
+# }
   j <- c(j,f)
 }
 
@@ -166,9 +166,9 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265381"
-}
+#   for(i in 1:length(f)){
+#   f[[i]]$RunNumber <- "265381"
+# }
   j <- c(j,f)
 }
 
@@ -177,11 +177,11 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  if(length(f)!=0){
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265383"
-  }
-  }
+  # if(length(f)!=0){
+  # for(i in 1:length(f)){
+  # f[[i]]$RunNumber <- "265383"
+  # }
+  # }
   j <- c(j,f)
 }
 
@@ -190,11 +190,11 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  if(length(f)!=0){
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265385"
-  }
-  }
+  # if(length(f)!=0){
+  # for(i in 1:length(f)){
+  # f[[i]]$RunNumber <- "265385"
+  # }
+  # }
   j <- c(j,f)
 }
 
@@ -203,11 +203,11 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  if(length(f)!=0){
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265388"
-  }
-  }
+  # if(length(f)!=0){
+  # for(i in 1:length(f)){
+  # f[[i]]$RunNumber <- "265388"
+  # }
+  # }
   j <- c(j,f)
 }
 
@@ -216,11 +216,11 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  if(length(f)!=0){
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265419"
-  }
-  }
+  # if(length(f)!=0){
+  # for(i in 1:length(f)){
+  # f[[i]]$RunNumber <- "265419"
+  # }
+  # }
   j <- c(j,f)
 }
 
@@ -229,11 +229,11 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  if(length(f)!=0){
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265420"
-  }
-  }
+  # if(length(f)!=0){
+  # for(i in 1:length(f)){
+  # f[[i]]$RunNumber <- "265420"
+  # }
+  # }
   j <- c(j,f)
 }
 
@@ -242,11 +242,11 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  if(length(f)!=0){
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265425"
-  }
-  }
+  # if(length(f)!=0){
+  # for(i in 1:length(f)){
+  # f[[i]]$RunNumber <- "265425"
+  # }
+  # }
   j <- c(j,f)
 }
 
@@ -255,11 +255,11 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  if(length(f)!=0){
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265426"
-  }
-  }
+  # if(length(f)!=0){
+  # for(i in 1:length(f)){
+  # f[[i]]$RunNumber <- "265426"
+  # }
+  # }
   j <- c(j,f)
 }
 
@@ -268,11 +268,11 @@ files <- list.files(path="C:/Users/gerhard/Documents/msc-thesis-data/processed/0
 for(i in 1:length(files)){
 
   f <- fromJSON(files[i])
-  if(length(f)!=0){
-  for(i in 1:length(f)){
-  f[[i]]$RunNumber <- "265499"
-  }
-  }
+  # if(length(f)!=0){
+  # for(i in 1:length(f)){
+  # f[[i]]$RunNumber <- "265499"
+  # }
+  # }
   j <- c(j,f)
 }
 
@@ -597,10 +597,81 @@ model %>%
 
 summary(model)
 
+model %>% compile(
+  loss = "mean_squared_error", 
+  optimizer = "adam"
+)
+
+# fit model
+model %>% fit(
+  x = meta_train, 
+  y = meta_train, 
+  epochs = 2000,
+  verbose = 2
+)
+
+# evaluate the performance of the model
+mse.ae2 <- evaluate(model, meta_train, meta_train)
+mse.ae2
+
+##        loss 
+## 0.009725631
+
+# extract the bottleneck layer
+intermediate_layer_model <- keras_model(inputs = model$input, outputs = get_layer(model, "bottleneck")$output)
+intermediate_output <- predict(intermediate_layer_model, meta_train)
+
+ggplot(data.frame(PC1 = intermediate_output[,1], PC2 = intermediate_output[,2]), aes(x = PC1, y = PC2, col = factor(y_train))) + geom_point()
+
 ```
 
 
+## Dim reduction on x data
 
+
+
+
+```{r}
+dim(x_train) <- c(dim(x_train)[1],dim(X_train)[2]*dim(x_train)[3])
+
+x_train <- as.matrix(x_train)
+
+model <- keras_model_sequential()
+model %>%
+  layer_dense(units = 36, activation = "tanh", input_shape = ncol(x_train)) %>%
+  layer_dense(units = 12, activation = "tanh", name = "bottleneck") %>%
+  layer_dense(units = 36, activation = "tanh") %>%
+  layer_dense(units = ncol(x_train))
+
+summary(model)
+
+model %>% compile(
+  loss = "mean_squared_error", 
+  optimizer = "adam"
+)
+
+# fit model
+model %>% fit(
+  x = x_train, 
+  y = x_train, 
+  epochs = 2000,
+  verbose = 2
+)
+
+# evaluate the performance of the model
+mse.ae2 <- evaluate(model, x_train, x_train)
+mse.ae2
+
+##        loss 
+## 0.009725631
+
+# extract the bottleneck layer
+intermediate_layer_model <- keras_model(inputs = model$input, outputs = get_layer(model, "bottleneck")$output)
+intermediate_output <- predict(intermediate_layer_model, x_train)
+
+ggplot(data.frame(PC1 = intermediate_output[,1], PC2 = intermediate_output[,2]), aes(x = PC1, y = PC2, col = factor(y_train))) + geom_point()
+
+```
 
 
 
