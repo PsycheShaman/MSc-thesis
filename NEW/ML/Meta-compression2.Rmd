@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 rm(list=ls())
 
-load("C:/Users/gerhard/documents/msc-thesis-data/meta.rdata")
+# load("C:/Users/gerhard/documents/msc-thesis-data/meta.rdata")
 load("C:/Users/Gerhard/Documents/msc-thesis-data/aux_.rdata")
 load("C:/Users/gerhard/documents/msc-thesis-data/y.rdata")
 load("C:/Users/gerhard/documents/msc-thesis-data/x.rdata")
@@ -35,9 +35,337 @@ P6 <- which(P<=6&P>5)
 rm(P,P1)
 ```
 
+
+```{r}
+x2 <- x[P2,]
+x3 <- x[P3,]
+x4 <- x[P4,]
+x5 <- x[P5,]
+x6 <- x[P6,]
+
+y2 <- y[P2]
+y3 <- y[P3]
+y4 <- y[P4]
+y5 <- y[P5]
+y6 <- y[P6]
+
+rm(x,P2,P3,P4,P5,P6)
+rm(y)
+```
+
+```{r}
+save(x2,file="C:/Users/gerhard/documents/msc-thesis-data/x_P2")
+save(x3,file="C:/Users/gerhard/documents/msc-thesis-data/x_P3")
+save(x4,file="C:/Users/gerhard/documents/msc-thesis-data/x_P4")
+save(x5,file="C:/Users/gerhard/documents/msc-thesis-data/x_P5")
+save(x6,file="C:/Users/gerhard/documents/msc-thesis-data/x_P6")
+
+save(y2,file="C:/Users/gerhard/documents/msc-thesis-data/y_P2")
+save(y3,file="C:/Users/gerhard/documents/msc-thesis-data/y_P3")
+save(y4,file="C:/Users/gerhard/documents/msc-thesis-data/y_P4")
+save(y5,file="C:/Users/gerhard/documents/msc-thesis-data/y_P5")
+save(y6,file="C:/Users/gerhard/documents/msc-thesis-data/y_P6")
+```
+
 ```{r}
 
+table(y2)
+
+pid_per_p <- cbind(
+  rbind(
+  as.numeric(table(y2)),
+  as.numeric(table(y3)),
+  as.numeric(table(y4)),
+  as.numeric(table(y5)),
+  as.numeric(table(y6))
+),
+c("P<=2","2<P<=3","3<P<=4","4<P<=5","5<P<=6")
+)
+
+pid_per_p <- cbind(c(pid_per_p[,1],pid_per_p[,2]),rep(pid_per_p[,3],2))
+
+pid <- c(rep("pion",5),rep("electron",5))
+
+pid_per_p <- data.frame(cbind(pid_per_p,pid))
+
+names(pid_per_p)[1:2] <- c("count","Momentum Range")
+
+pid_per_p$count <- as.numeric(as.character(pid_per_p$count))
+
+require(ggplot2)
+
+ggplot(pid_per_p,aes(x=count))
+
+ggplot(pid_per_p,aes(y=pid_per_p$count,fill=pid,color=pid,x=pid))+geom_col()+facet_wrap(~`Momentum Range`)+xlab("Particle ID")+ylab("Number of Particles per Momentum Range")
+
 ```
+
+
+```{r}
+rm(x3,x4,x5,x6)
+rm(y3,y4,y5,y6)
+rm(pid_per_p)
+```
+
+
+
+
+
+```{r}
+dim(x2)
+dim(x2) <- c(dim(x2)[1],17,24,1)
+
+x <- (x2-max(x2))/max(x2)
+
+```
+
+```{r}
+rm(list=ls())
+load("C:/Users/gerhard/documents/msc-thesis-data/x_P2")
+load("C:/Users/gerhard/documents/msc-thesis-data/y_P2")
+```
+
+```{r}
+# dim(x2)
+dim(x2) <- c(dim(x2)[1],17,24,1)
+
+# x <- (x2-max(x2))/max(x2)
+
+any(is.na(x2))
+
+```
+
+
+```{python,eval=F}
+def focal_loss(gamma=2., alpha=.25):
+
+	def focal_loss_fixed(y_true, y_pred):
+	
+		pt_1 = tf.where(tf.equal(y_true, 1), y_pred, tf.ones_like(y_pred))
+	
+		pt_0 = tf.where(tf.equal(y_true, 0), y_pred, tf.zeros_like(y_pred))
+	
+		return -K.mean(alpha * K.pow(1. - pt_1, gamma) * K.log(pt_1)) - K.mean((1 - alpha) * K.pow(pt_0, gamma) * K.log(1. - pt_0))
+	
+	return focal_loss_fixed
+
+```
+
+
+```{r}
+require(keras)
+
+require(tensorflow)
+
+K <- keras::backend()
+
+# Custom Focal Loss
+
+fokLos <- function(gamma=2., alpha=.25){
+  
+  loss <- function(y_true,y_pred){
+  
+  pt_1 <- tf$where(tf$equal(y_true,1),y_pred,tf$ones_like(y_pred))
+  
+  pt_0 <- tf$where(tf$equal(y_true,0),y_pred,tf$ones_like(y_pred))
+  
+  #clip to prevent NaNs and Infs
+  
+  epsilon <- K$epsilon()
+  
+  pt_1 <- K$clip(pt_1,epsilon,1.-epsilon)
+  pt_0 <- K$clip(pt_0,epsilon,1.-epsilon)
+  
+  return(-K$mean(alpha*K$pow(1.-pt_1,gamma)*K$log(pt_1))-K$mean((1-alpha)*K$pow(pt_0,gamma)*K$log(1.-pt_0)))
+    
+  }
+  
+ return(loss)
+}
+
+```
+
+```{r}
+model <- keras_model_sequential() %>%
+  layer_conv_2d(input_shape = c(17,24,1),filters = 128,kernel_size = c(3,3),padding = "same",activation = "relu") %>%
+  layer_max_pooling_2d() %>%
+  layer_conv_2d(64,c(3,3),activation = "relu",padding="same") %>%
+  layer_max_pooling_2d() %>%
+  layer_conv_2d(32,c(3,3),activation = "relu",padding="same") %>%
+  layer_max_pooling_2d() %>%
+  layer_conv_2d(16,c(3,3),activation = "relu",padding="same") %>%
+  layer_max_pooling_2d() %>%
+  layer_conv_2d(8,c(3,3),activation = "relu",padding="same") %>%
+  layer_flatten() %>%
+  layer_dense(512,"relu") %>%
+  layer_dense(1,activation = "sigmoid")
+
+
+
+model %>% compile(
+  loss = fokLos(),
+  optimizer = optimizer_adam(),
+  metrics = c("accuracy")
+)
+
+history <- model %>% fit(
+  x2, y2, 
+  epochs = 30, batch_size = 32, 
+  validation_split = 0.2,
+  shuffle=T
+)
+```
+
+
+![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/focal_loss_1.png)
+
+```{r}
+rm(list=ls())
+load("C:/Users/gerhard/documents/msc-thesis-data/x_P2")
+load("C:/Users/gerhard/documents/msc-thesis-data/y_P2")
+```
+
+```{r}
+# dim(x2)
+dim(x2) <- c(dim(x2)[1],17,24,1)
+
+x <- (x2-max(x2))/max(x2)
+
+```
+
+
+```{r}
+require(keras)
+
+require(tensorflow)
+
+K <- keras::backend()
+
+# Custom Focal Loss
+
+fokLos <- function(gamma=2., alpha=.25){
+  
+  loss <- function(y_true,y_pred){
+  
+  pt_1 <- tf$where(tf$equal(y_true,1),y_pred,tf$ones_like(y_pred))
+  
+  pt_0 <- tf$where(tf$equal(y_true,0),y_pred,tf$ones_like(y_pred))
+  
+  #clip to prevent NaNs and Infs
+  
+  epsilon <- K$epsilon()
+  
+  pt_1 <- K$clip(pt_1,epsilon,1.-epsilon)
+  pt_0 <- K$clip(pt_0,epsilon,1.-epsilon)
+  
+  return(-K$mean(alpha*K$pow(1.-pt_1,gamma)*K$log(pt_1))-K$mean((1-alpha)*K$pow(pt_0,gamma)*K$log(1.-pt_0)))
+    
+  }
+  
+ return(loss)
+}
+
+```
+
+```{r}
+#Benchmark
+1- length(which(y2==1))/length(y2)
+#0.7651971
+
+model <- keras_model_sequential() %>%
+  layer_conv_2d(input_shape = c(17,24,1),filters = 32,kernel_size = c(6,6),padding = "same",activation = "tanh") %>%
+  layer_max_pooling_2d() %>%
+  layer_dropout(rate=0.2) %>%
+  layer_conv_2d(64,c(3,3),activation = "tanh",padding="same") %>%
+  layer_max_pooling_2d() %>%
+  layer_dropout(rate=0.2) %>%
+  layer_conv_2d(128,c(3,3),activation = "tanh",padding="same") %>%
+  layer_max_pooling_2d() %>%
+  layer_dropout(rate=0.2) %>%
+  layer_flatten() %>%
+  layer_dense(512,"tanh") %>%
+  layer_dropout(rate=0.2) %>%
+  layer_dense(256,"tanh") %>%
+  layer_dropout(rate=0.2) %>%
+  layer_dense(128,"tanh") %>%
+  layer_dropout(rate=0.2) %>%
+  layer_dense(1,activation = "sigmoid")
+
+
+
+model %>% compile(
+  loss = fokLos(),
+  optimizer = optimizer_adam(lr=0.00001),
+  metrics = c("accuracy")
+)
+
+history <- model %>% fit(
+  x2, y2, 
+  epochs = 10, batch_size = 32, 
+  validation_split = 0.2,
+  shuffle=T
+)
+```
+
+
+![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/focal_loss_2.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
