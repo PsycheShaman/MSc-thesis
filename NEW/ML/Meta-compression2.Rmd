@@ -305,11 +305,24 @@ history <- model %>% fit(
   validation_split = 0.2,
   shuffle=T
 )
+
+plot(history)
 ```
 
 
 ![](C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/focal_loss_2.png)
 
+```{r}
+history <- model %>% fit(
+  x2, y2, 
+  epochs = 30, batch_size = 32, 
+  validation_split = 0.2,
+  shuffle=T,
+  initial_epoch = 10
+)
+
+plot(history)
+```
 
 
 
