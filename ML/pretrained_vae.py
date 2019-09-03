@@ -241,8 +241,8 @@ def load_data():
 (x_train,y_train) = load_data()
 
 vae.fit(x_train,
-                epochs=6000000,
-                batch_size=1)
+                epochs=1,
+                batch_size=1000)
 
 vae.save_weights('C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/vae_pretrained_1.h5')
 
