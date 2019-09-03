@@ -22,7 +22,7 @@ dim(x) <- c(dim(x)[1],17,24,1)
 
 ```
 
-```{r}
+```{r,eval=F}
 
 rm(proto)
 proto <- keras_model_sequential() %>%
@@ -138,7 +138,7 @@ visualize_images <-
     
   }
 
-x <- as.double(x)
+# x <- as.double(x)
 
 # sigma <- sd(x)
 mu <- mean(x)
@@ -180,7 +180,7 @@ np <- import("numpy")
 #   k_cast(dtype = "float32")
 # train_images <- train_images %>% `/`(255)
 
-train_images <- (x) %>% k_expand_dims() %>%
+train_images <- (x) %>% #k_expand_dims() %>%
    k_cast(dtype = "float32")
 train_images <- train_images %>% `/`(mu)
 
@@ -281,6 +281,58 @@ encoder_model <- function(name = NULL,
 
 # Decoder ------------------------------------------------------------------
 
+# input_size = latent_size * code_size
+# 
+# debug <- keras_model_sequential() %>%
+#   layer_reshape(target_shape = c(1, 1, input_size),input_shape=c(16))
+# 
+# debug <- debug %>% #deconv1
+#    default_deconv(
+#         filters = 4 * base_depth,
+#         kernel_size = 6,
+#         padding = "valid"
+#       )
+# 
+# 
+# debug <- debug %>% #deconv2
+#   default_deconv(filters = 2 * base_depth, kernel_size = 6)
+# 
+# debug <- debug %>% #deconv3
+# default_deconv(
+#         filters = 2 * base_depth,
+#         kernel_size = 6,
+#         strides = 2
+#       )
+# 
+# 
+# debug <- debug %>% #deconv4
+#   default_deconv(filters = base_depth, kernel_size = 6)
+#   
+# 
+# debug <- debug %>% #deconv5
+#         default_deconv(filters = base_depth,
+#                      kernel_size = 3,
+#                      strides = 2)
+# 
+# debug <- debug %>% #deconv6
+# default_deconv(filters = base_depth, kernel_size = 3)
+# 
+# 
+# debug <- debug %>%
+#   default_conv(filters = 144,
+#                    kernel_size = 1,
+#                    activation = "linear")
+# 
+# summary(debug)
+
+m <- keras_model_sequential() %>%
+  layer_dense(144,input_shape = c(17,24,1)) %>%
+  layer_dense(144) %>%
+  layer_reshape(target_shape=c(17,24,1))
+
+summary(m)
+
+
 decoder_model <- function(name = NULL,
                           input_size,
                           output_shape) {
@@ -289,12 +341,12 @@ decoder_model <- function(name = NULL,
     self$reshape1 <- layer_reshape(target_shape = c(1, 1, input_size))
     self$deconv1 <-
       default_deconv(
-        filters = 2 * base_depth,
+        filters = base_depth,
         kernel_size = 3,
         padding = "valid"
       )
     self$deconv2 <-
-      default_deconv(filters = 2 * base_depth, kernel_size = 3)
+      default_deconv(filters = 2 * base_depth, kernel_size = 6)
     self$deconv3 <-
       default_deconv(
         filters = 2 * base_depth,
@@ -302,17 +354,24 @@ decoder_model <- function(name = NULL,
         strides = 2
       )
     self$deconv4 <-
-      default_deconv(filters = base_depth, kernel_size = 3)
+      default_deconv(filters = base_depth, kernel_size = 6)
     self$deconv5 <-
       default_deconv(filters = base_depth,
                      kernel_size = 3,
                      strides = 2)
     self$deconv6 <-
       default_deconv(filters = base_depth, kernel_size = 3)
+    
+    self$flatcake <- layer_flatten()
+    
     self$conv1 <-
-      default_conv(filters = output_shape[3],
-                   kernel_size = 3,
-                   activation = "linear")
+      layer_dense(units=26112,activation = "linear")
+    
+    self$resh <-
+      layer_reshape(target_shape = c(64,17,24,1))
+      # default_conv(filters = output_shape[3],
+      #              kernel_size = 3,
+      #              activation = "linear")
     
     function (x, mask = NULL) {
       x <- x %>%
@@ -330,8 +389,10 @@ decoder_model <- function(name = NULL,
         self$deconv5() %>%
         # output shape:  7 28 28 32
         self$deconv6() %>%
+        self$flatcake() %>%
         # output shape:  7 28 28 1
-        self$conv1()
+        self$conv1() %>%
+         self$resh()
       tfd$Independent(tfd$Bernoulli(logits = x),
                       reinterpreted_batch_ndims = length(output_shape))
     }
