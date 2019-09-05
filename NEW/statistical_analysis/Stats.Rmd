@@ -68,8 +68,38 @@ ggplot(t,aes(x=`Particle ID`, y= `Freq`,fill=`Particle ID`))+geom_bar(stat = "id
 ```
 
 
+```{r}
+
+library("RColorBrewer")
+
+meta$y <- ifelse(as.numeric(as.character(meta$y))==1,"electron","pion")
+
+# table(meta$y)
+
+meta$y <- ifelse(as.character(meta$y)=="electron","pion","electron")
+
+myPalette <- colorRampPalette((brewer.pal(11, "Spectral")))
+sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0, 100))
+
+# table(meta$dEdX,meta$P)
+
+install.packages("hexbin")
+
+ggplot(meta,aes(y=dEdX,x=P))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Momentum (GeV/c)")+ylab("dE/dX (Arbitrary Units)")
+
+ggplot(meta,aes(y=dEdX,x=PT))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Transverse Momentum (P_T) (GeV/c)")+ylab("dE/dX (Arbitrary Units)")
+```
 
 
+```{r}
+cs <- cbind(cs,meta$y)
+
+
+
+cs1 <- rowMeans(cs)
+
+ggplot(data.frame(cs1),aes(x=1:24,y=cs1))+geom_line()
+```
 
 
 
