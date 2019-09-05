@@ -19,9 +19,53 @@ load("C:/Users/Gerhard/Documents/msc-thesis-data/x.rdata")
 load("C:/Users/Gerhard/Documents/msc-thesis-data/y.rdata")
 ```
 
+```{r}
+dim(x) <- c(dim(x)[1],17,24)
+
+cs <- apply(x,1,colSums)
+
+```
 
 
+```{r}
+names(meta)
+names(aux)
 
+meta <- data.frame(meta,aux,y)
+
+rm(aux,y)
+
+names(meta)
+
+
+fac_cols <- c(4,5,6,7,13)
+
+for(i in fac_cols){
+  meta[,i] <- as.factor(meta[,i])
+}
+
+non_fac_cols <- 1:ncol(meta)[-fac_cols]
+
+for(i in non_fac_cols){
+  meta[,i] <- as.numeric(meta[,i])
+}
+
+```
+
+```{r}
+t <- data.frame(table(meta$y))
+
+names(t)[1] <- "Particle ID"
+
+t$`Particle ID` <- c("pion","electron")
+
+t$Percent <- c(round(t$Freq[1]/sum(t$Freq)*100,2),round(t$Freq[2]/sum(t$Freq)*100,2))
+
+require(ggplot2)
+
+ggplot(t,aes(x=`Particle ID`, y= `Freq`,fill=`Particle ID`))+geom_bar(stat = "identity")+geom_text(label=c(paste0(t$Freq[1],"\n (",t$Percent[1],"%)"),paste0(t$Freq[2],"\n (",t$Percent[2],"%)")))
+
+```
 
 
 
