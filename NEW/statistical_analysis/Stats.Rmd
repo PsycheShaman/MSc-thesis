@@ -11,7 +11,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 rm(list=ls())
-load("C:/Users/Gerhard/Documents/msc-thesis-data/j.rdata")
+
+
+load("C:/Users/Gerhard/Documents/msc-thesis-data/aux_.rdata")
+load("C:/Users/Gerhard/Documents/msc-thesis-data/meta.rdata")
+load("C:/Users/Gerhard/Documents/msc-thesis-data/x.rdata")
+load("C:/Users/Gerhard/Documents/msc-thesis-data/y.rdata")
 ```
 
 
