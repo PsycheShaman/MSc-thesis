@@ -17,17 +17,12 @@ load("C:/Users/Gerhard/Documents/msc-thesis-data/aux_.rdata")
 load("C:/Users/Gerhard/Documents/msc-thesis-data/meta.rdata")
 load("C:/Users/Gerhard/Documents/msc-thesis-data/x.rdata")
 load("C:/Users/Gerhard/Documents/msc-thesis-data/y.rdata")
-```
 
-```{r}
 dim(x) <- c(dim(x)[1],17,24)
 
 cs <- apply(x,1,colSums)
 
-```
 
-
-```{r}
 names(meta)
 names(aux)
 
@@ -92,13 +87,68 @@ ggplot(meta,aes(y=dEdX,x=PT))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Transvers
 
 
 ```{r}
-cs <- cbind(cs,meta$y)
+dim(cs)
 
+cs <- t(cs)
 
+names(cs)
 
-cs1 <- rowMeans(cs)
+cs <- data.frame(cbind(cs,meta$y))
 
-ggplot(data.frame(cs1),aes(x=1:24,y=cs1))+geom_line()
+typeof(cs$meta.y)
+
+cs$meta.y[1]
+
+table(cs$meta.y)
+
+cs$y <- ifelse(cs$meta.y==1,"pion","electron")
+
+require(dplyr)
+
+cs <- cs %>%
+  group_by(y) %>%
+  summarise(X1=mean(X1),X2=mean(X2),
+            X3=mean(X3),X4=mean(X4),
+            X5=mean(X5),X6=mean(X6),
+            X7=mean(X7),X8=mean(X8),
+            X9=mean(X9),X10=mean(X10),
+            X11=mean(X11),X12=mean(X12),
+            X13=mean(X13),X14=mean(X14),
+            X15=mean(X15),X16=mean(X16),
+            X17=mean(X17),X18=mean(X18),
+            X19=mean(X19),X20=mean(X20),
+            X21=mean(X21),X22=mean(X22),
+            X23=mean(X23),X24=mean(X24))
+
+cs <- t(cs)
+
+cs <- data.frame(cs)
+
+names(cs) <- cs[1,]
+
+cs <- cs[-1,]
+
+names(cs) <- c("electron","pion")
+
+require(reshape2)
+
+# cs <- cs %>%
+#   reshape2::melt()
+
+el_t <- cbind(as.numeric(as.character(cs$electron)),"electron")
+pi_t <- cbind(as.numeric(as.character(cs$pion)),"pion")
+
+cs2 <- data.frame(rbind(el_t,pi_t))
+
+names(cs2) <- c("Pulse height","Particle ID")
+
+cs2$`Pulse height` <- as.numeric(as.character(cs2$`Pulse height`))
+
+require(ggplot2)
+
+cs2$timebin <- 1:24
+
+ggplot(cs2,aes(x=timebin,y=`Pulse height`,col=`Particle ID`))+geom_line()+ylab("Average Pulse Height (mv)")+xlab("Time bin (Arbitrary Units)")
 ```
 
 
