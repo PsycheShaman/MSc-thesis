@@ -1642,6 +1642,353 @@ elec_pi_eff_func(pred_act[,1],pred_act[,2])
 
 
 
+```{r}
+rm(list=ls())
+require(stringr)
+for(model in c("xgb0_results","xgb1_results","xgb2_results")){
+  print("--------------------------------------------------------------------------------------------------")
+  print(model)
+  print("--------------------------------------------------------------------------------------------------")
+
+pred <- read.csv(paste0("C:/Users/gerhard/Documents/hpc-mini/xgb/",model,".csv"),header=F,sep = "")
+act <- read.csv(paste0("C:/Users/gerhard/Documents/hpc-mini/xgb/", 
+                       str_replace(model,regex("_.+"),"") ,
+                       
+                       "_y_test.csv"),header=F,sep="")
+
+if(ncol(pred)==2){
+  
+pred <- data.frame(pred[,2])
+}
+
+if(ncol(act)==2){
+act <- data.frame(act[,2])  
+}
+
+
+names(pred) <- "pred"
+names(act) <- "act"
+
+pred_act <- data.frame(cbind(pred,act))
+
+pi <- which(pred_act$act==1)
+el <- which(pred_act$act!=1)
+
+while(length(pi)%%6!=0){
+  #print(length(pi))
+  pi <- pi[-length(pi)]
+  
+}
+
+while(length(el)%%6!=0){
+  #print(length(el))
+  el <- el[-length(el)]
+  
+}
+
+pred_act <- pred_act[c(el,pi),]
+
+six_tracklet_pred <- c()
+
+for(i in seq(1,nrow(pred),6)){
+  j=i+5
+  
+  this.dat <- prod(pred[i:j,])/sum(prod(pred[i:j,]),prod(1-pred[i:j,]))
+  six_tracklet_pred <- c(six_tracklet_pred,this.dat)
+}
+
+six_tracklet_pred <- data.frame(six_tracklet_pred)
+
+n <- which(is.na(six_tracklet_pred))
+
+# six_tracklet_pred <- na.omit(six_tracklet_pred)
+
+six_tracklet_real <- c()
+
+for(i in seq(1,nrow(act),6)){
+  this.dat <- act[i,]
+  six_tracklet_real <- c(six_tracklet_real,this.dat)
+  
+}
+
+six_tracklet_real <- data.frame(six_tracklet_real)
+
+n <- c(n,which(is.na(six_tracklet_pred)))
+
+if(length(n)!=0){
+  six_tracklet_real <- six_tracklet_real[-n,]
+six_tracklet_pred <- six_tracklet_pred[-n,]
+}
+
+
+
+
+# which(is.na(six_tracklet_real))
+
+pred_act <- data.frame(cbind(six_tracklet_pred,six_tracklet_real))
+
+elec_pi_eff_func <- function(model_1.preds,model_1.labels){
+  
+    # model_1.preds <- read.csv(model_1.preds,header=F, sep="")
+    # 
+    # model_1.labels <- read.csv(model_1.labels,header=F, sep="")
+    
+    model_1 <- data.frame(cbind(model_1.preds,model_1.labels))
+    
+    model_1.electrons <- which(model_1[,2]==1)
+    
+    electrons <- model_1[model_1.electrons,]
+    
+    pions <- model_1[-as.numeric(model_1.electrons),]
+    
+    electrons <- data.frame(electrons)
+    
+    names(electrons) <- c("prediction","label")
+    
+    pions <- data.frame(pions)
+    
+    names(pions) <- c("prediction","label")
+    
+    electron_efficiency <- function(electrons.,par){
+  
+    electrons <- electrons.
+    
+    electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+    
+    correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+    
+    error_metric <- sum(correct)/nrow(electrons)
+    
+    error_metric <- (error_metric-0.9)^2
+    
+    return(error_metric)
+  
+}
+
+  res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+  
+  require(ggplot2)
+  
+  g <- ggplot(pred_act,aes(pred_act[,1],colour=factor(pred_act[,2])))+geom_histogram(bins = 1000)+facet_wrap(factor(pred_act[,2]))
+  print(g)
+  
+  hist(pred_act[,1],breaks=1000)
+  abline(v=res$par,col="red")
+  
+  electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+  
+  print(paste0("Electron Efficiency: ",sum(electrons$predicted_label)/nrow(electrons)))
+  
+  pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+  
+  pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+  
+  print(paste0("Pion Efficiency: ",sum(pions$misclassified_as_electron)/nrow(pions)))
+  
+  pred_act$final_pred <- ifelse(pred_act[,1]>=res$par,1,0)
+  
+  require(caret)
+  
+  print(caret::confusionMatrix(data=factor(pred_act$final_pred),reference = factor(pred_act[,2])))
+  print("--------------------------------------------------------------------------------------------------")
+  
+}
+
+elec_pi_eff_func(pred_act[,1],pred_act[,2])
+
+}
+```
+
+```{r}
+rm(list=ls())
+require(stringr)
+for(model in c("merging1_results")){
+  print("--------------------------------------------------------------------------------------------------")
+  print(model)
+  print("--------------------------------------------------------------------------------------------------")
+
+pred <- read.csv(paste0("C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/",model,".csv"),header=F,sep = "")
+act <- read.csv(paste0("C:/Users/gerhard/Documents/MSc-thesis/NEW/ML/", 
+                       str_replace(model,regex("_.+"),"") ,
+                       
+                       "_y_test.csv"),header=F,sep="")
+
+if(ncol(pred)==2){
+  
+pred <- data.frame(pred[,2])
+}
+
+if(ncol(act)==2){
+act <- data.frame(act[,2])  
+}
+
+
+names(pred) <- "pred"
+names(act) <- "act"
+
+pred_act <- data.frame(cbind(pred,act))
+
+pi <- which(pred_act$act==1)
+el <- which(pred_act$act!=1)
+
+while(length(pi)%%6!=0){
+  #print(length(pi))
+  pi <- pi[-length(pi)]
+  
+}
+
+while(length(el)%%6!=0){
+  #print(length(el))
+  el <- el[-length(el)]
+  
+}
+
+pred_act <- pred_act[c(el,pi),]
+
+six_tracklet_pred <- c()
+
+for(i in seq(1,nrow(pred),6)){
+  j=i+5
+  
+  this.dat <- prod(pred[i:j,])/sum(prod(pred[i:j,]),prod(1-pred[i:j,]))
+  six_tracklet_pred <- c(six_tracklet_pred,this.dat)
+}
+
+six_tracklet_pred <- data.frame(six_tracklet_pred)
+
+n <- which(is.na(six_tracklet_pred))
+
+# six_tracklet_pred <- na.omit(six_tracklet_pred)
+
+six_tracklet_real <- c()
+
+for(i in seq(1,nrow(act),6)){
+  this.dat <- act[i,]
+  six_tracklet_real <- c(six_tracklet_real,this.dat)
+  
+}
+
+six_tracklet_real <- data.frame(six_tracklet_real)
+
+n <- c(n,which(is.na(six_tracklet_pred)))
+
+if(length(n)!=0){
+  six_tracklet_real <- six_tracklet_real[-n,]
+six_tracklet_pred <- six_tracklet_pred[-n,]
+}
+
+
+
+
+# which(is.na(six_tracklet_real))
+
+pred_act <- data.frame(cbind(six_tracklet_pred,six_tracklet_real))
+
+elec_pi_eff_func <- function(model_1.preds,model_1.labels){
+  
+    # model_1.preds <- read.csv(model_1.preds,header=F, sep="")
+    # 
+    # model_1.labels <- read.csv(model_1.labels,header=F, sep="")
+    
+    model_1 <- data.frame(cbind(model_1.preds,model_1.labels))
+    
+    model_1.electrons <- which(model_1[,2]==1)
+    
+    electrons <- model_1[model_1.electrons,]
+    
+    pions <- model_1[-as.numeric(model_1.electrons),]
+    
+    electrons <- data.frame(electrons)
+    
+    names(electrons) <- c("prediction","label")
+    
+    pions <- data.frame(pions)
+    
+    names(pions) <- c("prediction","label")
+    
+    electron_efficiency <- function(electrons.,par){
+  
+    electrons <- electrons.
+    
+    electrons$electron_pred <- ifelse(electrons$prediction>=par[1],1,0)
+    
+    correct <- ifelse(electrons$electron_pred==electrons$label,1,0)
+    
+    error_metric <- sum(correct)/nrow(electrons)
+    
+    error_metric <- (error_metric-0.9)^2
+    
+    return(error_metric)
+  
+}
+
+  res <- optim(par=c(0),fn=electron_efficiency,lower = 0,upper = 1,electrons.=electrons,method="Brent")
+  
+  require(ggplot2)
+  
+  g <- ggplot(pred_act,aes(pred_act[,1],colour=factor(pred_act[,2])))+geom_histogram(bins = 1000)+facet_wrap(factor(pred_act[,2]))
+  print(g)
+  
+  hist(pred_act[,1],breaks=1000)
+  abline(v=res$par,col="red")
+  
+  electrons$predicted_label <- ifelse(electrons$prediction>=res$par,1,0)
+  
+  print(paste0("Electron Efficiency: ",sum(electrons$predicted_label)/nrow(electrons)))
+  
+  pions$predicted_label <- ifelse(pions$prediction>=res$par,1,0)
+  
+  pions$misclassified_as_electron <- ifelse(pions$predicted_label==1,1,0)
+  
+  print(paste0("Pion Efficiency: ",sum(pions$misclassified_as_electron)/nrow(pions)))
+  
+  pred_act$final_pred <- ifelse(pred_act[,1]>=res$par,1,0)
+  
+  require(caret)
+  
+  print(caret::confusionMatrix(data=factor(pred_act$final_pred),reference = factor(pred_act[,2])))
+  print("--------------------------------------------------------------------------------------------------")
+  
+}
+
+elec_pi_eff_func(pred_act[,1],pred_act[,2])
+
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
