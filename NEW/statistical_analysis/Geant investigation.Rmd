@@ -1,0 +1,82 @@
+---
+title: "Geant Data Analyzed"
+author: "Gerhard Viljoen"
+date: "08/09/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list=ls())
+load("C:/users/gerhard/documents/msc-thesis-data/hijing-sim/sim_x_full.rdata")
+
+dim(sim_x)
+
+require(plot3D)
+
+par(mfrow=c(2,2))
+
+
+for(i in c(1,2,3,6)){
+zval <- sim_x[i,,]
+
+x <- 1:17
+y <- 1:24
+
+p <- hist3D(x,y,zval)
+
+print(p)
+}
+
+
+
+
+load("C:/users/gerhard/documents/msc-thesis-data/hijing-sim/real_x_full.rdata")
+
+dim(sim_x)
+
+require(plot3D)
+
+par(mfrow=c(2,2))
+
+
+for(i in c(1,2,3,6)){
+zval <- real_x[i,,]
+
+x <- 1:17
+y <- 1:24
+
+p <- hist3D(x,y,zval)
+
+print(p)
+}
+
+
+
+ph_sim <- apply(sim_x, 1, colSums)
+ph_real <- apply(real_x, 1, colSums)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
