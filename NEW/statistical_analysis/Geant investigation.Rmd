@@ -58,6 +58,30 @@ print(p)
 
 ph_sim <- apply(sim_x, 1, colSums)
 ph_real <- apply(real_x, 1, colSums)
+
+
+dim(ph_sim)
+
+ph_sim <- rowMeans(ph_sim)
+
+ph_real <- rowMeans(ph_real)
+
+ph <- c(ph_sim,ph_real)
+
+ph <- data.frame(ph)
+
+ph$Data <- c(rep("Simulated",24),rep("Real",24))
+
+ph$Timebin <- c(1:24,1:24)
+
+names(ph)[1] <- "Average Pulse height (mV)"
+
+ph$Data <- as.factor(ph$Data)
+
+require(ggplot2)
+
+ggplot(ph,aes(x=Timebin,y=`Average Pulse height (mV)`,colour=Data))+geom_line()
+
 ```
 
 
