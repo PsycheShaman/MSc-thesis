@@ -16,6 +16,9 @@ def load_real_data():
         
         with open(x_files[0],'rb') as x_file:
             x = pickle.load(x_file)
+        with open(x_files[1],'rb') as x_file:
+            xi = pickle.load(x_file)
+            x = np.concatenate((x,xi),axis=0)
         return(x)
 
 
@@ -25,7 +28,7 @@ def load_aae_data():
     with open(x_files[0],'rb') as x_file:
         x = np.load(x_file)
         
-    for i in x_files[len(x_files)-10000:]:
+    for i in x_files[1:]:
         with open(i,'rb') as x_file:
             xi = np.load(x_file)
             x = np.concatenate((x,xi),axis=0)
@@ -58,10 +61,15 @@ aae = scale(aae)
 vae = scale(vae)
 real = scale(real)
 
+vae.shape = (vae.shape[0],17,24,1)
+real.shape = (real.shape[0],17,24,1)
+
+
 from ast import literal_eval
 
 def load_geant_data():
-    x_files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\hijing-sim\\*.json")
+    x_files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\hijing-sim\\test3\\test2\\**\\*.txt"\
+                        , recursive=True)
     def file_reader2(i,l):
         di = open(i)
         di = di.read()
@@ -72,6 +80,7 @@ def load_geant_data():
             di = literal_eval(di)
             ki = list(di.keys())
             layer = [di.get(k).get(l) for k in ki]
+#            print(i)
             return(layer)
             
     layer0 = [file_reader2(i,"layer 0") for i in x_files]
@@ -110,10 +119,21 @@ def load_geant_data():
     layer5 = np.delete(layer5, empties)
     layer5 = np.stack(layer5)
     
-    x = np.vstack([layer0,layer1,layer2,layer3,layer4,layer5])
+    x = np.concatenate((layer0,layer1,layer2,layer3,layer4,layer5),axis=0)
     return(x)
     
 geant = load_geant_data()
+
+geant.shape = (geant.shape[0],17,24,1)
+
+geant = scale(geant)
+
+np.save("c:/Users/gerhard/Documents/MSc-thesis/simulated_datasets/geant_scaled.npy",geant)
+np.save("c:/Users/gerhard/Documents/MSc-thesis/simulated_datasets/aae_scaled.npy",aae)
+np.save("c:/Users/gerhard/Documents/MSc-thesis/simulated_datasets/vae_scaled.npy",vae)
+np.save("c:/Users/gerhard/Documents/MSc-thesis/simulated_datasets/real_scaled.npy",real)
+
+sim = np.concatenate((geant,vae,aae))
 
 
 import tensorflow as tf
@@ -143,8 +163,7 @@ y = np.concatenate((np.zeros(sim.shape[0]),np.ones(sim.shape[0])))
     
 history=model.fit(x, y,
               batch_size=batch_size,
-              epochs=epochs,
-              validation_split=0.2)
+              epochs=epochs)
 
 #unit = model.get_weights()[0]
 #
@@ -174,10 +193,15 @@ plt.savefig('C:/Users/gerhard/Documents/MSc-thesis/aae_vs_real__history2.png', b
 
 plt.close()
 
-model.probs = model.predict_proba(x)
+geant_pred = model.predict_proba(geant)
+aae_pred = model.predict_proba(aae)
+vae_pred = model.predict_proba(vae)
+real_pred = model.predict_proba(real)
 
-
-
+np.save("c:/Users/gerhard/Documents/MSc-thesis/simulated_datasets/geant_preds.npy",geant_pred)
+np.save("c:/Users/gerhard/Documents/MSc-thesis/simulated_datasets/aae_preds.npy",aae_pred)
+np.save("c:/Users/gerhard/Documents/MSc-thesis/simulated_datasets/vae_preds.npy",vae_pred)
+np.save("c:/Users/gerhard/Documents/MSc-thesis/simulated_datasets/real_preds.npy",real_pred)
 
 
 
