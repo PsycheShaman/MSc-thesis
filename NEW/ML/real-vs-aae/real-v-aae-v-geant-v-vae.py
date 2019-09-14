@@ -19,33 +19,102 @@ def load_real_data():
         return(x)
 
 
-def load_simulated_data():
+def load_aae_data():
     x_files = glob.glob("C:\\Users\\gerhard\\Documents\\Keras-GAN\\newAAE\\v11\\simulated_data\\*.npy")
     
     with open(x_files[0],'rb') as x_file:
         x = np.load(x_file)
         
-#len(x_files)-10000:len(x_files)
+    for i in x_files[len(x_files)-10000:]:
+        with open(i,'rb') as x_file:
+            xi = np.load(x_file)
+            x = np.concatenate((x,xi),axis=0)
+    return(x)
+
+def load_vae_data():
+    x_files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\generated-data\\vae11\\*.npy")
+    
+    with open(x_files[0],'rb') as x_file:
+        x = np.load(x_file)
         
     for i in x_files[1:]:
         with open(i,'rb') as x_file:
             xi = np.load(x_file)
             x = np.concatenate((x,xi),axis=0)
     return(x)
+    
 
-sim = load_simulated_data()
-real = load_real_data()
 
 def scale(x, out_range=(-1, 1)):
     domain = np.min(x), np.max(x)
     y = (x - (domain[1] + domain[0]) / 2) / (domain[1] - domain[0])
     return y * (out_range[1] - out_range[0]) + (out_range[1] + out_range[0]) / 2
 
-real = real[0:sim.shape[0],:,:]
-real.shape = (sim.shape[0],17,24,1)
+aae = load_aae_data()
+vae = load_vae_data()
+real = load_real_data()
 
-sim = scale(sim)
+aae = scale(aae)
+vae = scale(vae)
 real = scale(real)
+
+from ast import literal_eval
+
+def load_geant_data():
+    x_files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\hijing-sim\\*.json")
+    def file_reader2(i,l):
+        di = open(i)
+        di = di.read()
+        if di == "}":
+            pass
+        else:
+#            di = di + "}"
+            di = literal_eval(di)
+            ki = list(di.keys())
+            layer = [di.get(k).get(l) for k in ki]
+            return(layer)
+            
+    layer0 = [file_reader2(i,"layer 0") for i in x_files]
+    layer0 = np.array([item for sublist in layer0 for item in sublist])
+    empties = np.where([np.array(i).shape!=(17,24) for i in layer0])
+    layer0 = np.delete(layer0, empties)
+    layer0 = np.stack(layer0)
+    
+    layer1 = [file_reader2(i,"layer 1") for i in x_files]
+    layer1 = np.array([item for sublist in layer1 for item in sublist])
+    empties = np.where([np.array(i).shape!=(17,24) for i in layer1])
+    layer1 = np.delete(layer1, empties)
+    layer1 = np.stack(layer1)
+    
+    layer2 = [file_reader2(i,"layer 2") for i in x_files]
+    layer2 = np.array([item for sublist in layer2 for item in sublist])
+    empties = np.where([np.array(i).shape!=(17,24) for i in layer2])
+    layer2 = np.delete(layer2, empties)
+    layer2 = np.stack(layer2)
+    
+    layer3 = [file_reader2(i,"layer 3") for i in x_files]
+    layer3 = np.array([item for sublist in layer3 for item in sublist])
+    empties = np.where([np.array(i).shape!=(17,24) for i in layer3])
+    layer3 = np.delete(layer3, empties)
+    layer3 = np.stack(layer3)
+    
+    layer4 = [file_reader2(i,"layer 4") for i in x_files]
+    layer4 = np.array([item for sublist in layer4 for item in sublist])
+    empties = np.where([np.array(i).shape!=(17,24) for i in layer4])
+    layer4 = np.delete(layer4, empties)
+    layer4 = np.stack(layer4)
+    
+    layer5 = [file_reader2(i,"layer 5") for i in x_files]
+    layer5 = np.array([item for sublist in layer5 for item in sublist])
+    empties = np.where([np.array(i).shape!=(17,24) for i in layer5])
+    layer5 = np.delete(layer5, empties)
+    layer5 = np.stack(layer5)
+    
+    x = np.vstack([layer0,layer1,layer2,layer3,layer4,layer5])
+    return(x)
+    
+geant = load_geant_data()
+
 
 import tensorflow as tf
 
