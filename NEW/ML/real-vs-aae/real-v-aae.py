@@ -16,11 +16,7 @@ def load_real_data():
         
         with open(x_files[0],'rb') as x_file:
             x = pickle.load(x_file)
-        
-        for i in x_files[1:5]:
-            with open(i,'rb') as x_file:
-                xi = pickle.load(x_file)
-                x = np.concatenate((x,xi),axis=0)
+        return(x)
 
 
 def load_simulated_data():
@@ -33,9 +29,10 @@ def load_simulated_data():
         with open(i,'rb') as x_file:
             xi = np.load(x_file)
             x = np.concatenate((x,xi),axis=0)
-            print(x.shape)
+        return(x)
 
 sim = load_simulated_data()
+real = load_real_data()
 
 
 
