@@ -144,6 +144,44 @@ plt.ylabel("P(real)")
 plt.savefig('C:/Users/gerhard/Documents/MSc-thesis/generative_models_compared.png', bbox_inches='tight')
 plt.close()
 
+import numpy as np
+
+geant_preds = np.load("c:/Users/gerhard/Documents/msc-thesis-data/simulated_datasets/geant_preds.npy")
+aae_preds = np.load("c:/Users/gerhard/Documents/msc-thesis-data/simulated_datasets/aae_preds.npy")
+vae_preds = np.load("c:/Users/gerhard/Documents/msc-thesis-data/simulated_datasets/vae_preds.npy")
+real_preds = np.load("c:/Users/gerhard/Documents/msc-thesis-data/simulated_datasets/real_preds.npy")
+gan_preds = np.load("c:/Users/gerhard/Documents/msc-thesis-data/simulated_datasets/gan_preds.npy")
+
+import heapq
+
+#geant_preds[geant_idx[0]]
+
+geant_idx = heapq.nlargest(10, range(len(geant_preds)), geant_preds.take)
+aae_idx = heapq.nlargest(10, range(len(aae_preds)), aae_preds.take)
+vae_idx = heapq.nlargest(10, range(len(vae_preds)), vae_preds.take)
+gan_idx = heapq.nlargest(10, range(len(gan_preds)), gan_preds.take)
+real_idx = heapq.nlargest(10, range(len(real_preds)), real_preds.take)
+
+real_preds[real_idx]
+geant_preds[geant_idx]
+aae_preds[aae_idx]
+vae_preds[vae_idx]
+gan_preds[gan_idx]
+
+import matplotlib.pyplot as plt
+for i in range(0,10):
+    plot_me = gan_test[gan_idx[i],:,:,0]
+    plt.imshow(plot_me,cmap='gray')
+    plt.show()
+    plt.close()
+
+
+
+
+
+
+
+
 
 
 
