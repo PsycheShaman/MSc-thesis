@@ -78,11 +78,22 @@ sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0, 100))
 
 # table(meta$dEdX,meta$P)
 
-install.packages("hexbin")
+# install.packages("hexbin")
+# 
+bethe_bloch = meta[(meta$y=="electron"&meta$P>=1.5)|(meta$y=="pion"&meta$P>=2),]
 
-ggplot(meta,aes(y=dEdX,x=P))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Momentum (GeV/c)")+ylab("dE/dX (Arbitrary Units)")
+ggplot(bethe_bloch,aes(y=dEdX,x=P))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Momentum (GeV/c)")+ylab("dE/dX (Arbitrary Units)")+myPalette <- colorRampPalette((brewer.pal(11, "Spectral")))
+sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0, 100))
 
-ggplot(meta,aes(y=dEdX,x=PT))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Transverse Momentum (P_T) (GeV/c)")+ylab("dE/dX (Arbitrary Units)")
+# table(meta$dEdX,meta$P)
+
+# install.packages("hexbin")
+# 
+# bethe_bloch = meta[(meta$y=="electron"&meta$P>=1.5)|(meta$y=="pion"&meta$P>=2),]
+
+ggplot(bethe_bloch,aes(y=dEdX,x=P))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Momentum (GeV/c)")+ylab("dE/dX (Arbitrary Units)")+geom_line()
+
+# ggplot(meta,aes(y=dEdX,x=PT))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Transverse Momentum (P_T) (GeV/c)")+ylab("dE/dX (Arbitrary Units)")
 ```
 
 
