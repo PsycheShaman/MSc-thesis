@@ -74,6 +74,7 @@ meta$y <- ifelse(as.numeric(as.character(meta$y))==1,"electron","pion")
 meta$y <- ifelse(as.character(meta$y)=="electron","pion","electron")
 
 myPalette <- colorRampPalette((brewer.pal(11, "Spectral")))
+require(ggplot2)
 sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0, 100))
 
 # table(meta$dEdX,meta$P)
@@ -82,8 +83,12 @@ sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0, 100))
 # 
 bethe_bloch = meta[(meta$y=="electron"&meta$P>=1.5)|(meta$y=="pion"&meta$P>=2),]
 
-ggplot(bethe_bloch,aes(y=dEdX,x=P))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Momentum (GeV/c)")+ylab("dE/dX (Arbitrary Units)")+myPalette <- colorRampPalette((brewer.pal(11, "Spectral")))
-sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0, 100))
+ggplot(bethe_bloch,aes(y=dEdX,x=P))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Momentum (GeV/c)")+ylab("dE/dX (Arbitrary Units)")
+
++ stat_summary(aes(group=y), fun.y=mean, geom="line", colour="orange")
+  
+  # myPalette <- colorRampPalette((brewer.pal(11, "Spectral")))
+# sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0, 100))
 
 # table(meta$dEdX,meta$P)
 
@@ -91,7 +96,7 @@ sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0, 100))
 # 
 # bethe_bloch = meta[(meta$y=="electron"&meta$P>=1.5)|(meta$y=="pion"&meta$P>=2),]
 
-ggplot(bethe_bloch,aes(y=dEdX,x=P))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Momentum (GeV/c)")+ylab("dE/dX (Arbitrary Units)")+geom_line()
+# ggplot(bethe_bloch,aes(y=dEdX,x=P))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Momentum (GeV/c)")+ylab("dE/dX (Arbitrary Units)")+geom_line()
 
 # ggplot(meta,aes(y=dEdX,x=PT))+geom_hex(bins=1000)+facet_wrap(~y)+xlab("Transverse Momentum (P_T) (GeV/c)")+ylab("dE/dX (Arbitrary Units)")
 ```
