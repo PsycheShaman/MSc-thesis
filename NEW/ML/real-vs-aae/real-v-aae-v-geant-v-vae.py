@@ -38,8 +38,6 @@ def load_real_data():
         
 real = load_real_data()
 
-
-
 real.shape = (real.shape[0],17,24,1)
 
 gan = scale(gan)
