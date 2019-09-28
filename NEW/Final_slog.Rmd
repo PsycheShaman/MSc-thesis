@@ -9,9 +9,69 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#Bethe Bloch
+#Real V Geant
 
 ```{r}
+rm(list=ls())
 
+load("c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/sim_x_full.rdata")
+load("c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_x_full.rdata")
 ```
+
+```{r}
+require(abind)
+x_train = abind(real_x,sim_x,along=1)
+
+y_train = c(rep(1,dim(real_x)[1]),rep(0,dim(sim_x)[1]))
+
+dim(x_train) = c(dim(x_train),1)
+
+require(keras)
+model <- keras_model_sequential() %>%
+  layer_conv_2d(16, kernel_size = c(4,4),activation = "tanh") %>%
+  layer_max_pooling_2d() %>%
+  layer_conv_2d(32, kernel_size = c(4,4),activation = "tanh") %>%
+  layer_max_pooling_2d() %>%
+  layer_flatten() %>%
+  layer_dense(512,"tanh") %>%
+  layer_dense(256,"tanh") %>%
+  layer_dense(128,"tanh") %>%
+  layer_dense(1, "sigmoid")
+
+model %>%
+  compile(
+    loss="binary_crossentropy",
+    optimizer_adam(0.00001),
+    metrics="acc"
+    
+  )
+  
+history <- model %>%
+  fit(x_train,
+      y_train,
+      batch_size=32,
+      verbose=2,
+      epochs=30,
+      shuffle=TRUE)
+
+png("C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real_FINAL.png")
+plot(history)
+dev.off()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
