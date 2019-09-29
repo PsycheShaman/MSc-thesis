@@ -59,15 +59,55 @@ plot(history)
 dev.off()
 ```
 
+```{r}
+preds <- data.frame(cbind(predict(model,x_train)),ifelse(y_train==1,"real","geant"))
+```
+
+```{r}
+require(ggplot2)
+
+names(preds) <- c("P(real)","Datatype")
+
+preds$`P(real)` <- as.numeric(as.character(preds$`P(real)`))
+
+preds$Datatype <- as.factor(preds$Datatype)
+
+ggplot(preds,aes(x=preds$`P(real)`,fill=Datatype,colour=Datatype))+geom_histogram(stat="count")+
+  xlab("P(real)")
+```
 
 
+```{r}
+require(plot.matrix)
+par(mar=c(0,0,1,5))
+plot(x_train[which(preds$`P(real)`<=0.001&as.character(preds$Datatype)=="geant")[1],,,],col=gray.colors(start=0,n=10),
+     main=paste0('Geant: P(real) = ',round(preds$`P(real)`[which(preds$`P(real)`<=0.001&as.character(preds$Datatype)=="geant")[1]],4)),
+     xlab='',ylab='',cex=0.02,axis.col =NULL,axis.row=NULL,border=NA)
+
+```
 
 
+```{r}
+require(plot.matrix)
+par(mar=c(0,0,1,5))
+plot(x_train[max(which(preds$`P(real)`>=0.9&preds$`P(real)`<=1.0&as.character(preds$Datatype)=="geant")),,,],col=gray.colors(start=0,n=10),
+     main=paste0('Geant: P(real) = ',round(preds$`P(real)`[max(which(preds$`P(real)`>=0.9&preds$`P(real)`<=1.0&as.character(preds$Datatype)=="geant"))],4)),
+     xlab='',ylab='',cex=0.02,axis.col =NULL,axis.row=NULL,border=NA)
 
+```
 
+```{r}
+require(plot.matrix)
+par(mar=c(0,0,1,5))
+plot(x_train[max(which(preds$`P(real)`>=0.9999&preds$`P(real)`<=1.0&as.character(preds$Datatype)=="geant")),,,],col=gray.colors(start=0,n=10),
+     main=paste0('Geant: P(real) = ',round(preds$`P(real)`[max(which(preds$`P(real)`>=0.9999&preds$`P(real)`<=1.0&as.character(preds$Datatype)=="geant"))],4)),
+     xlab='',ylab='',cex=0.02,axis.col =NULL,axis.row=NULL,border=NA)
 
+```
 
-
+```{r}
+save_model_hdf5(model,"C:/USers/gerhard/Documents/msc-thesis/geant_discrim_model.h5")
+```
 
 
 
