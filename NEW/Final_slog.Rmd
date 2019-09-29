@@ -119,13 +119,35 @@ require(keras)
 
 load("c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_x_full.rdata")
 
-sim_x <- read.csv("C:/Users/Gerhard/Documents/msc-thesis-data/simulated_datasets/simulated_data_aae12/sim_flat.csv")
+sim_x <- read.csv("C:/Users/Gerhard/Documents/msc-thesis-data/simulated_datasets/simulated_data_aae12/sim_flat.csv",
+                  header=FALSE,sep=",",dec=".",nrows=1000000)
+
+sim_x <- as.matrix(sim_x)
+
+new_sim_x <- array(sim_x)
+
+for(i in 1:1000000){
+  
+}
+
+real_x <- real_x[1:1000000,,]
+
+dim(real_x) <- c(1000000,17,24,1)
 
 require(scales)
 
 sim_x = rescale(sim_x,to=c(min(real_x),max(real_x)))
 ```
 
+```{r}
+require(plot.matrix)
+for(i in 1:50){
+t <- tst[i,,]
+t <- as.matrix(t)
+plot(t)  
+}
+
+```
 
 
 
