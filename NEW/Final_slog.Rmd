@@ -107,7 +107,48 @@ plot(x_train[max(which(preds$`P(real)`>=0.9999&preds$`P(real)`<=1.0&as.character
 
 ```{r}
 save_model_hdf5(model,"C:/USers/gerhard/Documents/msc-thesis/geant_discrim_model.h5")
+
+sim_preds <- preds[which(as.character(preds$Datatype)=="geant"),1]
+save(sim_preds,file="C:/USers/gerhard/Documents/msc-thesis/geant_preds.rdata")
 ```
+
+```{r}
+rm(list=ls())
+
+require(keras)
+
+load("c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_x_full.rdata")
+
+sim_x <- read.csv("C:/Users/Gerhard/Documents/msc-thesis-data/simulated_datasets/simulated_data_aae12/sim_flat.csv")
+
+require(scales)
+
+sim_x = rescale(sim_x,to=c(min(real_x),max(real_x)))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
