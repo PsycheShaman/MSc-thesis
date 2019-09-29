@@ -124,11 +124,12 @@ sim_x <- read.csv("C:/Users/Gerhard/Documents/msc-thesis-data/simulated_datasets
 
 sim_x <- as.matrix(sim_x)
 
-new_sim_x <- array(sim_x)
 
-for(i in 1:1000000){
-  
-}
+###what the fuccccck
+
+tst <- sim_x[1:100,]
+
+tst <- aperm(tst,dim=c(100,17,24),perm = c(2,1))
 
 real_x <- real_x[1:1000000,,]
 
