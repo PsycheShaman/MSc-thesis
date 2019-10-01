@@ -119,17 +119,22 @@ require(keras)
 
 load("c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_x_full.rdata")
 
-sim_x <- read.csv("C:/Users/Gerhard/Documents/msc-thesis-data/simulated_datasets/simulated_data_aae12/sim_flat.csv",
-                  header=FALSE,sep=",",dec=".",nrows=1000000)
+sim_x <- read.csv("C:/Users/Gerhard/Documents/msc-thesis-data/simulated_datasets/simulated_data_aae12/sim_flat.csv",header=FALSE,sep=",",dec=".",nrows=1000000)
 
 sim_x <- as.matrix(sim_x)
 
+new_sim_x <- matrix(data=sim_x[1,],nrow=17,ncol=24,byrow = T)
+dim(new_sim_x) <- c(1,17,24,1)
 
-###what the fuccccck
+require(abind)
 
-tst <- sim_x[1:100,]
+for(i in 2:1000000){
+  a <- matrix(data=sim_x[i,],nrow=17,ncol=24,byrow=T)
+  dim(a) <- c(1,17,24,1)
+  new_sim_x <- abind(new_sim_x,a,along=1) 
+}
 
-tst <- aperm(tst,dim=c(100,17,24),perm = c(2,1))
+rm(sim_x)
 
 real_x <- real_x[1:1000000,,]
 
@@ -137,15 +142,16 @@ dim(real_x) <- c(1000000,17,24,1)
 
 require(scales)
 
-sim_x = rescale(sim_x,to=c(min(real_x),max(real_x)))
+new_sim_x = rescale(new_sim_x,to=c(min(real_x),max(real_x)))
 ```
 
 ```{r}
 require(plot.matrix)
-for(i in 1:50){
-t <- tst[i,,]
-t <- as.matrix(t)
-plot(t)  
+
+for(i in 1:30){
+n <- as.matrix(new_sim_x[i,,,])
+plot(n)
+  
 }
 
 ```
