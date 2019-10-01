@@ -7,7 +7,7 @@ Created on Sun Sep 29 19:34:14 2019
 
 import numpy as np
 
-sim_x = np.load("C:/Users/Gerhard/Documents/msc-thesis-data/simulated_datasets/simulated_data_aae12/sim.npy")
+sim_x = np.load("C:/Users/Gerhard/Documents/msc-thesis-data/simulated_datasets/simulated_data_aae12/sim_big.npy")
 
 import glob, pickle
 
@@ -25,6 +25,8 @@ def load_real_data():
 real = load_real_data()
 
 real.shape = (real.shape[0],17,24,1)
+
+sim_x = sim_x[0:real.shape[0],:,:,:]
 
 def scale(x, out_range=(-1, 1)):
     domain = np.min(x), np.max(x)
@@ -57,7 +59,7 @@ model.compile(loss='binary_crossentropy',
 
 batch_size=32
 
-epochs=30
+epochs=10
 
 
 
@@ -83,6 +85,29 @@ plt.xlabel('epoch')
 plt.savefig('C:/Users/gerhard/Documents/MSc-thesis/vae_vs_real__FINAL2.png', bbox_inches='tight')
 
 plt.close()
+
+sim_preds = model.predict(sim_x)
+sim_y = np.zeros(len(sim_preds))
+
+preds = np.c_[sim_preds,sim_y]
+
+real_preds = model.predict(real)
+real_y = np.ones(len(real_preds))
+
+preds = np.r_[preds,np.c_[real_preds,real_y]]
+
+sim_preds.shape = len(sim_preds)
+real_preds.shape = len(real_preds)
+
+colors = ['red','blue']
+plt.hist([sim_preds,real_preds],bins=100,color=colors,label=['AAE','real'],histtype='bar',stacked=True)
+plt.legend(loc=0)
+plt.xlabel("P(real)")
+plt.ylabel("Frequency")
+
+
+
+
 
 
 
