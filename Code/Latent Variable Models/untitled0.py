@@ -42,7 +42,7 @@ y = np.concatenate((np.zeros(sim_x.shape[0]),np.ones(real.shape[0])))
 import tensorflow as tf
 
 model = tf.keras.Sequential()
-model.add(tf.keras.layers.Conv2D(filters=16,kernel_size=(4,4),strides=1, padding='valid',activation="relu"))
+model.add(tf.keras.layers.Conv2D(filters=16,kernel_size=(4,4),strides=1, padding='valid',activation="relu",input_shape=(17,24,1)))
 model.add(tf.keras.layers.MaxPool2D())
 model.add(tf.keras.layers.Conv2D(filters=32,kernel_size=(4,4),strides=1, padding='valid',activation="relu"))
 model.add(tf.keras.layers.MaxPool2D())
@@ -51,6 +51,10 @@ model.add(tf.keras.layers.Dense(512,activation="sigmoid"))
 model.add(tf.keras.layers.Dense(256,activation="sigmoid"))
 model.add(tf.keras.layers.Dense(128,activation="sigmoid"))
 model.add(tf.keras.layers.Dense(1,activation="sigmoid"))
+
+from tensorflow.keras.utils import plot_model
+plot_model(model,to_file="C:/Users/gerhard.22seven/Desktop/sim_disx.png",show_shapes=True,show_layer_names=False)
+
 
 
 model.compile(loss='binary_crossentropy',
