@@ -4,7 +4,7 @@
 
 **Masters in Data Science Dissertation (PHY5008W)**
 
-**Title:** The Application of Machine Learning Techniques towards the Optimization of High Energy Physics Event Simulations in the ALICE TRD at CERN
+**Title:** DEEP GENERATIVE MODELS FOR HIGH ENERGY PHYSICS EVENT SIMULATIONS & CONVOLUTIONAL NEURAL NETWORKS FOR PARTICLE IDENTIFICATION
 
 **Student:** CG Viljoen
 
