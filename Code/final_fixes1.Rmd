@@ -1,0 +1,81 @@
+---
+title: "Final thesis plots and fixes"
+author: "Gerhard Viljoen"
+date: "05/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list=ls())
+load("C:/Users/Gerhard/Documents/msc-thesis-data/aux_.rdata")
+load("C:/Users/Gerhard/Documents/msc-thesis-data/meta.rdata")
+load("C:/Users/Gerhard/Documents/msc-thesis-data/y.rdata")
+```
+
+
+```{r}
+names(aux)
+names(meta)
+```
+
+
+```{r}
+y <- data.frame(y)
+pt_pid <- data.frame(cbind(aux$P,aux$PT,ifelse(y$y==0,"pion","electron")))
+head(pt_pid)
+pt_pid$X1 <- as.numeric(as.character(pt_pid$X1))
+pt_pid$X2 <- as.numeric(as.character(pt_pid$X2))
+pt_pid$X3 <- as.factor(unlist(pt_pid$X3))
+names(pt_pid) <- c("P","Pt","Particle ID")
+```
+
+```{r}
+h1 <- hist(pt_pid$Pt[as.character(pt_pid$`Particle ID`)=="electron"])
+h2 <- hist(pt_pid$Pt[as.character(pt_pid$`Particle ID`)=="pion"])
+
+x_elec = h1$mids
+x_pion = h2$mids
+
+y_elec = h1$counts
+y_pion = h2$counts
+
+df1 <- data.frame(cbind(x_elec,y_elec))
+df2 <- data.frame(cbind(x_pion,y_pion))
+
+names(df1) <- names(df2) <- c("Pt","counts")
+
+df <- rbind(df1,df2)
+df$`Particle ID` <- c(rep("electron",23),rep("pion",23))
+
+require(ggplot2)
+
+ggplot(data=df,aes(x=Pt,y=counts,color=`Particle ID``))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
