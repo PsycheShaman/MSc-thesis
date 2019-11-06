@@ -34,8 +34,10 @@ names(pt_pid) <- c("P","Pt","Particle ID")
 ```
 
 ```{r}
-h1 <- hist(pt_pid$Pt[as.character(pt_pid$`Particle ID`)=="electron"])
-h2 <- hist(pt_pid$Pt[as.character(pt_pid$`Particle ID`)=="pion"])
+h1 <- hist(pt_pid$Pt[as.character(pt_pid$`Particle ID`)=="electron"],breaks = c(1.5,2.5,3.5,4.5,5.5,6.5))
+h2 <- hist(pt_pid$Pt[as.character(pt_pid$`Particle ID`)=="pion"],breaks=c(1.5,2.5,3.5,4.5,5.5,6.5))
+
+h1$mids==h2$mids
 
 x_elec = h1$mids
 x_pion = h2$mids
@@ -49,11 +51,55 @@ df2 <- data.frame(cbind(x_pion,y_pion))
 names(df1) <- names(df2) <- c("Pt","counts")
 
 df <- rbind(df1,df2)
-df$`Particle ID` <- c(rep("electron",23),rep("pion",23))
+df$`Particle ID` <- c(rep("electron",length(x_elec)),rep("pion",length(x_pion)))
 
 require(ggplot2)
+require(latex2exp)
 
-ggplot(data=df,aes(x=Pt,y=counts,color=`Particle ID``))
+fancy_scientific <- function(l) {
+     # turn in to character string in scientific notation
+     l <- format(l, scientific = TRUE)
+     # quote the part before the exponent to keep all the digits
+     l <- gsub("^(.*)e", "'\\1'e", l)
+     # turn the 'e+' into plotmath format
+     l <- gsub("e", "%*%10^", l)
+     # return this as an expression
+     parse(text=l)
+}
+
+install.packages("extrafont")
+library(extrafont)
+font_import()
+loadfonts(device = "win")
+
+windowsFonts()
+
+ggplot(data=df,aes(x=Pt,y=counts,color=`Particle ID`))+xlab(TeX("$\\textit{p}_T (GeV/\\textit{c})$"))+
+scale_y_continuous(trans='log10',labels = fancy_scientific,limits=c(10^0, 10^7))+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+ylab(TeX("\\textit{N} (log_{10} scale)"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+geom_errorbar(ymin=df$counts+
+                                                                               sqrt(df$counts),
+                                                                             ymax=df$counts-sqrt(df$counts))+
+  geom_errorbarh(aes(xmin=df$Pt-0.5,xmax=df$Pt+0.5))+theme(legend.position = c(0.9, 0.9),legend.text = 
+                                                             element_text(size=12,  family="serif"),
+                                                           legend.title = element_text(size=12,  family="serif"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="white",size=0.01))+
+  theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(legend.box.background = element_rect(colour = "black"),
+        legend.background = element_blank(),legend.key = element_blank())
+  
+
+# scale_y_log10() geom_step()+ +geom_point()
+
+ggplot(data=data.frame(cbind(h1$mids,h1$counts/h2$counts)),aes(x=h1$mids,y=h2$counts/h1$counts))+geom_line()+
+  ggtitle(TeX("Relative $\\pi$ abundance per momentum bin ($\\frac{n_{\\pi}}{n_e}$)"))+xlab(TeX("P_T (GeV/c)"))+ylab(TeX('$\\frac{n_{\\pi}}{n_e}$'))+scale_y_log10(labels = scales::comma)
+
+
+plot(TeX('\\frac{1}{2}'))
+
+ggplot(data=data.frame(cbind(h1$mids,h1$counts/h2$counts)),aes(x=h1$mids,y=h1$counts/h2$counts))+geom_line()+
+  ggtitle("Relative pion abundance per momentum bin")+xlab(TeX("P_T (GeV/c)"))+ylab("\\frac{1}{2}")
 ```
 
 
