@@ -122,9 +122,18 @@ load("C:/Users/Gerhard/Documents/msc-thesis-data/y.rdata")
 load("C:/Users/Gerhard/Documents/msc-thesis-data/x.rdata")
 dim(x) <- c(6573905,17,24)
 ph <- apply(x, 1, colSums)
+rm(x)
+ph2 <- ph
 
 ph_elec_mean <- colMeans(t(ph)[which(y==1),])
 ph_pi_mean <- colMeans(t(ph)[which(y==0),])
+
+sd_el <- t(ph)[which(y==1),]
+sd_el <- apply(sd_el, 2, sd)
+
+sd_pi <- t(ph)[which(y==0),]
+sd_pi <- apply(sd_pi, 2, sd)
+
 ph <- cbind(c(ph_elec_mean,ph_pi_mean),rep(c(1,0),each=24))
 ph <- setNames(data.frame(ph),c("Pulse height (mV)","Particle ID")) 
 ph$`Particle ID` <- factor(ifelse(ph$`Particle ID`==1,"electron","pion"))
@@ -140,17 +149,55 @@ require(ggplot2)
 require(latex2exp)
 
 ggplot(ph,aes(x=`Drift time (us)`,y=`Pulse height (mV)`,color=`Particle ID`))+geom_line()+xlim(c(0,2.8))+
-  xlab(TeX("Drift time ($\\mu$s)"))+ylab(TeX("Average pulse height (mV)"))+
+  xlab(TeX("Drift time ($\\mu$s)"))+ylab(TeX("$Average \\,\\,pulse\\,\\, height\\,\\, (mV)$"))+
   theme( axis.title.x =element_text(size=12,  family="serif"))+
   theme( axis.title.y =element_text(size=12,  family="serif"))+
   theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
   theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
                       size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
   theme(panel.background = element_rect(fill="white",color="black",size=0.01))+scale_x_continuous(breaks=0:12*0.2)+
-  ylim(c(0,200))
+  ylim(c(0,200))+
+  theme(legend.box.background = element_rect(colour = "black"),
+        legend.background = element_blank(),legend.key = element_blank())+theme(legend.position = c(0.9, 0.87),legend.text = 
+                                                             element_text(size=12,  family="serif"),
+                                                           legend.title = element_text(size=12,  family="serif"))+geom_point()
 ```
 
 
+```{r}
+ph2 <- data.frame(t(ph2))
+
+```
+
+```{r}
+par(mfrow=c(1,2),family="serif")
+ph2_elec <-
+  ph2[y==1,]
+  
+plot(1:24*0.1,ph2_elec[1,],type="l",col="red",lty="solid",log=c("y"),ylim=c(1,3000),
+     xlab=TeX("Drift time $(\\mu s)$"),
+     ylab="Pulse height (mV)",main=TeX("$\\textit{e}$"))
+for(i in 2:500){
+  lines(1:24*0.1,ph2_elec[i,],col="red",lty="solid")
+}
+lines(1:24*0.1,ph_elec_mean,lty="solid",col="black",lwd=4)
+# lines(1:24,ph_elec_mean+sd_el,lty="dashed",col="black",lwd=4)
+# lines(1:24,ph_elec_mean-sd_el,lty="dashed",col="black",lwd=4)
+
+ph2_pion <-
+  ph2[y!=1,]
+  
+plot(1:24*0.1,ph2_pion[1,],ylim=c(1,3000),type="l",col="blue",lty="solid",log=c("y"),
+     xlab=TeX("Drift time $(\\mu s$)"),
+     ylab="Pulse height (mV)",main=TeX("$\\textit{\\pi}$"))
+for(i in 2:500){
+  lines(1:24*0.1,ph2_pion[i,],col="blue",lty="solid")
+}
+lines(1:24*0.1,ph_pi_mean,lty="solid",col="black",lwd=4)
+# lines(1:24,ph_pi_mean+sd_pi,lty="dashed",col="black",lwd=4)
+# lines(1:24,ph_pi_mean-sd_pi,lty="dashed",col="black",lwd=4)
+
+```
 
 
 
