@@ -83,11 +83,11 @@ scale_y_continuous(trans='log10',labels = fancy_scientific,limits=c(10^0, 10^7),
   theme( axis.title.y =element_text(size=12,  family="serif"))+geom_errorbar(ymin=df$counts+
                                                                                sqrt(df$counts),
                                                                              ymax=df$counts-sqrt(df$counts))+
-  geom_errorbarh(aes(xmin=df$Pt-0.5,xmax=df$Pt+0.5))+theme(legend.position = c(0.9, 0.9),legend.text = 
+  geom_errorbarh(aes(xmin=df$Pt-0.5,xmax=df$Pt+0.5))+theme(legend.position = c(0.9, 0.85),legend.text = 
                                                              element_text(size=12,  family="serif"),
                                                            legend.title = element_text(size=12,  family="serif"))+ theme( axis.line = element_line(colour = "black", 
                       size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
-  theme(panel.background = element_rect(fill="white",color="white",size=0.01))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.01))+
   theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
   theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+
   theme(legend.box.background = element_rect(colour = "black"),
@@ -112,12 +112,42 @@ ggplot(data=data.frame(cbind(h1$mids,h2$counts/h1$counts)),aes(x=h1$mids,y=h2$co
   theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
   theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
                       size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
-  theme(panel.background = element_rect(fill="white",color="white",size=0.01))
+  theme(panel.background = element_rect(fill="white",color="black",size=0.01))
+
+```
+
+```{r}
+rm(list=ls())
+load("C:/Users/Gerhard/Documents/msc-thesis-data/y.rdata")
+load("C:/Users/Gerhard/Documents/msc-thesis-data/x.rdata")
+dim(x) <- c(6573905,17,24)
+ph <- apply(x, 1, colSums)
+
+ph_elec_mean <- colMeans(t(ph)[which(y==1),])
+ph_pi_mean <- colMeans(t(ph)[which(y==0),])
+ph <- cbind(c(ph_elec_mean,ph_pi_mean),rep(c(1,0),each=24))
+ph <- setNames(data.frame(ph),c("Pulse height (mV)","Particle ID")) 
+ph$`Particle ID` <- factor(ifelse(ph$`Particle ID`==1,"electron","pion"))
 
 ```
 
 ```{r}
 
+ph$`Drift time (us)` <- seq(from=0,to=2.4,length.out=24)
+
+require(ggplot2)
+
+require(latex2exp)
+
+ggplot(ph,aes(x=`Drift time (us)`,y=`Pulse height (mV)`,color=`Particle ID`))+geom_line()+xlim(c(0,2.8))+
+  xlab(TeX("Drift time ($\\mu$s)"))+ylab(TeX("Average pulse height (mV)"))+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.01))+scale_x_continuous(breaks=0:12*0.2)+
+  ylim(c(0,200))
 ```
 
 
