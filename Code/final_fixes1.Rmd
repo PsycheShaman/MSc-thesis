@@ -381,6 +381,9 @@ ggMarginal(p,type="density")
 ```
 
 ```{r}
+# pi_eff_by_num_convolutional_layers <- unique(pi_eff_by_num_convolutional_layers)
+# p_3d <- unique(p_3d)
+
 ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,size=Pion.Efficiency,color=Optimizer))+geom_jitter()+scale_y_continuous(trans='log10')+
   scale_fill_distiller(palette=4, direction=-1)+facet_wrap(~factor(Learning.Rate))
 ```
