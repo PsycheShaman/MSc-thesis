@@ -321,29 +321,69 @@ pi_eff_by_num_dense_layers$Pion.Efficiency <- as.numeric(as.character(pi_eff_by_
 # 
 # pi_eff_by_num_dense_layers <- data.frame(pi_eff_by_num_dense_layers)
 
-ggplot(pi_eff_by_num_dense_layers,aes(num_layers,Pion.Efficiency,col=layer_type))+ geom_point()+
+names(pi_eff_by_num_dense_layers)[3] <- "Layer Type"
+
+ggplot(pi_eff_by_num_dense_layers,aes(num_layers,Pion.Efficiency,col=`Layer Type`))+ geom_point()+
   theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
   theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
                       size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
   theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
   theme(legend.box.background = element_rect(colour = "black",linetype = "solid"))+
-  scale_y_continuous(trans="log10",breaks = 0.1*1:10)+
+  scale_y_continuous(trans="log10",breaks =c(0.001,0.01,0.1*c(0,1,2,3,4,5,7,10)),minor_breaks =c(0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.6,0.8,0.9,0.45,0.35,0.25,0.11,
+                                                                                                 0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.9),labels = fancy_scientific,limits = c(0.001,1))+
   theme( axis.title.x =element_text(size=12,  family="serif"))+
   theme( axis.title.y =element_text(size=12,  family="serif"))+
   ylab(
     TeX("$\\epsilon_{\\pi}$")
   )+
-  xlab(TeX("$N_{layers}$"))+facet_wrap(~layer_type,scales="free_x")+
+  xlab(TeX("$N_{layers}$"))+facet_wrap(~`Layer Type`,scales="free_x")+
   theme(legend.box.background = element_rect(colour = "black",linetype = "solid"),
         legend.background = element_blank(),legend.key = element_blank())+theme(legend.position = c(0.89, 0.86),legend.text = 
                                                              element_text(size=12,  family="serif"),
                                                            legend.title = element_text(size=12,  family="serif"))+ 
-       theme(strip.text.x = element_text(size = 12, family = "serif"))
+       theme(strip.text.x = element_text(size = 12, family = "serif"))+theme(legend.title = element_text(size=12,  family="serif"))+ theme(legend.position = "none")
 
 ```
 
 
+```{r}
+names(d)
 
+require(plotly)
+
+p_3d <- d %>%
+  dplyr::select(Learning.Rate,Epochs,Pion.Efficiency,Optimizer) %>%
+  unique() %>%
+  na.omit() %>%
+  data.frame()
+
+require(stringr)
+
+p_3d <- data.frame(p_3d)
+
+p_3d$Learning.Rate <- as.numeric(str_replace(string=as.character(p_3d$Learning.Rate),pattern = ",","."))
+p_3d$Pion.Efficiency <- as.numeric(str_replace(string=as.character(p_3d$Pion.Efficiency),pattern = ",","."))
+
+p_3d <- unique(p_3d)
+
+# p_3d <- expand.grid(p_3d)
+
+require(ggExtra)
+
+p <- ggplot(p_3d,aes(x=Epochs,y=Learning.Rate,color=Pion.Efficiency))+geom_jitter()+scale_y_continuous(trans='log10')+
+  scale_fill_distiller(palette=4, direction=-1) 
+
+ggMarginal(p,type="density")
+# p <-ggMarginal(p,type="density")
+# min(p_3d$Pion.Efficiency)
+
+# plot_ly(data=p_3d,x=p_3d$Epochs, y=p_3d$Learning.Rate, z=p_3d$Pion.Efficiency, type="scatter3d", mode="markers", color=p_3d$Optimizer)
+```
+
+```{r}
+ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,size=Pion.Efficiency,color=Optimizer))+geom_jitter()+scale_y_continuous(trans='log10')+
+  scale_fill_distiller(palette=4, direction=-1)+facet_wrap(~factor(Learning.Rate))
+```
 
 
 
