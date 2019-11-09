@@ -42,18 +42,41 @@ particle_names = list("electron" = TeX("$\\textit{e}$"), "pion" = TeX("$\\textit
 particle_labeler <- function(variable,value){
   return(particle_names[value])
 }                    
-                      
 
-ggplot(dedx_plot[(as.character(dedx_plot$`Particle ID`)=="electron"&dedx_plot$P>=1.5)|(as.character(dedx_plot$`Particle ID`)=="pion"&dedx_plot$P>=2),],aes(P,dEdX))+geom_hex(bins=100)+facet_wrap(~`Particle ID`,labeller = particle_labeler)+
+require(ggExtra)   
+
+x = hist(dedx_plot$P,breaks = 0:100)
+x = x$mids
+y = hist(dedx_plot$P,breaks=0:100)
+y = y$mids
+
+#install.packages("viridis")  # Install
+require("viridis") 
+
+
+ggplot(dedx_plot[(as.character(dedx_plot$`Particle ID`)=="electron"&dedx_plot$P>=1.5)|(as.character(dedx_plot$`Particle ID`)=="pion"&dedx_plot$P>=2),],aes(P,dEdX))+geom_hex(bins=1000)+facet_wrap(~`Particle ID`,labeller = particle_labeler)+
   theme( axis.title.y =element_text(size=12,  family="serif"))+
   theme( axis.title.x =element_text(size=12,  family="serif"))+theme(axis.text = element_text(color = "black"))+
   theme(panel.background = element_rect(fill="white",color="black",size=0.01))+
   theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
   theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+xlab(TeX("$\\textit{p}\\,(GeV/\\textit{c})$"))+
   ylab(TeX("$\\frac{d\\textit{E}}{d\\textit{x}}\\,$ ( TPC signal , arb. units )"))+ 
-       theme(strip.text.x = element_text(size = 12, family = "serif"))
+       theme(strip.text.x = element_text(size = 12, family = "serif"))+
+  scale_fill_viridis()+theme(legend.position = c(0.9, 0.7),
+                                                           legend.title = element_text(size=12,  family="serif"))
 
-# +geom_density_2d(bins=5)
+p <- ggplot(dedx_plot[(as.character(dedx_plot$`Particle ID`)=="electron"&dedx_plot$P>=1.5)|(as.character(dedx_plot$`Particle ID`)=="pion"&dedx_plot$P>=2),],aes(P,dEdX))+geom_point()+geom_density_2d()+facet_wrap(~`Particle ID`,labeller = particle_labeler)+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.01))+
+  theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+xlab(TeX("$\\textit{p}\\,(GeV/\\textit{c})$"))+
+  ylab(TeX("$\\frac{d\\textit{E}}{d\\textit{x}}\\,$ ( TPC signal , arb. units )"))+ 
+       theme(strip.text.x = element_text(size = 12, family = "serif"))+
+  scale_fill_viridis()+theme(legend.position = c(0.9, 0.7),
+                                                           legend.title = element_text(size=12,  family="serif"))
+
+p
 ```
 
 
@@ -186,9 +209,39 @@ ggplot(ph,aes(x=`Drift time (us)`,y=`Pulse height (mV)`,color=`Particle ID`))+ge
 ```
 
 
+```{r}
+rm(list=ls())
+```
+
+```{r}
+# d <- read.csv("C:/Users/gerhard/Documents/Msc-thesis/Code/statistical_analysis/Networks Compared.csv",sep=";",header=T)
+```
 
 
+```{r}
+rm(list=ls())
+dat <- read.csv("C:/Users/gerhard/Documents/Msc-thesis/Code/statistical_analysis/Pion_efficiency_results_incremental_training.csv",sep=";",header=T)
 
+require(dplyr)
+
+dat <- tribble(
+  ~P, ~pi_eff_unseen, ~pi_eff_seen,
+  1.5, NA, 0.012,
+  2.5, 0.014,0.0112,
+  3.5, 0.0116,0.0151,
+  4.5,NA,NA,
+  5.5,NA,NA)
+
+require(reshape2)
+
+dat <- melt(dat,id.vars = "P")
+
+require(ggplot2)
+
+ggplot(dat,aes(P,value,color=variable))+geom_point()+
+  geom_errorbarh(xmin=dat$P-0.5,xmax=dat$P+0.5)
+
+```
 
 
 
