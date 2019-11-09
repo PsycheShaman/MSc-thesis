@@ -241,7 +241,130 @@ require(ggplot2)
 ggplot(dat,aes(P,value,color=variable))+geom_point()+
   geom_errorbarh(xmin=dat$P-0.5,xmax=dat$P+0.5)
 
+#TODO: get plot data from publication
+
 ```
+
+```{r}
+# detach("package:MASS", unload=TRUE)
+rm(list=ls())
+d <- read.csv("C:/Users/gerhard/Documents/Msc-thesis/Code/statistical_analysis/Networks Compared.csv",sep=";",header=T)
+
+names(d)
+
+d$Convolutional[d$Convolutional]
+
+require(dplyr)
+
+pi_eff_by_num_dense_layers <- d %>%
+  subset(is.na(Convolutional)==T) %>%
+  dplyr::select(Model.Number,Layer.Number,Pion.Efficiency) %>%
+  group_by(Model.Number) %>%
+  mutate(num_layers=n())
+
+head(pi_eff_by_num_dense_layers)
+
+pi_eff_by_num_dense_layers <- unique(pi_eff_by_num_dense_layers)
+
+pi_eff_by_num_dense_layers <- pi_eff_by_num_dense_layers[,-c(1,2)]
+
+#pi_eff_by_num_dense_layers <- pi_eff_by_num_dense_layers[-289,]
+
+pi_eff_by_num_dense_layers$Pion.Efficiency <- as.character(pi_eff_by_num_dense_layers$Pion.Efficiency )
+
+require(stringr)
+
+head(d)
+
+pi_eff_by_num_convolutional_layers <- d %>%
+  subset(Convolutional==T) %>%
+  dplyr::select(Model.Number,Layer.Number,Pion.Efficiency) %>%
+  group_by(Model.Number) %>%
+  mutate(num_layers=n())
+
+pi_eff_by_num_convolutional_layers$Pion.Efficiency <- as.numeric(str_replace(string=as.character(pi_eff_by_num_convolutional_layers$Pion.Efficiency),pattern=",",replacement="."))
+
+pi_eff_by_num_convolutional_layers <- unique(pi_eff_by_num_convolutional_layers)
+
+pi_eff_by_num_convolutional_layers <- pi_eff_by_num_convolutional_layers[,-c(1,2)]
+
+#pi_eff_by_num_convolutional_layers <- pi_eff_by_num_convolutional_layers[-289,]
+
+pi_eff_by_num_convolutional_layers$Pion.Efficiency <- as.character(pi_eff_by_num_convolutional_layers$Pion.Efficiency )
+
+require(stringr)
+
+pi_eff_by_num_convolutional_layers$Pion.Efficiency <- as.numeric(str_replace(string=as.character(pi_eff_by_num_convolutional_layers$Pion.Efficiency),pattern=",",replacement="."))
+
+pi_eff_by_num_dense_layers$Pion.Efficiency <- as.numeric(str_replace(string=as.character(pi_eff_by_num_dense_layers$Pion.Efficiency),pattern=",",replacement="."))
+
+pi_eff_by_num_convolutional_layers$layer_type <- as.factor("Convolutional")
+pi_eff_by_num_dense_layers$layer_type <- as.factor("Dense")
+
+pi_eff_by_num_dense_layers <- rbind(pi_eff_by_num_dense_layers,pi_eff_by_num_convolutional_layers)
+
+require(ggplot2)
+require(latex2exp)
+
+fancy_scientific <- function(l) {
+     l <- format(l, scientific = TRUE)
+     l <- gsub("^(.*)e", "'\\1'e", l)
+     l <- gsub("e", "%*%10^", l)
+     parse(text=l)
+}
+
+# require(scales)
+
+pi_eff_by_num_dense_layers$Pion.Efficiency <- as.numeric(as.character(pi_eff_by_num_dense_layers$Pion.Efficiency))
+
+# pi_eff_by_num_dense_layers <- as.numeric(as.character(pi_eff_by_num_dense_layers))
+# 
+# pi_eff_by_num_dense_layers <- data.frame(pi_eff_by_num_dense_layers)
+
+ggplot(pi_eff_by_num_dense_layers,aes(num_layers,Pion.Efficiency,col=layer_type))+ geom_point()+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"))+
+  scale_y_continuous(trans="log10",breaks = 0.1*1:10)+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  ylab(
+    TeX("$\\epsilon_{\\pi}$")
+  )+
+  xlab(TeX("$N_{layers}$"))+facet_wrap(~layer_type,scales="free_x")+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"),
+        legend.background = element_blank(),legend.key = element_blank())+theme(legend.position = c(0.89, 0.86),legend.text = 
+                                                             element_text(size=12,  family="serif"),
+                                                           legend.title = element_text(size=12,  family="serif"))+ 
+       theme(strip.text.x = element_text(size = 12, family = "serif"))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
