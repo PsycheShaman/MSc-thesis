@@ -352,10 +352,15 @@ names(d)
 require(plotly)
 
 p_3d <- d %>%
-  dplyr::select(Learning.Rate,Epochs,Pion.Efficiency,Optimizer) %>%
+  dplyr::select(Model.Number,Learning.Rate,Epochs,Pion.Efficiency,Optimizer,Batch.Size,Layer.Number,Convolutional) %>%
+  group_by(Model.Number) %>%
+  mutate(convolutional_layers=length(which(Convolutional))) %>%
+  mutate(`Total N layers`=max(Layer.Number)) %>%
   unique() %>%
   na.omit() %>%
   data.frame()
+
+p_3d <- p_3d[,-c(1,7,8)]
 
 require(stringr)
 
@@ -370,7 +375,7 @@ p_3d <- unique(p_3d)
 
 require(ggExtra)
 
-p <- ggplot(p_3d,aes(x=Epochs,y=Learning.Rate,color=Pion.Efficiency))+geom_jitter()+scale_y_continuous(trans='log10')+
+p <- ggplot(p_3d,aes(x=Epochs,y=Learning.Rate,color=Batch.Size))+geom_jitter()+scale_y_continuous(trans='log10')+
   scale_fill_distiller(palette=4, direction=-1) 
 
 ggMarginal(p,type="density")
@@ -384,8 +389,15 @@ ggMarginal(p,type="density")
 # pi_eff_by_num_convolutional_layers <- unique(pi_eff_by_num_convolutional_layers)
 # p_3d <- unique(p_3d)
 
-ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,size=Pion.Efficiency,color=Optimizer))+geom_jitter()+scale_y_continuous(trans='log10')+
-  scale_fill_distiller(palette=4, direction=-1)+facet_wrap(~factor(Learning.Rate))
+p_3d$Batch.Size <- as.factor(p_3d$Batch.Size)
+
+ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,size=Total.N.layers,shape=Optimizer,color=convolutional_layers))+geom_jitter(alpha=8/10)+scale_y_continuous(trans='log10')+facet_wrap(~factor(Learning.Rate))
+
+
+
+
+
+#+geom_text(size=2,col="black",position = position_jitterdodge())
 ```
 
 
