@@ -408,17 +408,18 @@ as.character(p_3d$Learning.Rate)
 
 p_3d$Batch.Size <- as.factor(p_3d$Batch.Size)
 
-ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,size=Total.N.layers,shape=Optimizer,color=convolutional_layers))+geom_jitter(alpha=8/10)+scale_y_continuous(trans='log10')+facet_wrap(~factor(Learning.Rate),labeller = label_parsed)+
+ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,size=Total.N.layers,shape=Optimizer,color=convolutional_layers))+geom_jitter(alpha=6/10)+facet_wrap(~factor(Learning.Rate),labeller = label_parsed)+
   theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
   theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
                       size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
-  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  ylab(expression(epsilon[pi]))+xlab("Epochs")+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  scale_y_continuous(trans="log10",breaks =c(0.001,0.01,0.1*c(0,1,2,5,7,10)),labels = fancy_scientific,limits = c(0.01,1))
 
+#+scale_y_continuous(trans='log10')
 
-
-
-
-#+geom_text(size=2,col="black",position = position_jitterdodge())
 ```
 
 
