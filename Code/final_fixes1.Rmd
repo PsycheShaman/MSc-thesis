@@ -375,23 +375,44 @@ p_3d <- unique(p_3d)
 
 require(ggExtra)
 
-p <- ggplot(p_3d,aes(x=Epochs,y=Learning.Rate,color=Batch.Size))+geom_jitter()+scale_y_continuous(trans='log10')+
-  scale_fill_distiller(palette=4, direction=-1) 
-
-ggMarginal(p,type="density")
+# p <- ggplot(p_3d,aes(x=Epochs,y=Learning.Rate,color=Batch.Size))+geom_jitter()+scale_y_continuous(trans='log10')+
+#   scale_fill_distiller(palette=4, direction=-1) 
+# 
+# ggMarginal(p,type="density")
 # p <-ggMarginal(p,type="density")
 # min(p_3d$Pion.Efficiency)
 
-# plot_ly(data=p_3d,x=p_3d$Epochs, y=p_3d$Learning.Rate, z=p_3d$Pion.Efficiency, type="scatter3d", mode="markers", color=p_3d$Optimizer)
-```
 
-```{r}
 # pi_eff_by_num_convolutional_layers <- unique(pi_eff_by_num_convolutional_layers)
 # p_3d <- unique(p_3d)
 
+p_3d$Learning.Rate <- as.character(p_3d$Learning.Rate)
+
+    
+
+# particle_names = list("0.01" = TeX("10^{-1}"),"1e-05"=TeX("10^{-5}"), "1e-07"= TeX("10^{-7}"),"1e-06"=TeX("10^{-6}"))
+# 
+# particle_labeler <- function(variable,value){
+#   return(particle_names[value])
+# }
+
+p_3d$Learning.Rate <- as.factor(p_3d$Learning.Rate)
+
+# levels(p_3d$Learning.Rate) <- c("0.01" = TeX("$\\eta=10^{-1}$"),"1e-05"=TeX("$\\eta=10^{-5}$"),"1e-06"= TeX("$\\eta=10^{-6}$"),"1e-07"= TeX("$\\eta=10^{-7}$"))
+
+# levels(p_3d$Learning.Rate) <- c("0.01" = TeX("$\\eta=0.01$"),"1e-05"=TeX("$\\eta=0.000001$"),"1e-06"= TeX("$\\eta=0.0000001$"),"1e-07"= TeX("$\\eta=0.00000001$"))
+
+levels(p_3d$Learning.Rate) <- c("0.01" = "eta==~10^-2","1e-05"="eta==~10^-5","1e-06"= "eta==~10^-6","1e-07"= "eta==~10^-7")
+
+as.character(p_3d$Learning.Rate)
+
 p_3d$Batch.Size <- as.factor(p_3d$Batch.Size)
 
-ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,size=Total.N.layers,shape=Optimizer,color=convolutional_layers))+geom_jitter(alpha=8/10)+scale_y_continuous(trans='log10')+facet_wrap(~factor(Learning.Rate))
+ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,size=Total.N.layers,shape=Optimizer,color=convolutional_layers))+geom_jitter(alpha=8/10)+scale_y_continuous(trans='log10')+facet_wrap(~factor(Learning.Rate),labeller = label_parsed)+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))
 
 
 
@@ -403,6 +424,16 @@ ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,size=Total.N.layers,shape=Optimizer,c
 
 
 
+```{r}
+mydata = data.frame(x=rnorm(4), y=runif(4), tau=c(0,0,1,1))
+ggplot(mydata) + geom_point(aes(x=x, y=y)) +
+         facet_grid(~ tau,labeller = label_bquote(tau ^ .(x)))
+
+labNames <- c('xLab','yLab')
+xlab <- bquote(.(labNames[1]) ~ x^2)
+ylab <- bquote(.(labNames[2]) ~ y^2)
+plot(c(1:10), xlab = xlab, ylab = ylab)
+```
 
 
 
