@@ -442,10 +442,26 @@ ylab <- bquote(.(labNames[2]) ~ y^2)
 plot(c(1:10), xlab = xlab, ylab = ylab)
 ```
 
+```{r}
+rm(list=ls())
+
+load("C:/Users/gerhard/documents/msc-thesis/Thesis/misc/random_images/geant_preds.rdata")
+
+length(sim_preds)
+
+hist(sim_preds,breaks=1000)
+```
 
 
 
+#Real V Geant
 
+```{r}
+rm(list=ls())
+
+load("c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/sim_x_full.rdata")
+load("c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_x_full.rdata")
+```
 
 
 
