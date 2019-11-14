@@ -560,13 +560,15 @@ ggplot(preds,aes(x=preds$`P(real)`,fill=Datatype,colour=Datatype))+geom_bar(stat
 
 ```{r}
 baseurl <- "C:/Users/gerhard/documents/Msc-thesis/code/"
-NN <- read.csv(paste0(baseurl,"NN.csv"),header = F)
-LQ7D <- read.csv(paste0(baseurl,"LQ7D.csv"),header = F)
-LQ3D <- read.csv(paste0(baseurl,"LQ3D.csv"),header = F)
-LQ2D <- read.csv(paste0(baseurl,"LQ2D.csv"),header = F)
-LQ1D <- read.csv(paste0(baseurl,"LQ1D.csv"),header = F)
-TruncMean <- LQ7D <- read.csv(paste0(baseurl,"Trunc Mean.csv"),header = F)
-# myResult <- read.csv(paste0(baseurl,"Pion_efficiency_results_incremental_training.csv"),sep=";")
+NN <- data.frame(read.csv(paste0(baseurl,"NN.csv"),header = F))
+LQ7D <- data.frame(read.csv(paste0(baseurl,"LQ7D.csv"),header = F))
+
+NN$V2 > LQ7D$V2
+
+LQ3D <- data.frame(read.csv(paste0(baseurl,"LQ3D.csv"),header = F))
+LQ2D <- data.frame(read.csv(paste0(baseurl,"LQ2D.csv"),header = F))
+LQ1D <- data.frame(read.csv(paste0(baseurl,"LQ1D.csv"),header = F))
+TruncMean <- data.frame(read.csv(paste0(baseurl,"Trunc Mean.csv"),header = F))
 
 myResult <- tribble(
   ~GeV, ~pi_eff_unseen, ~pi_eff_seen,
@@ -612,6 +614,8 @@ LQ7D$GeV <- as.numeric(as.character(LQ7D$GeV))
 LQ7D$pi_efficiency <- as.numeric(as.character(LQ7D$pi_efficiency))
 LQ7D$model <- as.character(LQ7D$model)
 
+NN$pi_efficiency > LQ7D$pi_efficiency
+
 LQ3D$GeV <- as.numeric(as.character(LQ3D$GeV))
 LQ3D$pi_efficiency <- as.numeric(as.character(LQ3D$pi_efficiency))
 LQ3D$model <- as.character(LQ3D$model)
@@ -636,44 +640,205 @@ res <- data.frame(rbind(myResult,
              LQ1D,
              TruncMean))
 
-# res$xmin <- numeric(67)
-# res$xmax <- numeric(67)
-# 
-# res$xmax[1:5] <- res$GeV[1:5]+0.5
-# res$xmin[1:5] <- res$GeV[1:5]-0.5
-# 
-# res$xmax[6:length(res$xmax)] <- res$GeV[6:length(res$xmax)]+c(c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2),
-#                                                               c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2),
-#                                                               c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2,.3),
-#                                                               c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2,.3),
-#                                                               c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2,.3,1.7),
-#                                                               c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2,.3,1.7)
-# )
-# 
-# res$xmin[6:length(res$xmin)] <- res$GeV[6:length(res$xmax)]-c(c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2),
-#                                                               c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2),
-#                                                               c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2,.3),
-#                                                               c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2,.3),
-#                                                               c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2,.3,1.7),
-#                                                               c(.01,0.05,0.05,0.05,
-#                                                               .1,.15,.2,.2,.2,.3,1.7))
+add <- res[1:5,]
+
+xmin = c(
+res$GeV[1:5]-0.5,
+res$GeV[6:65]-c(
+  
+  c(0.2,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.2,
+                0.2,
+                0.5,
+                0.5),
+  
+  c(0.2,
+                0.001,
+                0.001,
+                0.001,
+                0.001,
+                0.002,
+                0.002,
+                0.1,
+                0.1),
+  
+  c(0.01,
+                0.001,
+                0.001,
+                0.001,
+                0.001,
+                0.002,
+                0.002,
+                0.1,
+                0.1,
+    0.2),
+  
+  c(0.01,
+                0.001,
+                0.001,
+                0.001,
+                0.001,
+                0.002,
+                0.002,
+                0.1,
+                0.1,
+    0.2),
+  
+  c(0.01,
+                0.001,
+                0.001,
+                0.001,
+                0.001,
+                0.002,
+                0.002,
+                0.1,
+                0.1,
+    0.2,
+    0.6),
+  
+    c(0.01,
+                0.001,
+                0.001,
+                0.001,
+                0.001,
+                0.002,
+                0.002,
+                0.1,
+                0.1,
+    0.2,
+    0.6)
+                
+                
+                )
+  
+)
+
+
+xmax = c(
+res$GeV[1:5]+0.5,
+res$GeV[6:65]+c(
+  
+  c(0.01,
+                0.001,
+                0.001,
+                0.001,
+                0.001,
+                0.002,
+                0.002,
+                0.1,
+                0.1),
+  
+  c(0.01,
+                0.001,
+                0.001,
+                0.001,
+                0.001,
+                0.002,
+                0.002,
+                0.1,
+                0.1),
+  
+  c(0.01,
+                0.001,
+                0.001,
+                0.001,
+                0.001,
+                0.002,
+                0.002,
+                0.1,
+                0.1,
+    0.2),
+  
+  c(0.01,
+                0.001,
+                0.001,
+                0.001,
+                0.001,
+                0.002,
+                0.002,
+                0.1,
+                0.1,
+    0.2),
+  
+  c(0.01,
+                0.001,
+                0.001,
+                0.001,
+                0.001,
+                0.002,
+                0.002,
+                0.1,
+                0.1,
+    0.2,
+    1.4),
+  
+    c(0.01,
+                0.001,
+                0.001,
+                0.001,
+                0.001,
+                0.002,
+                0.002,
+                0.1,
+                0.1,
+    0.2,
+    1.4)
+                
+                
+                )
+  
+)
+
+
+res$pi_efficiency <- round(res$pi_efficiency,4)
 
 ggplot(res,aes(x=GeV,y=pi_efficiency,color=model))+geom_point()+scale_y_continuous(trans="log10",
-                                                                                   limits = c(10^-3,10^-1))
-# +
-#   geom_errorbarh(xmin=res$xmin,xmax=res$xmax)+scale_x_continuous(limits = c(0,6))
+                                                                                   limits = c(10^-3,10^1))+
+  geom_point(data=add,aes(x=add$GeV,y=add$pi_efficiency,size=2))+geom_errorbarh(xmin=xmin,xmax=xmax)+
+  scale_x_continuous(limits=c(0,6))
+
+# +scale_alpha_manual(values=c("This thesis: seen"=1, "This thesis: unseen"="1", 
+                                                                # "NN"="0.5","LQ7D"="0.5","LQ3D"="0.5","LQ1D"="0.5","Truncated Mean"="0.5"))
 ```
+
+
+```{r}
+# install.packages('digitize') #download the digitize package
+library(digitize) #load the digitize package into the workspace
+```
+
+
+```{r}
+# cal = ReadAndCal("C:/Users/gerhard/documents/msc-thesis/thesis/misc/random_images/trd_res.png")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
