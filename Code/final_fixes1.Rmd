@@ -559,12 +559,121 @@ ggplot(preds,aes(x=preds$`P(real)`,fill=Datatype,colour=Datatype))+geom_bar(stat
 
 
 ```{r}
+baseurl <- "C:/Users/gerhard/documents/Msc-thesis/code/"
+NN <- read.csv(paste0(baseurl,"NN.csv"),header = F)
+LQ7D <- read.csv(paste0(baseurl,"LQ7D.csv"),header = F)
+LQ3D <- read.csv(paste0(baseurl,"LQ3D.csv"),header = F)
+LQ2D <- read.csv(paste0(baseurl,"LQ2D.csv"),header = F)
+LQ1D <- read.csv(paste0(baseurl,"LQ1D.csv"),header = F)
+TruncMean <- LQ7D <- read.csv(paste0(baseurl,"Trunc Mean.csv"),header = F)
+# myResult <- read.csv(paste0(baseurl,"Pion_efficiency_results_incremental_training.csv"),sep=";")
 
+myResult <- tribble(
+  ~GeV, ~pi_eff_unseen, ~pi_eff_seen,
+  1.5, NA, 0.012,
+  2.5, 0.014,0.0112,
+  3.5, 0.0116,0.0151,
+  4.5,NA,NA,
+  5.5,NA,NA)
+
+names(myResult) <- c("GeV","This thesis: unseen","This thesis: seen")
+
+myResult$GeV <- as.numeric(as.character(myResult$GeV))
+
+myResult <- melt(myResult,id.vars = "GeV")
+
+names(myResult) <- c("GeV","model","pi_efficiency")
+
+names(NN) <- c("GeV","pi_efficiency")
+names(LQ7D) <- c("GeV","pi_efficiency")
+names(LQ3D) <- c("GeV","pi_efficiency")
+names(LQ2D) <- c("GeV","pi_efficiency")
+names(LQ1D) <- c("GeV","pi_efficiency")
+names(TruncMean) <- c("GeV","pi_efficiency")
+
+NN$model <- "NN"
+LQ7D$model <- "LQ7D"
+LQ3D$model <- "LQ3D"
+LQ2D$model <- "LQ2D"
+LQ1D$model <- "LQ1D"
+TruncMean$model <- "Truncated Mean"
+
+myResult <- myResult[-c(1,4,5,9,10),]
+
+myResult$GeV <- as.numeric(as.character(myResult$GeV))
+myResult$pi_efficiency <- as.numeric(as.character(myResult$pi_efficiency))
+myResult$model <- as.character(myResult$model)
+
+NN$GeV <- as.numeric(as.character(NN$GeV))
+NN$pi_efficiency <- as.numeric(as.character(NN$pi_efficiency))
+NN$model <- as.character(NN$model)
+
+LQ7D$GeV <- as.numeric(as.character(LQ7D$GeV))
+LQ7D$pi_efficiency <- as.numeric(as.character(LQ7D$pi_efficiency))
+LQ7D$model <- as.character(LQ7D$model)
+
+LQ3D$GeV <- as.numeric(as.character(LQ3D$GeV))
+LQ3D$pi_efficiency <- as.numeric(as.character(LQ3D$pi_efficiency))
+LQ3D$model <- as.character(LQ3D$model)
+
+LQ2D$GeV <- as.numeric(as.character(LQ2D$GeV))
+LQ2D$pi_efficiency <- as.numeric(as.character(LQ2D$pi_efficiency))
+LQ2D$model <- as.character(LQ2D$model)
+
+LQ1D$GeV <- as.numeric(as.character(LQ1D$GeV))
+LQ1D$pi_efficiency <- as.numeric(as.character(LQ1D$pi_efficiency))
+LQ1D$model <- as.character(LQ1D$model)
+
+TruncMean$GeV <- as.numeric(as.character(TruncMean$GeV))
+TruncMean$pi_efficiency <- as.numeric(as.character(TruncMean$pi_efficiency))
+TruncMean$model <- as.character(TruncMean$model)
+
+res <- data.frame(rbind(myResult,
+                        NN,
+             LQ7D,
+             LQ3D,
+             LQ2D,
+             LQ1D,
+             TruncMean))
+
+# res$xmin <- numeric(67)
+# res$xmax <- numeric(67)
+# 
+# res$xmax[1:5] <- res$GeV[1:5]+0.5
+# res$xmin[1:5] <- res$GeV[1:5]-0.5
+# 
+# res$xmax[6:length(res$xmax)] <- res$GeV[6:length(res$xmax)]+c(c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2),
+#                                                               c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2),
+#                                                               c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2,.3),
+#                                                               c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2,.3),
+#                                                               c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2,.3,1.7),
+#                                                               c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2,.3,1.7)
+# )
+# 
+# res$xmin[6:length(res$xmin)] <- res$GeV[6:length(res$xmax)]-c(c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2),
+#                                                               c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2),
+#                                                               c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2,.3),
+#                                                               c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2,.3),
+#                                                               c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2,.3,1.7),
+#                                                               c(.01,0.05,0.05,0.05,
+#                                                               .1,.15,.2,.2,.2,.3,1.7))
+
+ggplot(res,aes(x=GeV,y=pi_efficiency,color=model))+geom_point()+scale_y_continuous(trans="log10",
+                                                                                   limits = c(10^-3,10^-1))
+# +
+#   geom_errorbarh(xmin=res$xmin,xmax=res$xmax)+scale_x_continuous(limits = c(0,6))
 ```
-
-
-
-
 
 
 
