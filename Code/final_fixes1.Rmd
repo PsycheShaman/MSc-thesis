@@ -802,11 +802,24 @@ res$pi_efficiency <- round(res$pi_efficiency,4)
 res$GeV <- round(res$GeV,1)
 # res$GeV[nrow(res)] <- 4.6
 
+require(latex2exp)
+
 ggplot(res,aes(x=GeV,y=pi_efficiency,color=model))+geom_point()+scale_y_continuous(trans="log10",
                                                                                    limits = c(10^-3,10^1),
                                                                                    labels = fancy_scientific)+
   geom_point(data=add,aes(x=add$GeV,y=add$pi_efficiency,size=5,alpha=0.8))+geom_errorbarh(xmin=xmin,xmax=xmax)+
-  scale_x_continuous(limits=c(0,6))+scale_alpha(guide=F)+scale_size(guide=F)
+  scale_x_continuous(limits=c(0,6))+scale_alpha(guide=F)+scale_size(guide=F)+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  ylab(expression(epsilon[pi]))+xlab(TeX("$\\textit{p}\\,(GeV/\\textit{c})$"))+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+theme(legend.position = c(0.8, 0.79),
+                                                           legend.title = element_blank(),
+                                                           legend.text = element_text(size=8,family = "serif"),
+                                                           legend.background = element_rect(colour = "black"))+
+  annotation_logticks(base=10,side="lr")+guides(color=guide_legend(ncol=2))
 
 # +scale_alpha_manual(values=c("This thesis: seen"=1, "This thesis: unseen"="1", 
                                                                 # "NN"="0.5","LQ7D"="0.5","LQ3D"="0.5","LQ1D"="0.5","Truncated Mean"="0.5"))
