@@ -61,9 +61,7 @@ dev.off()
 
 ```{r}
 preds <- data.frame(cbind(predict(model,x_train)),ifelse(y_train==1,"real","geant"))
-```
 
-```{r}
 require(ggplot2)
 
 names(preds) <- c("P(real)","Datatype")

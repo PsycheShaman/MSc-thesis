@@ -463,15 +463,99 @@ load("c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/sim_x_full.rdata")
 load("c:/Users/gerhard/Documents/msc-thesis-data/hijing-sim/real_x_full.rdata")
 ```
 
+```{r}
+require(abind)
+x_train = abind(real_x,sim_x,along=1)
+
+y_train = c(rep(1,dim(real_x)[1]),rep(0,dim(sim_x)[1]))
+
+dim(x_train) = c(dim(x_train),1)
+
+require(keras)
+model <- keras_model_sequential() %>%
+  layer_conv_2d(16, kernel_size = c(4,4),activation = "tanh") %>%
+  layer_max_pooling_2d() %>%
+  layer_conv_2d(32, kernel_size = c(4,4),activation = "tanh") %>%
+  layer_max_pooling_2d() %>%
+  layer_flatten() %>%
+  layer_dense(512,"tanh") %>%
+  layer_dense(256,"tanh") %>%
+  layer_dense(128,"tanh") %>%
+  layer_dense(1, "sigmoid")
+
+model %>%
+  compile(
+    loss="binary_crossentropy",
+    optimizer_adam(0.00001),
+    metrics="acc"
+    
+  )
+  
+history <- model %>%
+  fit(x_train,
+      y_train,
+      batch_size=32,
+      verbose=2,
+      epochs=30,
+      shuffle=TRUE)
+
+png("C:/Users/gerhard/documents/MSc-thesis/NEW/ML/geant_v_real_FINAL.png")
+plot(history)
+dev.off()
+```
+
+
+```{r}
+m <- setNames(data.frame(cbind(1:history$params$epochs, history$metrics$loss, history$metrics$acc)),c("epochs","loss","accuracy")) 
+```
 
 
 
+```{r}
+require(ggplot2)
+
+require(reshape2)
+
+m <- melt(m,id.vars ="epochs")
+
+ggplot(m,aes(x=epochs,y=value,color=variable))+geom_line()+geom_point()+facet_wrap(~variable)+scale_y_continuous(limits=c(0,1))
+```
 
 
+```{r}
+preds <- data.frame(cbind(predict(model,x_train)),ifelse(y_train==1,"real","geant"))
 
+require(ggplot2)
 
+names(preds) <- c("P(real)","Datatype")
 
+preds$`P(real)` <- as.numeric(as.character(preds$`P(real)`))
 
+preds$Datatype <- as.factor(preds$Datatype)
+
+fancy_scientific <- function(l) {
+     l <- format(l, scientific = TRUE)
+     l <- gsub("^(.*)e", "'\\1'e", l)
+     l <- gsub("e", "%*%10^", l)
+     parse(text=l)
+}
+
+require(dplyr)
+
+ggplot(preds,aes(x=preds$`P(real)`,fill=Datatype,colour=Datatype))+geom_bar(stat="bin", position = position_dodge())+
+  xlab("P(real)")+scale_y_continuous(trans="log",labels = fancy_scientific)+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"),
+        legend.background = element_blank(),legend.key = element_blank())+theme(legend.text = 
+                                                             element_text(size=12,  family="serif"),
+                                                           legend.title = element_text(size=12,  family="serif"),
+                                                           legend.position = c(0.7,0.85))
+```
 
 
 
