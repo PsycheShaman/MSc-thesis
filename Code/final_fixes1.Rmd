@@ -1021,20 +1021,400 @@ lq2d_ymax <- c(0.0002579389,
    # 0.002946113,
    # 0.005231558)
 
+truncmean_x <- c(0.4282423,
+   0.6000849,
+   0.7962816,
+   0.9943921,
+   1.194152,
+   1.435419,
+   1.775172,
+   2.208079,
+   2.715589,
+   3.39307,
+   4.66792)
 
-lq2d <- data.frame(cbind(lq2d_x,lq2d_y),lq2d_xmin,lq2d_xmax,lq2d_ymin,lq2d_ymax)
+truncmean_y <- c(0.01087039,
+   0.008806097,
+   0.009541358,
+   0.01061348,
+   0.01210252,
+   0.01536979,
+   0.02205133,
+   0.0257691,
+   0.02921964,
+   0.03458587,
+   0.04394453)
 
-lq1d <- data.frame(cbind(lq1d_x,lq1d_y,lq1d_xmin,lq1d_xmax,lq1d_ymin,lq1d_ymax))
+truncmean_xmin <- c(0.1782423,
+   0.1000849,
+   0.09628164,
+   0.09439208,
+   0.09415187,
+   0.1354187,
+   0.1751718,
+   0.2080794,
+   0.2155892,
+   0.3930699,
+   0.66792)
 
-lq1d <- rbind(lq1d,setNames(lq2d,names(lq1d)))
-```
+truncmean_ymin <- c(0.0002332891,
+   0.0001339876,
+   0.0001392597,
+   0.000162656,
+   0.0002041303,
+   0.0002315973,
+   0.0003275415,
+   0.0004846174,
+   0.0008150425,
+   0.001053386,
+   0.001840933)
+
+truncmean_xmax <- c(0.07175772,
+   0.09991508,
+   0.1037184,
+   0.1056079,
+   0.1058481,
+   0.1645813,
+   0.2248282,
+   0.2919206,
+   0.2844108,
+   0.6069301,
+   1.33208)
+
+truncmean_ymax <- c(0.0002332891,
+   0.0001339876,
+   0.0001392597,
+   0.000162656,
+   0.0002041303,
+   0.0002315973,
+   0.0003275415,
+   0.0004846174,
+   0.0008150425,
+   0.001053386,
+   0.001840933)
+
+lq3d_x <- c(0.4246237,
+   0.5985138,
+   0.7952877,
+   0.9949122,
+   1.195459,
+   1.439668,
+   1.781109,
+   2.220042,
+   2.719777,
+   3.386895)
+# ,
+#    0,
+#    6.708676,
+#    8.769783)
+
+lq3d_y <- c(0.008587062,
+   0.004324015,
+   0.003892957,
+   0.004236479,
+   0.00420567,
+   0.004426742,
+   0.005222723,
+   0.006813136,
+   0.007418575,
+   0.01003108)
+# ,
+#    0,
+#    0.03515625,
+#    0.01610306)
+
+lq3d_xmin <- c(0.1746237,
+   0.09851377,
+   0.0952877,
+   0.09491219,
+   0.09545939,
+   0.1396684,
+   0.1811093,
+   0.2200421,
+   0.2197765,
+   0.3868948)
+# ,
+#    0,
+#    0.7086763,
+#    0.7697825)
+
+lq3d_ymin <- c( 0.0001918521,
+   7.709787e-05,
+   7.38549e-05,
+   8.741507e-05,
+   0.0001012156,
+   0.0001031333,
+   0.0001297245,
+   0.0001905773,
+   0.0002929545,
+   0.0003988052)
+# ,
+#    0,
+#    0.003224016,
+#    0.004571037)
+
+lq3d_xmax <- c(0.07537628,
+   0.1014862,
+   0.1047123,
+   0.1050878,
+   0.1045406,
+   0.1603316,
+   0.2188907,
+   0.2799579,
+   0.2802235,
+   0.6131052)
+# ,
+#    0,
+#    1.291324,
+#    1.230217)
+
+lq3d_ymax <- c(0.0001947267,
+   7.802294e-05,
+   7.479652e-05,
+   8.862788e-05,
+   0.0001028577,
+   0.0001047534,
+   0.0001318987,
+   0.0001941726,
+   0.0003008153,
+   0.0004095506)
+# ,
+#    0,
+#    0.003425921,
+#    0.005622436)
+
+lq7d_x <- c(0.4246237,
+   0.5985138,
+   0.7952877,
+   0.9949122,
+   1.195459,
+   1.439668,
+   1.781109,
+   2.220042,
+   2.719777)
+# ,
+#    0,
+#    0,
+#    6.708676,
+#    8.769783)
+
+lq7d_y <- c(0.002198844,
+   0.00169033,
+   0.001693018,
+   0.002433176,
+   0.0027795,
+   0.003243855,
+   0.004485803,
+   0.00581661,
+   0.007621758)
+# ,
+#    0,
+#    0,
+#    0.02690326,
+#    0.09782609)
+
+lq7d_xmin <- c(0.1746237,
+   0.09851377,
+   0.0952877,
+   0.09491219,
+   0.09545939,
+   0.1396684,
+   0.1811093,
+   0.2200421,
+   0.2197765)
+# ,
+#    0,
+#    0,
+#    0.7086763,
+#    0.7697825)
+
+lq7d_ymin <- c( 0.0001454883,
+   7.771092e-05,
+   8.019785e-05,
+   0.0001092691,
+   0.0001337509,
+   0.000140521,
+   0.0001858729,
+   0.000263229,
+   0.0004301765)
+# ,
+#    0,
+#    0,
+#    0.003696484,
+#    0.01475164)
+
+lq7d_xmax <- c(0.07537628,
+   0.1014862,
+   0.1047123,
+   0.1050878,
+   0.1045406,
+   0.1603316,
+   0.2188907,
+   0.2799579,
+   0.2802235)
+# ,
+#    0,
+#    0,
+#    1.291324,
+#    1.230217)
+
+lq7d_ymax <- c(0.0001521873,
+   8.016433e-05,
+   8.280832e-05,
+   0.0001126328,
+   0.0001381718,
+   0.0001446861,
+   0.00019113,
+   0.0002713692,
+   0.0004468621)
+# ,
+#    0,
+#    0,
+#    0.004058301,
+#    0.01620625)
+
+nn_x <- c(0.4350755,
+   0.6029244,
+   0.7949052,
+   0.9947967,
+   1.194642,
+   1.437239,
+   1.776804,
+   2.216097,
+   2.717597)
+# ,
+#    0,
+#    0)
+
+nn_y <- c(0.001584595,
+   0.002067708,
+   0.001976303,
+   0.002800063,
+   0.002948037,
+   0.00314751,
+   0.003752736,
+   0.005697906,
+   0.007884761)
+# ,
+#    0,
+#    0)
+
+nn_xmin <- c(0.1850755,
+   0.1029244,
+   0.09490524,
+   0.09479674,
+   0.09464166,
+   0.1372393,
+   0.1768043,
+   0.2160971,
+   0.217597)
+# ,
+#    0,
+#    0)
+
+nn_ymin <- c(0.0001819213,
+   0.0001447847,
+   0.0001499419,
+   0.0001954909,
+   0.0002381787,
+   0.0002787655,
+   0.0003655312,
+   0.000538673,
+   0.0010679)
+# ,
+#    0,
+#    0)
+
+nn_xmax <- c(0.06492454,
+   0.09707562,
+   0.1050947,
+   0.1052033,
+   0.1053583,
+   0.1627608,
+   0.2231956,
+   0.2839029,
+   0.282403)
+# ,
+#    0,
+#    0)
+
+nn_ymax <- c(0.0001819213,
+   0.0001447847,
+   0.0001499419,
+   0.0001954909,
+   0.0002381787,
+   0.0002787655,
+   0.0003655312,
+   0.000538673,
+   0.0010679)
+# ,
+#    0,
+#    0)
 
 
-```{r}
+lq2d <- data.frame(cbind(lq2d_x,lq2d_y,lq2d_xmin,lq2d_xmax,lq2d_ymin,lq2d_ymax,rep("LQ2D",length(lq2d_x))))
+
+lq1d <- data.frame(cbind(lq1d_x,lq1d_y,lq1d_xmin,lq1d_xmax,lq1d_ymin,lq1d_ymax,rep("LQ1D",length(lq1d_x))))
+
+truncmean <- data.frame(cbind(truncmean_x,truncmean_y,truncmean_xmin,truncmean_xmax,
+                              truncmean_ymin,truncmean_ymax,rep("Truncated Mean",length(truncmean_x))))
+
+lq3d <- data.frame(cbind(lq3d_x,lq3d_y,lq3d_xmin,lq3d_xmax,lq3d_ymin,lq3d_ymax,rep("LQ3D",length(lq3d_x))))
+
+lq7d <- data.frame(cbind(lq7d_x,lq7d_y,lq7d_xmin,lq7d_xmax,lq7d_ymin,lq7d_ymax,rep("LQ7D",length(lq7d_x))))
+
+nn <- data.frame(cbind(nn_x,nn_y,nn_xmin,nn_xmax,nn_ymin,nn_ymax,rep("NN",length(nn_x))))
+
+myResult <- tribble(
+  ~GeV, ~pi_eff_unseen, ~pi_eff_seen,
+  1.5, NA, 0.012,
+  2.5, 0.014,0.0112,
+  3.5, 0.0116,0.0151)
+
+require(reshape2)
+
+myResult <- melt(myResult,id.vars="GeV")
+
+myResult <- na.omit(myResult)
+
+myResult$GeV <- as.numeric(as.character(myResult$GeV))
+myResult$value <- as.numeric(as.character(myResult$value))
+myResult$variable <- as.factor(myResult$variable)
+
+myResult <- myResult[,c(1,3,2)]
+
+myResult$xmin <- 0.5
+myResult$xmax <- 0.5
+myResult$ymin <- 0
+myResult$ymax <- 0
+
+myResult$Model <- c(rep("CNN (this thesis, data unseen)*",2),
+                    rep("CNN (this thesis, data seen)*",3))
+
+myResult <- myResult[,-3]
+
+for(i in 1:6){
+  myResult[,i] <- as.numeric(as.character(myResult[,i]))
+}
+
+lq1d <- rbind(lq1d,setNames(lq2d,names(lq1d)),setNames(lq3d,names(lq1d)),
+              setNames(lq7d,names(lq1d)),setNames(truncmean,names(lq1d)),
+              setNames(nn,names(lq1d)))
+
+names(lq1d)[7] <- "Model"
+
+for(i in 1:6){
+  lq1d[,i] <- as.numeric(as.character(lq1d[,i]))
+}
+
 require(ggplot2)
 
-ggplot(lq1d,aes(lq1d_x,lq1d_y))+geom_point()+geom_errorbar(ymin=lq1d$lq1d_y-lq1d$lq1d_ymin,ymax=lq1d$lq1d_y+lq1d$lq1d_ymax)+
-  geom_errorbarh(xmin=lq1d$lq1d_x-lq1d$lq1d_xmin,xmax=lq1d$lq1d_x+lq1d$lq1d_xmax)
+lq1d <- rbind(lq1d,setNames(myResult,names(lq1d)))
+
+ggplot(lq1d,aes(x=lq1d_x,y=lq1d_y,color=Model))+geom_point()+geom_errorbar(ymin=lq1d$lq1d_y-lq1d$lq1d_ymin,ymax=lq1d$lq1d_y+lq1d$lq1d_ymax)+
+  geom_errorbarh(xmin=lq1d$lq1d_x-lq1d$lq1d_xmin,xmax=lq1d$lq1d_x+lq1d$lq1d_xmax)+
+  scale_x_continuous(limits = c(0,6))+scale_y_continuous(trans="log10",limits=c(0.001,1))+
+  geom_point(data=myResult,aes(x=myResult$GeV,y=myResult$value),size=5,alpha=0.5)
 
 ```
 
