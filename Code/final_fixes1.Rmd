@@ -1411,10 +1411,30 @@ require(ggplot2)
 
 lq1d <- rbind(lq1d,setNames(myResult,names(lq1d)))
 
+require(latex2exp)
+
+fancy_scientific <- function(l) {
+     l <- format(l, scientific = TRUE)
+     l <- gsub("^(.*)e", "'\\1'e", l)
+     l <- gsub("e", "%*%10^", l)
+     parse(text=l)
+}
+
 ggplot(lq1d,aes(x=lq1d_x,y=lq1d_y,color=Model))+geom_point()+geom_errorbar(ymin=lq1d$lq1d_y-lq1d$lq1d_ymin,ymax=lq1d$lq1d_y+lq1d$lq1d_ymax)+
   geom_errorbarh(xmin=lq1d$lq1d_x-lq1d$lq1d_xmin,xmax=lq1d$lq1d_x+lq1d$lq1d_xmax)+
-  scale_x_continuous(limits = c(0,6))+scale_y_continuous(trans="log10",limits=c(0.001,1))+
-  geom_point(data=myResult,aes(x=myResult$GeV,y=myResult$value),size=5,alpha=0.5)
+  scale_x_continuous(limits = c(0,6))+scale_y_continuous(trans="log10",limits=c(0.001,1),labels = fancy_scientific)+
+  geom_point(data=myResult,aes(x=myResult$GeV,y=myResult$value),size=5,alpha=0.5)+scale_alpha(guide=F)+scale_size(guide=F)+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  ylab(expression(epsilon[pi]))+xlab(TeX("$\\textit{p}\\,(GeV/\\textit{c})$"))+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+theme(legend.position = c(0.75, 0.81),
+                                                           legend.title = element_blank(),
+                                                           legend.text = element_text(size=8,family = "serif"),
+                                                           legend.background = element_rect(colour = "black"))+
+  annotation_logticks(base=10,side="lr")+guides(color=guide_legend(ncol=2))
 
 ```
 
