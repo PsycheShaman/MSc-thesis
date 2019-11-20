@@ -1,3 +1,4 @@
+*.npy
 key
 key.pub
 R/j.rdata
