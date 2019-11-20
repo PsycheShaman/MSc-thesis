@@ -72,6 +72,7 @@ def sampling(args):
     return z_mean + K.exp(0.5 * z_log_var) * epsilon
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 def sample_images(models,data,epoch, latent_dim=2,batch_size=500000):
     noise = np.random.normal(0, 1, (batch_size, latent_dim))
     gen_imgs = decoder.predict(noise)
@@ -79,18 +80,27 @@ def sample_images(models,data,epoch, latent_dim=2,batch_size=500000):
     gen_imgs = (gen_imgs-np.min(gen_imgs))/(np.max(gen_imgs)-np.min(gen_imgs))
     gen_imgs = gen_imgs.reshape(-1,17,24,1)
 =======
+=======
+>>>>>>> 418a9f89f691c466a97bdee1641eaa67d27810e8
 def sample_images(models,data, latent_dim=2,batch_size=500000):
     noise = np.random.normal(0, 1, (batch_size, latent_dim))
     gen_imgs = decoder.predict(noise)
 #    gen_imgs = 0.5 * gen_imgs + 0.5
     gen_imgs = (gen_imgs-min(gen_imgs))/(max(gen_imgs)-min(gen_imgs))
+<<<<<<< HEAD
+>>>>>>> 418a9f89f691c466a97bdee1641eaa67d27810e8
+=======
 >>>>>>> 418a9f89f691c466a97bdee1641eaa67d27810e8
     # Rescale images 0 - 1
     for i in range(batch_size):
         
         plt.imshow(gen_imgs[i,:,:,0],cmap='gray')
 <<<<<<< HEAD
+<<<<<<< HEAD
         plt.savefig("images/vae"+str(epoch)+".png")
+=======
+        plt.savefig("images/vae"+str(i)+".png")
+>>>>>>> 418a9f89f691c466a97bdee1641eaa67d27810e8
 =======
         plt.savefig("images/vae"+str(i)+".png")
 >>>>>>> 418a9f89f691c466a97bdee1641eaa67d27810e8
@@ -249,7 +259,11 @@ plot_model(vae,
         # train the autoencoder
         
 <<<<<<< HEAD
+<<<<<<< HEAD
 for j in range(2):
+=======
+for j in range(1000):
+>>>>>>> 418a9f89f691c466a97bdee1641eaa67d27810e8
 =======
 for j in range(1000):
 >>>>>>> 418a9f89f691c466a97bdee1641eaa67d27810e8
@@ -263,6 +277,7 @@ for j in range(1000):
 
     sample_images(models,
                  data,
+<<<<<<< HEAD
 <<<<<<< HEAD
                  batch_size=1,
                  epoch=j)
@@ -284,6 +299,10 @@ for j in range(1000):
         
         
         
+=======
+                 batch_size=batch_size,
+                 model_name="vae_mlp_epoch_"+str(j))
+>>>>>>> 418a9f89f691c466a97bdee1641eaa67d27810e8
 =======
                  batch_size=batch_size,
                  model_name="vae_mlp_epoch_"+str(j))
