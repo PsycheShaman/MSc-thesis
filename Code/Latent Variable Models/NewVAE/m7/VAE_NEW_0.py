@@ -32,13 +32,13 @@ def load_data():
         with open(x_files[0],'rb') as x_file:
             x = pickle.load(x_file)
         
-        for i in x_files[1:]:
-            print(i)
-            with open(i,'rb') as x_file:
-                print(i)
-                xi = pickle.load(x_file)
-                x = np.concatenate((x,xi),axis=0)
-                print(x.shape)
+#        for i in x_files[1:]:
+#            print(i)
+#            with open(i,'rb') as x_file:
+#                print(i)
+#                xi = pickle.load(x_file)
+#                x = np.concatenate((x,xi),axis=0)
+#                print(x.shape)
         return(x)
         
 def scale(x, out_range=(-1, 1)):
@@ -137,7 +137,7 @@ x = LeakyReLU(alpha=0.2)(x)
 x = Dense(512)(x)
 x = BatchNormalization(momentum=0.8)(x)
 x = LeakyReLU(alpha=0.2)(x)
-outputs = Dense(original_dim, activation='tanh',bias_initializer=TruncatedNormal(mean=-2,stddev=0.1))(x)
+outputs = Dense(original_dim, activation='tanh')(x)#,bias_initializer=TruncatedNormal(mean=-2,stddev=0.1))(x)
 
 # instantiate decoder model
 decoder = Model(latent_inputs, outputs, name='decoder')
@@ -179,7 +179,7 @@ vae.add_loss(vae_loss)
 
 #import keras.optimizers.Adam
 
-adam = Adam(lr=0.0000001, beta_1=0.9, beta_2=0.999, amsgrad=True)
+adam = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=True)
 
 vae.compile(optimizer=adam)#'adam')
 vae.summary()
@@ -187,26 +187,45 @@ plot_model(vae,
            to_file='vae_mlp.png',
            show_shapes=True)
 
-#    if args.weights:
-#        vae.load_weights(args.weights)
-#    else:
-        # train the autoencoder
-        
-def sample_images2(models,j):
-#        r, c = 5, 5
-        noise = np.random.normal(0, 1, (10, 4))
-        gen_imgs = decoder.predict(noise)
 
-        # Rescale images 0 - 1
-        gen_imgs = (gen_imgs-np.min(gen_imgs))/(np.max(gen_imgs)-np.min(gen_imgs))
-        gen_imgs = gen_imgs.reshape(-1,17,24,1)
-        np.save("simulated_data/vae"+str(j)+".npy",arr=gen_imgs)
-        
-for j in range(20000000000000000000000000000000000000000000000000000000):
+    
+for j in range(20):
     print("macro_epoch_batch_"+str(j))
-    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=1000),:],
+    vae.fit(x_train[0:1000,:],#[np.random.randint(low=0,high=x_train.shape[0],size=1000),:],
                 epochs=1,
                 batch_size=1)
+    sample_images(models,
+                 data,
+                 batch_size=1,
+                 epoch=j)
+    
+    
+adam = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, amsgrad=True)
+vae.compile(optimizer=adam)
+for j in range(21,40):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train[0:1000,:],#[np.random.randint(low=0,high=x_train.shape[0],size=1000),:],
+                epochs=1,
+                batch_size=1)
+    sample_images(models,
+                 data,
+                 batch_size=1,
+                 epoch=j)
+    
+adam = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, amsgrad=True)
+vae.compile(optimizer=adam)
+for j in range(1):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train,#[np.random.randint(low=0,high=x_train.shape[0],size=1000),:],
+                epochs=1,
+                batch_size=1)
+    sample_images(models,
+                 data,
+                 batch_size=1,
+                 epoch=j)
+    
+    
+    
 #        ,
 #                validation_data=(x_test, None))
 #        vae.save_weights('vae_mlp_mnist.h5')
@@ -215,9 +234,24 @@ for j in range(20000000000000000000000000000000000000000000000000000000):
                  data,
                  batch_size=1,
                  epoch=j)
-    sample_images2(models,j)
+#    sample_images2(models,j)
 #    ,
 #                 model_name="vae_mlp_epoch_"+str(j))
+    
+for j in range(20,200):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train,#[np.random.randint(low=0,high=x_train.shape[0],size=1000),:],
+                epochs=1,
+                batch_size=128)
+#        ,
+#                validation_data=(x_test, None))
+#        vae.save_weights('vae_mlp_mnist.h5')
+
+    sample_images(models,
+                 data,
+                 batch_size=1,
+                 epoch=j)
+
     
 def sample_images2(models):
 #        r, c = 5, 5
@@ -229,7 +263,7 @@ def sample_images2(models):
         gen_imgs = gen_imgs.reshape(-1,17,24,1)
         np.save("simulated_data/vae.npy",arr=gen_imgs)
 
-sample_images2()
+sample_images2(models)
 
         
 
