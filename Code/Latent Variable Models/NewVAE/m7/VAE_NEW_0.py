@@ -224,6 +224,30 @@ for j in range(1):
                  batch_size=1,
                  epoch=j)
     
+adam = Adam(lr=0.000001, beta_1=0.9, beta_2=0.999, amsgrad=True)
+vae.compile(optimizer=adam)
+for j in range(1):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train,#[np.random.randint(low=0,high=x_train.shape[0],size=1000),:],
+                epochs=1,
+                batch_size=1)
+    sample_images(models,
+                 data,
+                 batch_size=1,
+                 epoch=j)
+
+adam = Adam(lr=0.0000001, beta_1=0.9, beta_2=0.999, amsgrad=True)
+vae.compile(optimizer=adam)
+for j in range(1):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train,#[np.random.randint(low=0,high=x_train.shape[0],size=1000),:],
+                epochs=1,
+                batch_size=1)
+    sample_images(models,
+                 data,
+                 batch_size=1,
+                 epoch=j)
+    
     
     
 #        ,
