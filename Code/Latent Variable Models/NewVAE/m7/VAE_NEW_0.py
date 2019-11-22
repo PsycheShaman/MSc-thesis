@@ -247,8 +247,40 @@ for j in range(1):
                  data,
                  batch_size=1,
                  epoch=j)
+
+def load_data():
+        x_files = glob.glob("C:\\Users\\gerhard\\Documents\\msc-thesis-data\\cnn\\x_*.pkl")
+        
+        with open(x_files[0],'rb') as x_file:
+            x = pickle.load(x_file)
+        
+        for i in x_files[1:5]:
+            print(i)
+            with open(i,'rb') as x_file:
+                print(i)
+                xi = pickle.load(x_file)
+                x = np.concatenate((x,xi),axis=0)
+                print(x.shape)
+        return(x)
+
+x_train = load_data()
+#x_test = load_data()
+
+#image_size = x_train.shape[1]
+original_dim = 17 * 24
+x_train = np.reshape(x_train, [-1, original_dim])
+#x_test = np.reshape(x_test, [-1, original_dim])
+x_train = scale(x_train)
     
-    
+for j in range(1):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train,#[np.random.randint(low=0,high=x_train.shape[0],size=1000),:],
+                epochs=1,
+                batch_size=1)
+    sample_images(models,
+                 data,
+                 batch_size=1,
+                 epoch=j)
     
 #        ,
 #                validation_data=(x_test, None))
@@ -289,7 +321,7 @@ def sample_images2(models):
 
 sample_images2(models)
 
-        
+
 
         
 

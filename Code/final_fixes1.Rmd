@@ -1440,6 +1440,20 @@ ggplot(lq1d,aes(x=lq1d_x,y=lq1d_y,color=Model))+geom_point()+geom_errorbar(ymin=
 
 
 
+```{r}
+rm(list=ls())
+
+setwd("C:/Users/gerhard/documents/msc-thesis/code/")
+
+vae_loss <- read.csv("vae_loss.csv")
+
+require(ggplot2)
+
+vae_loss <- data.frame(cbind(1:109,vae_loss))
+names(vae_loss) <- c("epoch","mean(MSE + KL) loss")
+
+ggplot(vae_loss,aes(epoch,`mean(MSE + KL) loss`))+geom_line()+scale_y_continuous(trans="log")
+```
 
 
 
