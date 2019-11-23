@@ -32,16 +32,16 @@ def load_data():
         with open(x_files[0],'rb') as x_file:
             x = pickle.load(x_file)
         
-        for i in x_files[1:11]:
-            print(i)
-            with open(i,'rb') as x_file:
-                print(i)
-                xi = pickle.load(x_file)
-                x = np.concatenate((x,xi),axis=0)
-                print(x.shape)
+#        for i in x_files[1:11]:
+#            print(i)
+#            with open(i,'rb') as x_file:
+#                print(i)
+#                xi = pickle.load(x_file)
+#                x = np.concatenate((x,xi),axis=0)
+#                print(x.shape)
         return(x)
         
-def scale(x, out_range=(-1, 1)):
+def scale(x, out_range=(0, 1)):
     domain = np.min(x), np.max(x)
     y = (x - (domain[1] + domain[0]) / 2) / (domain[1] - domain[0])
     return y * (out_range[1] - out_range[0]) + (out_range[1] + out_range[0]) / 2
@@ -174,7 +174,7 @@ epochs = 50
 
 from keras.layers import BatchNormalization
 
-# VAE model = encoder + decoder
+# VAE model = encoder + decode3r
 # build encoder model
 inputs = Input(shape=input_shape, name='encoder_input')
 x = Dense(intermediate_dim, activation='tanh')(inputs)
@@ -183,9 +183,9 @@ x = Dense(intermediate_dim, activation='tanh')(x)
 x = BatchNormalization()(x)
 x = Dense(intermediate_dim, activation='tanh')(x)
 x = BatchNormalization()(x)
-x = Dense(intermediate_dim, activation='relu')(x)
-x = BatchNormalization()(x)
 x = Dense(intermediate_dim, activation='tanh')(x)
+x = BatchNormalization()(x)
+x = Dense(intermediate_dim, activation='relu')(x)
 x = BatchNormalization()(x)
 z_mean = Dense(latent_dim, name='z_mean')(x)
 z_log_var = Dense(latent_dim, name='z_log_var')(x)
@@ -211,7 +211,7 @@ x = Dense(intermediate_dim, activation='tanh')(x)
 x = BatchNormalization()(x)
 x = Dense(intermediate_dim, activation='tanh')(x)
 x = BatchNormalization()(x)
-outputs = Dense(original_dim, activation='tanh')(x)
+outputs = Dense(original_dim, activation='sigmoid')(x)
 
 # instantiate decoder model
 decoder = Model(latent_inputs, outputs, name='decoder')

@@ -1449,12 +1449,15 @@ vae_loss <- read.csv("vae_loss.csv")
 
 require(ggplot2)
 
-vae_loss <- data.frame(cbind(1:109,vae_loss))
+vae_loss <- data.frame(cbind(1:164,vae_loss))
 names(vae_loss) <- c("epoch","mean(MSE + KL) loss")
 
 ggplot(vae_loss,aes(epoch,`mean(MSE + KL) loss`))+geom_line()+scale_y_continuous(trans="log")
 ```
 
+```{r}
+
+```
 
 
 

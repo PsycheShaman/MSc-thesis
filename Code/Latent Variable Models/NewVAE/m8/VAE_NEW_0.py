@@ -32,7 +32,7 @@ def load_data():
         with open(x_files[0],'rb') as x_file:
             x = pickle.load(x_file)
         
-        for i in x_files[1:11]:
+        for i in x_files[1:5]:
             print(i)
             with open(i,'rb') as x_file:
                 print(i)
