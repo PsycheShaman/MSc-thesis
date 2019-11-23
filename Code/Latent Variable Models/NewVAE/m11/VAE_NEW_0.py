@@ -308,7 +308,7 @@ vae.add_loss(vae_loss)
 
 #import keras.optimizers.Adam
 
-adam = Adam(lr=0.00000001, beta_1=0.9, beta_2=0.999, amsgrad=True)
+adam = Adam(lr=0.0000001, beta_1=0.9, beta_2=0.999, amsgrad=True)
 
 vae.compile(optimizer=adam)
 vae.summary()
