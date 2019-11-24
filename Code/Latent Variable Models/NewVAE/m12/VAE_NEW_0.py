@@ -215,9 +215,9 @@ def sample_images2(models,j):
         
 batch_size=256
         
-for j in range(100000):
+for j in range(200):
     print("macro_epoch_batch_"+str(j))
-    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=50000),:],
+    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=5000),:],
                 epochs=1,
                 batch_size=batch_size)
 #        ,
@@ -230,3 +230,131 @@ for j in range(100000):
                  epoch=j)
     sample_images2(models,j)
 #    ,
+    
+adam = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, amsgrad=True)
+
+vae.compile(optimizer=adam)
+
+for j in range(201,400):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=5000),:],
+                epochs=1,
+                batch_size=batch_size)
+#        ,
+#                validation_data=(x_test, None))
+    vae.save_weights('vae_mlp_mnist.h5')
+
+    sample_images(models,
+                 data,
+                 batch_size=3,
+                 epoch=j)
+    sample_images2(models,j)
+    
+adam = Adam(lr=0.000001, beta_1=0.9, beta_2=0.999, amsgrad=True)
+
+vae.compile(optimizer=adam)
+
+for j in range(400,600):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=5000),:],
+                epochs=1,
+                batch_size=batch_size)
+#        ,
+#                validation_data=(x_test, None))
+    vae.save_weights('vae_mlp_mnist.h5')
+
+    sample_images(models,
+                 data,
+                 batch_size=3,
+                 epoch=j)
+    sample_images2(models,j)
+    
+for j in range(600,800):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=5000),:],
+                epochs=1,
+                batch_size=128)
+#        ,
+#                validation_data=(x_test, None))
+    vae.save_weights('vae_mlp_mnist.h5')
+
+    sample_images(models,
+                 data,
+                 batch_size=3,
+                 epoch=j)
+    sample_images2(models,j)
+    
+adam = Adam(lr=0.000000001, beta_1=0.9, beta_2=0.999, amsgrad=True)
+
+vae.compile(optimizer=adam)
+
+for j in range(800,1000):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=5000),:],
+                epochs=1,
+                batch_size=batch_size)
+#        ,
+#                validation_data=(x_test, None))
+    vae.save_weights('vae_mlp_mnist.h5')
+
+    sample_images(models,
+                 data,
+                 batch_size=3,
+                 epoch=j)
+    sample_images2(models,j)
+
+adam = Adam(lr=0.000000000001, beta_1=0.9, beta_2=0.999, amsgrad=True)
+
+vae.compile(optimizer=adam)
+
+for j in range(1000,1010):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=100),:],
+                epochs=3,
+                batch_size=1)
+#        ,
+#                validation_data=(x_test, None))
+    vae.save_weights('vae_mlp_mnist.h5')
+
+    sample_images(models,
+                 data,
+                 batch_size=3,
+                 epoch=j)
+    sample_images2(models,j)
+
+for j in range(1010,1011):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=10000),:],
+                epochs=3,
+                batch_size=10000)
+#        ,
+#                validation_data=(x_test, None))
+    vae.save_weights('vae_mlp_mnist.h5')
+
+    sample_images(models,
+                 data,
+                 batch_size=3,
+                 epoch=j)
+    sample_images2(models,j)
+    
+for j in range(1011,1012):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=100000),:],
+                epochs=10,
+                batch_size=100000)
+#        ,
+#                validation_data=(x_test, None))
+    vae.save_weights('vae_mlp_mnist.h5')
+
+    sample_images(models,
+                 data,
+                 batch_size=3,
+                 epoch=j)
+    sample_images2(models,j)
+    
+    
+
+
+
+
+
