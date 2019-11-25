@@ -232,23 +232,43 @@ for j in range(1000000000000000000000000000000000000000000000000000):
                  epoch=j)
     sample_images2(models,j)
     
-#adam = Adam(lr=1e-9)
-#vae.compile(optimizer=adam)
-#
-#for j in range(2,1000000000000000000000000000000000000000000000000000):
-#    print("macro_epoch_batch_"+str(j))
-#    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=1000000),:],
-#                epochs=1,
-#                batch_size=batch_size)
-##        ,
-##                validation_data=(x_test, None))
-#    vae.save_weights('vae_mlp_mnist.h5')
-#
-#    sample_images(models,
-#                 data,
-#                 batch_size=3,
-#                 epoch=j)
-#    sample_images2(models,j)
+adam = Adam(lr=1e-9)
+vae.compile(optimizer=adam)
 
+for j in range(3,1000000000000000000000000000000000000000000000000000):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=1000000),:],
+                epochs=1,
+                batch_size=batch_size)
+#        ,
+#                validation_data=(x_test, None))
+    vae.save_weights('vae_mlp_mnist.h5')
 
+    sample_images(models,
+                 data,
+                 batch_size=3,
+                 epoch=j)
+    sample_images2(models,j)
+    
+#THE ABOVE DOES NOT WORK, GOING BACK TO LOADING WHEIGHTS AND SMALLER LR
 
+adam = Adam(lr=0.00001)
+
+vae.load_weights("C:/Users/gerhard/documents/msc-thesis/code/latent variable models/newvae/m13/weights_checkpoint/vae_weights_epoch_48_loss_0-5163.h5")
+
+vae.compile(optimizer=adam)
+
+for j in range(5,1000000000000000000000000000000000000000000000000000):
+    print("macro_epoch_batch_"+str(j))
+    vae.fit(x_train[np.random.randint(low=0,high=x_train.shape[0],size=1000000),:],
+                epochs=1,
+                batch_size=batch_size)
+#        ,
+#                validation_data=(x_test, None))
+    vae.save_weights('vae_mlp_mnist.h5')
+
+    sample_images(models,
+                 data,
+                 batch_size=3,
+                 epoch=j)
+    sample_images2(models,j)
