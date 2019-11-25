@@ -315,25 +315,14 @@ def plot_results(models,
     """
 
     encoder, decoder = models
-    x_test, y_test = data
+    x_test = data
     os.makedirs(model_name, exist_ok=True)
 
-    filename = os.path.join(model_name, "vae_mean.png")
-    # display a 2D plot of the digit classes in the latent space
-    z_mean, _, _ = encoder.predict(x_test,
-                                   batch_size=batch_size)
-    plt.figure(figsize=(12, 10))
-    plt.scatter(z_mean[:, 0], z_mean[:, 1], c=y_test)
-    plt.colorbar()
-    plt.xlabel("z[0]")
-    plt.ylabel("z[1]")
-    plt.savefig(filename)
-    plt.show()
 
     filename = os.path.join(model_name, "digits_over_latent.png")
     # display a 30x30 2D manifold of digits
     n = 30
-    digit_size = 28
+#    digit_size = 28
     figure = np.zeros((17 * n, 24 * n))
     # linearly spaced coordinates corresponding to the 2D plot
     # of digit classes in the latent space
@@ -342,31 +331,112 @@ def plot_results(models,
 
     for i, yi in enumerate(grid_y):
         for j, xi in enumerate(grid_x):
-            z_sample = np.array([[xi, yi]])
+            z_sample = np.array([[0,0,0,xi,yi]])
             x_decoded = decoder.predict(z_sample)
             digit = x_decoded[0].reshape(17, 24)
             figure[i * 17: (i + 1) * 17,
                    j * 24: (j + 1) * 24] = digit
 
     plt.figure(figsize=(10, 10))
-    start_range = digit_size // 2
-    end_range = (n - 1) * digit_size + start_range + 1
-    pixel_range = np.arange(start_range, end_range, digit_size)
-    sample_range_x = np.round(grid_x, 1)
-    sample_range_y = np.round(grid_y, 1)
-    plt.xticks(pixel_range, sample_range_x)
-    plt.yticks(pixel_range, sample_range_y)
-    plt.xlabel("z[0]")
-    plt.ylabel("z[1]")
+#    start_range = 17 // 2
+#    end_range = (n - 1) * 1 + start_range + 1
+#    pixel_range = np.arange(start_range, end_range, 24)
+#    sample_range_x = np.round(grid_x, 1)
+#    sample_range_y = np.round(grid_y, 1)
+    plt.xticks((0,175,350,525,700),(-4,-2,0,2,4))
+    plt.yticks((0,125,250,375,500), (-4,-2,0,2,4))
+    plt.xlabel("z[3]")
+    plt.ylabel("z[4]")
     plt.imshow(figure, cmap='Greys_r')
     plt.savefig(filename)
     plt.show()
 
 
+plot_results(models,data)
+
+#Discrimination
+
+noise = np.random.normal(0, 1, (x_train.shape[0], latent_dim))
+gen_imgs = decoder.predict(noise)
+
+def scale(x, out_range=(0, 1)):
+    domain = np.min(x), np.max(x)
+    y = (x - (domain[1] + domain[0]) / 2) / (domain[1] - domain[0])
+    return y * (out_range[1] - out_range[0]) + (out_range[1] + out_range[0]) / 2
+
+        # Rescale images 0 - 1
+gen_imgs = scale(gen_imgs) #(gen_imgs-np.min(gen_imgs))/(np.max(gen_imgs)-np.min(gen_imgs))
+gen_imgs = gen_imgs.reshape(-1,17,24,1)
+
+x_train = x_train.reshape(-1,17,24,1)
+
+import tensorflow as tf
+
+model = tf.keras.Sequential()
+model.add(tf.keras.layers.Conv2D(filters=16,kernel_size=(4,4),strides=1, padding='valid',activation="relu"))
+model.add(tf.keras.layers.MaxPool2D())
+model.add(tf.keras.layers.Conv2D(filters=32,kernel_size=(4,4),strides=1, padding='valid',activation="relu"))
+model.add(tf.keras.layers.MaxPool2D())
+model.add(tf.keras.layers.Flatten())
+model.add(tf.keras.layers.Dense(512,activation="sigmoid"))
+model.add(tf.keras.layers.Dense(256,activation="sigmoid"))
+model.add(tf.keras.layers.Dense(128,activation="sigmoid"))
+model.add(tf.keras.layers.Dense(1,activation="sigmoid"))
 
 
+model.compile(loss='binary_crossentropy',
+              optimizer=tf.keras.optimizers.Adam(lr=0.00001),
+              metrics=['accuracy'])
+
+batch_size=32
+
+epochs=30
+
+x = np.concatenate((gen_imgs,x_train),axis=0)
+y = np.concatenate((np.zeros(gen_imgs.shape[0]),np.ones(x_train.shape[0])))
+    
+history=model.fit(x, y,
+              batch_size=batch_size,
+              epochs=epochs)
 
 
+import matplotlib.pyplot as plt
+
+plt.plot(history.history['acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.savefig('C:/Users/gerhard/Documents/MSc-thesis/final_vae_vs_real__history1.png', bbox_inches='tight')
+plt.close()
+
+
+plt.plot(history.history['loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.savefig('C:/Users/gerhard/Documents/MSc-thesis/final_vae_vs_real__history2.png', bbox_inches='tight')
+
+plt.close()
+
+
+vae_preds = model.predict(gen_imgs)
+
+np.savetxt("vae_preds.csv",X=vae_preds)
+
+real_preds = model.predict(x_train)
+np.savetxt("real_preds.csv",X=real_preds)
+
+#plt.hist(geant_preds,bins=10,range=(0,1))
+#plt.title('Histogram of P(real) Predictions for Fully Connected VAE Data')
+#plt.ylabel('Frequency')
+#plt.xlabel('P(real)')
+#
+#real_preds = model.predict(real)
+#
+#plt.hist(real_preds,bins=10,range=(0,1))
+#plt.title('Histogram of P(real) Predictions for Real Data')
+#plt.ylabel('Frequency')
+#plt.xlabel('P(real)')
 
 
 
