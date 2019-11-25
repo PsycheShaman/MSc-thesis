@@ -429,6 +429,22 @@ np.savetxt("real_preds.csv",X=real_preds)
 
 plt.hist(real_preds)
 
+x_train = load_data()
+
+def scale(x, out_range=(0, 1)):
+    domain = np.min(x), np.max(x)
+    y = (x - (domain[1] + domain[0]) / 2) / (domain[1] - domain[0])
+    return y * (out_range[1] - out_range[0]) + (out_range[1] + out_range[0]) / 2
+
+gen_imgs = scale(gen_imgs,(np.min(x_train),np.max(x_train)))
+
+i = np.where((vae_preds>0.1) & (vae_preds<=0.2))[0][0]
+i = np.where(vae_preds==np.max(vae_preds))[0][1]
+p_real = vae_preds[i][0]
+plt.imshow(gen_imgs[i,:,:,0],cmap='gray')
+plt.colorbar()
+plt.title("P(real)= "+str(p_real))
+
 #plt.hist(geant_preds,bins=10,range=(0,1))
 #plt.title('Histogram of P(real) Predictions for Fully Connected VAE Data')
 #plt.ylabel('Frequency')
@@ -441,9 +457,44 @@ plt.hist(real_preds)
 #plt.ylabel('Frequency')
 #plt.xlabel('P(real)')
 
+x_train = scale(x_train,(0,1))
 
+#def plot_results(models,
+#                 data,
+#                 batch_size=128,
+#                 model_name="vae_mnist"):
+#    """Plots labels and MNIST digits as a function of the 2D latent vector
+#
+#    # Arguments
+#        models (tuple): encoder and decoder models
+#        data (tuple): test data and label
+#        batch_size (int): prediction batch size
+#        model_name (string): which model is using this function
+#    """
+#
+#    encoder, decoder = models
+#    x_test, y_test = data
+#    os.makedirs(model_name, exist_ok=True)
+#    x_test = x_test.reshape(-1,17*24)
+#    filename = "vae_mean.png"
+#    # display a 2D plot of the digit classes in the latent space
 
+gen_imgs = scale(gen_imgs,(0,1))
+gen_imgs = gen_imgs.reshape(-1,17*24)
 
+gen_imgs2 = gen_imgs[]
+    
+z_mean, _, _ = encoder.predict(gen_imgs,
+                               batch_size=512)
+plt.figure(figsize=(12, 10))
+plt.scatter(z_mean[:, 0], z_mean[:, 1], c=vae_preds)
+plt.colorbar()
+plt.xlabel("z[0]")
+plt.ylabel("z[1]")
+#plt.savefig(filename)
+plt.show()
+
+plot_results(models,data=(x_train,real_preds))
 
 
 
