@@ -1507,6 +1507,14 @@ ggplot(preds,aes(x=preds$`P(real)`,fill=Datatype,colour=Datatype))+geom_bar(stat
 
 
 
+```{r}
+x = seq(-10,10,length.out = 100000)
+y = ifelse(x<0,0,x)
+require(latex2exp)
+plot(x=x,y=y,type="l",lwd=3,col="red",main=TeX("ReLU Activation function"),ylab="",xlab = TeX("$w^{T}x+b$"),family="serif")
+title(ylab = TeX("$\\varphi(w^{T}x+b)$"), mgp=c(2.5,1,1), family="serif",cex.lab=1.2)
+text(x=0,y=9,labels = TeX("$\\varphi(w^{T}x+b) = max(w^{T}x+b,0)$"),family="serif")
+```
 
 
 
