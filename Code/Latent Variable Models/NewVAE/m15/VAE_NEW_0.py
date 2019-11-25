@@ -481,23 +481,70 @@ x_train = scale(x_train,(0,1))
 
 gen_imgs = scale(gen_imgs,(0,1))
 gen_imgs = gen_imgs.reshape(-1,17*24)
-
-gen_imgs2 = gen_imgs[]
+s = np.random.randint(0,gen_imgs.shape[0],100)
+gen_imgs2 = gen_imgs[s,:]
     
 z_mean, _, _ = encoder.predict(gen_imgs,
                                batch_size=512)
-plt.figure(figsize=(12, 10))
-plt.scatter(z_mean[:, 0], z_mean[:, 1], c=vae_preds)
-plt.colorbar()
-plt.xlabel("z[0]")
-plt.ylabel("z[1]")
-#plt.savefig(filename)
-plt.show()
+
+import seaborn as sns
+
+cmap = sns.cubehelix_palette(as_cmap=True)
+
+#f, ax = plt.subplots()
+#points = ax.scatter(x=z_mean[:, 0], y=z_mean[:, 1], c=vae_preds[s], s=50, cmap=cmap)
+#f.colorbar(points)
+
+s = vae_preds
+
+s.shape = s.shape[0]
+
+for i in range(0,5):
+    for j in range(0,5):
+        if(i==j):continue
+        plt.figure(figsize=(12, 10))
+        
+        plt.scatter(x=noise[(s>=0.99), i], y=noise[(s>=0.99), j],
+                    c=s[(s>=0.99)],cmap=cmap,s=50,alpha=0.3)
+        plt.colorbar()
+        plt.xlabel("z["+str(i)+"]")
+        plt.ylabel("z["+str(j)+"]")
+        plt.show()
+        plt.savefig("vae_high"+str(i)+"_"+str(j)+".png")
+        
+        plt.figure(figsize=(12, 10))
+        
+        plt.scatter(x=noise[(s>=0.49)&(s<=0.51), i], y=noise[(s>=0.49)&(s<=0.51), j],
+                    c=s[(s>=0.49)&(s<=0.51)],cmap=cmap,s=50,alpha=0.3)
+        plt.colorbar()
+        plt.xlabel("z["+str(i)+"]")
+        plt.ylabel("z["+str(j)+"]")
+        plt.show()
+        plt.savefig("vae_med"+str(i)+"_"+str(j)+".png")
+        
+        plt.figure(figsize=(12, 10))
+        
+        plt.scatter(x=noise[(s<=0.01), i], y=noise[(s<=0.01), j],
+                    c=s[(s<=0.01)],cmap=cmap,s=50,alpha=0.3)
+        plt.colorbar()
+        plt.xlabel("z["+str(i)+"]")
+        plt.ylabel("z["+str(j)+"]")
+        plt.show()
+        plt.savefig("vae_low"+str(i)+"_"+str(j)+".png")
 
 plot_results(models,data=(x_train,real_preds))
 
 
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
+x, y, z = np.random.rand(3, 100)
+cmap = sns.cubehelix_palette(as_cmap=True)
+
+f, ax = plt.subplots()
+points = ax.scatter(x, y, c=z, s=50, cmap=cmap)
+f.colorbar(points)
 
 
     
