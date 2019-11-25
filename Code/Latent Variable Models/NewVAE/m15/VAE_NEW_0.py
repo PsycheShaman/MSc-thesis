@@ -499,52 +499,77 @@ s = vae_preds
 
 s.shape = s.shape[0]
 
-for i in range(0,5):
-    for j in range(0,5):
-        if(i==j):continue
-        plt.figure(figsize=(12, 10))
-        
-        plt.scatter(x=noise[(s>=0.99), i], y=noise[(s>=0.99), j],
-                    c=s[(s>=0.99)],cmap=cmap,s=50,alpha=0.3)
-        plt.colorbar()
-        plt.xlabel("z["+str(i)+"]")
-        plt.ylabel("z["+str(j)+"]")
-        plt.show()
-        plt.savefig("vae_high"+str(i)+"_"+str(j)+".png")
-        
-        plt.figure(figsize=(12, 10))
-        
-        plt.scatter(x=noise[(s>=0.49)&(s<=0.51), i], y=noise[(s>=0.49)&(s<=0.51), j],
-                    c=s[(s>=0.49)&(s<=0.51)],cmap=cmap,s=50,alpha=0.3)
-        plt.colorbar()
-        plt.xlabel("z["+str(i)+"]")
-        plt.ylabel("z["+str(j)+"]")
-        plt.show()
-        plt.savefig("vae_med"+str(i)+"_"+str(j)+".png")
-        
-        plt.figure(figsize=(12, 10))
-        
-        plt.scatter(x=noise[(s<=0.01), i], y=noise[(s<=0.01), j],
-                    c=s[(s<=0.01)],cmap=cmap,s=50,alpha=0.3)
-        plt.colorbar()
-        plt.xlabel("z["+str(i)+"]")
-        plt.ylabel("z["+str(j)+"]")
-        plt.show()
-        plt.savefig("vae_low"+str(i)+"_"+str(j)+".png")
-
-plot_results(models,data=(x_train,real_preds))
-
-
-import numpy as np
-import seaborn as sns
+import numpy as np; np.random.seed(0)
 import matplotlib.pyplot as plt
+import matplotlib.ticker
 
-x, y, z = np.random.rand(3, 100)
-cmap = sns.cubehelix_palette(as_cmap=True)
+class OOMFormatter(matplotlib.ticker.ScalarFormatter):
+    def __init__(self, order=0, fformat="%1.1f", offset=True, mathText=True):
+        self.oom = order
+        self.fformat = fformat
+        matplotlib.ticker.ScalarFormatter.__init__(self,useOffset=offset,useMathText=mathText)
+    def _set_orderOfMagnitude(self, nothing):
+        self.orderOfMagnitude = self.oom
+    def _set_format(self, vmin, vmax):
+        self.format = self.fformat
+        if self._useMathText:
+            self.format = '$%s$' % matplotlib.ticker._mathdefault(self.format)
 
-f, ax = plt.subplots()
-points = ax.scatter(x, y, c=z, s=50, cmap=cmap)
-f.colorbar(points)
+i=1
+#j=1
+for j in range(2,4):
+    if(i==j):continue
+    plt.figure(figsize=(6,5))
+    
+    plt.scatter(x=noise[(s>=0.99), i], y=noise[(s>=0.99), j],
+                c=s[(s>=0.99)],cmap=cmap,s=50,alpha=0.3)
+    plt.colorbar()
+    plt.xlabel("z["+str(i)+"]")
+    plt.ylabel("z["+str(j)+"]")
+    plt.show()
+    plt.savefig("vae_high"+str(i)+"_"+str(j)+".png")
+    
+    plt.figure(figsize=(6,5))
+    
+    plt.scatter(x=noise[(s>=0.49)&(s<=0.51), i], y=noise[(s>=0.49)&(s<=0.51), j],
+                c=s[(s>=0.49)&(s<=0.51)],cmap=cmap,s=50,alpha=0.3)
+    plt.colorbar()
+    plt.xlabel("z["+str(i)+"]")
+    plt.ylabel("z["+str(j)+"]")
+    plt.show()
+    plt.savefig("vae_med"+str(i)+"_"+str(j)+".png")
+    
+    n=1000
+    plt.figure(figsize=(6,5))
+    fig, ax = plt.subplots()
+    sipsx = noise[(s<=0.000001), i]
+    sipsx = sipsx[0:n]
+    sipsy = noise[(s<=0.000001), j]
+    sipsy = sipsy[0:n]
+    sipsc = s[(s<=0.000001)]
+    sipsc = sipsc[0:n]
+    plot = ax.scatter(x=sipsx, y=sipsy,
+                c=sipsc,cmap=cmap,s=50,alpha=0.3)
+    
+    cbar = fig.colorbar(plot,format=OOMFormatter(-7, mathText=True))
+    plt.xlabel("z["+str(i)+"]")
+    plt.ylabel("z["+str(j)+"]")
+    plt.show()
+    plt.savefig("vae_low"+str(i)+"_"+str(j)+".png")
+
+#plot_results(models,data=(x_train,real_preds))
+#
+#
+#import numpy as np
+#import seaborn as sns
+#import matplotlib.pyplot as plt
+#
+#x, y, z = np.random.rand(3, 100)
+#cmap = sns.cubehelix_palette(as_cmap=True)
+#
+#f, ax = plt.subplots()
+#points = ax.scatter(x, y, c=z, s=50, cmap=cmap)
+#f.colorbar(points)
 
 
     
