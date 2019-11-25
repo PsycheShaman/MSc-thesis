@@ -420,11 +420,14 @@ plt.close()
 
 
 vae_preds = model.predict(gen_imgs)
+plt.hist(vae_preds)
 
 np.savetxt("vae_preds.csv",X=vae_preds)
-
+ 
 real_preds = model.predict(x_train)
 np.savetxt("real_preds.csv",X=real_preds)
+
+plt.hist(real_preds)
 
 #plt.hist(geant_preds,bins=10,range=(0,1))
 #plt.title('Histogram of P(real) Predictions for Fully Connected VAE Data')
