@@ -1566,19 +1566,559 @@ y1=sin(sin(x1)+sin((x1-1)*3)+sin((x1-2)*1.5))
 segments(x0=x0,y0=y0,x1=x1,y1=y1,col="red")
 ```
 
+```{r}
+rm(list = ls())
+```
+
+
+```{r}
+x <- read.csv("C:/users/gerhard/documents/msc-thesis/code/statistical_analysis/1Dcnn.csv",sep=";",header=T)
+
+require(ggplot2)
+
+require(stringr)
+
+ggplot(x,aes(x=as.numeric(str_replace(as.character(Final.Validation.Accuracy),",",".")) ,y=as.numeric(str_replace(as.character(Pion.Efficiency),",","."))))+
+  geom_point(colour="purple")+geom_jitter(aes(x=as.numeric(str_replace(as.character(Final.Training.Accuracy),",",".")) ,y=as.numeric(str_replace(as.character(Pion.Efficiency),",",".")),col="blue"))+theme(legend.position = "none")
+
+```
 
 
 
+```{r}
+# detach("package:MASS", unload=TRUE)
+# rm(list=ls())
+# d <- read.csv("C:/Users/gerhard/Documents/Msc-thesis/Code/statistical_analysis/Networks Compared.csv",sep=";",header=T)
+x -> d
+names(d)
+
+d$Convolutional[d$Convolutional]
+
+require(dplyr)
+
+pi_eff_by_num_dense_layers <- d %>%
+  subset(is.na(Convolutional)==T) %>%
+  dplyr::select(Model.Number,Layer.Number,Pion.Efficiency) %>%
+  group_by(Model.Number) %>%
+  mutate(num_layers=n())
+
+head(pi_eff_by_num_dense_layers)
+
+pi_eff_by_num_dense_layers <- unique(pi_eff_by_num_dense_layers)
+
+pi_eff_by_num_dense_layers <- pi_eff_by_num_dense_layers[,-c(1,2)]
+
+#pi_eff_by_num_dense_layers <- pi_eff_by_num_dense_layers[-289,]
+
+pi_eff_by_num_dense_layers$Pion.Efficiency <- as.character(pi_eff_by_num_dense_layers$Pion.Efficiency )
+
+require(stringr)
+
+head(d)
+
+pi_eff_by_num_convolutional_layers <- d %>%
+  subset(Convolutional==T) %>%
+  dplyr::select(Model.Number,Layer.Number,Pion.Efficiency) %>%
+  group_by(Model.Number) %>%
+  mutate(num_layers=n())
+
+pi_eff_by_num_convolutional_layers$Pion.Efficiency <- as.numeric(str_replace(string=as.character(pi_eff_by_num_convolutional_layers$Pion.Efficiency),pattern=",",replacement="."))
+
+pi_eff_by_num_convolutional_layers <- unique(pi_eff_by_num_convolutional_layers)
+
+pi_eff_by_num_convolutional_layers <- pi_eff_by_num_convolutional_layers[,-c(1,2)]
+
+#pi_eff_by_num_convolutional_layers <- pi_eff_by_num_convolutional_layers[-289,]
+
+pi_eff_by_num_convolutional_layers$Pion.Efficiency <- as.character(pi_eff_by_num_convolutional_layers$Pion.Efficiency )
+
+require(stringr)
+
+pi_eff_by_num_convolutional_layers$Pion.Efficiency <- as.numeric(str_replace(string=as.character(pi_eff_by_num_convolutional_layers$Pion.Efficiency),pattern=",",replacement="."))
+
+pi_eff_by_num_dense_layers$Pion.Efficiency <- as.numeric(str_replace(string=as.character(pi_eff_by_num_dense_layers$Pion.Efficiency),pattern=",",replacement="."))
+
+pi_eff_by_num_convolutional_layers$layer_type <- as.factor("Convolutional")
+pi_eff_by_num_dense_layers$layer_type <- as.factor("Dense")
+
+pi_eff_by_num_dense_layers <- rbind(pi_eff_by_num_dense_layers,pi_eff_by_num_convolutional_layers)
+
+require(ggplot2)
+require(latex2exp)
+
+fancy_scientific <- function(l) {
+     l <- format(l, scientific = TRUE)
+     l <- gsub("^(.*)e", "'\\1'e", l)
+     l <- gsub("e", "%*%10^", l)
+     parse(text=l)
+}
+
+# require(scales)
+
+pi_eff_by_num_dense_layers$Pion.Efficiency <- as.numeric(as.character(pi_eff_by_num_dense_layers$Pion.Efficiency))
+
+# pi_eff_by_num_dense_layers <- as.numeric(as.character(pi_eff_by_num_dense_layers))
+# 
+# pi_eff_by_num_dense_layers <- data.frame(pi_eff_by_num_dense_layers)
+
+names(pi_eff_by_num_dense_layers)[3] <- "Layer Type"
+
+ggplot(pi_eff_by_num_dense_layers,aes(num_layers,Pion.Efficiency,col=`Layer Type`))+ geom_point()+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"))+
+  scale_y_continuous(trans="log10",breaks =c(0.05,0.06,0.07,0.08,0.09,0.1),minor_breaks =c(0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.6,0.8,0.9,0.45,0.35,0.25,0.11,
+                                                                                                 0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.9),labels = fancy_scientific,limits = c(0.05,0.1))+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  ylab(expression(epsilon[pi]))+xlab(expression(N[layers]))+
+  facet_wrap(~`Layer Type`,scales="free_x")+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"),
+        legend.background = element_blank(),legend.key = element_blank())+theme(legend.position = c(0.89, 0.86),legend.text = 
+                                                             element_text(size=12,  family="serif"),
+                                                           legend.title = element_text(size=12,  family="serif"))+ 
+       theme(strip.text.x = element_text(size = 12, family = "serif"))+theme(legend.title = element_text(size=12,  family="serif"))+ theme(legend.position = "none")
+
+```
+
+```{r}
+names(d)
+
+require(plotly)
+
+p_3d <- d %>%
+  dplyr::select(Model.Number,Learning.Rate,Epochs,Pion.Efficiency,Optimizer,Batch.Size,Layer.Number,Convolutional) %>%
+  group_by(Model.Number) %>%
+  mutate(convolutional_layers=length(which(Convolutional))) %>%
+  mutate(`Total N layers`=max(Layer.Number)) %>%
+  unique() %>%
+  na.omit() %>%
+  data.frame()
+
+p_3d <- p_3d[,-c(1,7,8)]
+
+require(stringr)
+
+p_3d <- data.frame(p_3d)
+
+p_3d$Learning.Rate <- as.numeric(str_replace(string=as.character(p_3d$Learning.Rate),pattern = ",","."))
+p_3d$Pion.Efficiency <- as.numeric(str_replace(string=as.character(p_3d$Pion.Efficiency),pattern = ",","."))
+
+p_3d <- unique(p_3d)
+
+# p_3d <- expand.grid(p_3d)
+
+require(ggExtra)
+
+# p <- ggplot(p_3d,aes(x=Epochs,y=Learning.Rate,color=Batch.Size))+geom_jitter()+scale_y_continuous(trans='log10')+
+#   scale_fill_distiller(palette=4, direction=-1) 
+# 
+# ggMarginal(p,type="density")
+# p <-ggMarginal(p,type="density")
+# min(p_3d$Pion.Efficiency)
 
 
+# pi_eff_by_num_convolutional_layers <- unique(pi_eff_by_num_convolutional_layers)
+# p_3d <- unique(p_3d)
+
+p_3d$Learning.Rate <- as.character(p_3d$Learning.Rate)
+
+    
+
+# particle_names = list("0.01" = TeX("10^{-1}"),"1e-05"=TeX("10^{-5}"), "1e-07"= TeX("10^{-7}"),"1e-06"=TeX("10^{-6}"))
+# 
+# particle_labeler <- function(variable,value){
+#   return(particle_names[value])
+# }
+
+p_3d$Learning.Rate <- as.factor(p_3d$Learning.Rate)
+
+# levels(p_3d$Learning.Rate) <- c("0.01" = TeX("$\\eta=10^{-1}$"),"1e-05"=TeX("$\\eta=10^{-5}$"),"1e-06"= TeX("$\\eta=10^{-6}$"),"1e-07"= TeX("$\\eta=10^{-7}$"))
+
+# levels(p_3d$Learning.Rate) <- c("0.01" = TeX("$\\eta=0.01$"),"1e-05"=TeX("$\\eta=0.000001$"),"1e-06"= TeX("$\\eta=0.0000001$"),"1e-07"= TeX("$\\eta=0.00000001$"))
+
+levels(p_3d$Learning.Rate) <- c("0.01" = "eta==~10^-2","1e-05"="eta==~10^-5","1e-06"= "eta==~10^-6","1e-07"= "eta==~10^-7")
+
+as.character(p_3d$Learning.Rate)
+
+p_3d$Batch.Size <- as.factor(p_3d$Batch.Size)
+
+names(p_3d)[c(6,7)] <- c("Number of conv. layers","Total number of layers")
+
+p <- ggplot(p_3d,aes(x=`Number of conv. layers`,y=Pion.Efficiency,size=`Total number of layers`))+geom_jitter()+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  ylab(expression(epsilon[pi]))+xlab(TeX("$N$"))+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  scale_y_continuous(trans="log10",breaks =c(0.05,0.06,0.07,0.08,0.09,0.1),labels = fancy_scientific,limits = c(0.05,.1))+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"),
+        legend.background = element_blank(),legend.key = element_blank())+theme(legend.text = 
+                                                             element_text(size=12,  family="serif"),
+                                                           legend.title = element_text(size=12,  family="serif"))+theme(legend.position = c(0.5,0.2))
+
+ggMarginal(p,type = "density")
+#+scale_y_continuous(trans='log10')
+```
 
 
+```{r}
+d <- read.csv("C:/users/gerhard/documents/msc-thesis/code/statistical_analysis/ff.csv",sep=";",header=T)
+names(d)
+
+require(plotly)
+
+p_3d <- d %>%
+  dplyr::select(Model.Number,Learning.Rate,Epochs,Pion.Efficiency,Optimizer,Batch.Size,Layer.Number) %>%
+  group_by(Model.Number) %>%
+  mutate(`Total N layers`=max(Layer.Number)) %>%
+  unique() %>%
+  na.omit() %>%
+  data.frame()
+
+# p_3d <- p_3d[,-c(1,7,8)]
+
+require(stringr)
+
+p_3d <- data.frame(p_3d)
+
+p_3d$Learning.Rate <- as.numeric(str_replace(string=as.character(p_3d$Learning.Rate),pattern = ",","."))
+p_3d$Pion.Efficiency <- as.numeric(str_replace(string=as.character(p_3d$Pion.Efficiency),pattern = ",","."))
+
+p_3d <- unique(p_3d)
+
+# p_3d <- expand.grid(p_3d)
+
+require(ggExtra)
+
+# p <- ggplot(p_3d,aes(x=Epochs,y=Learning.Rate,color=Batch.Size))+geom_jitter()+scale_y_continuous(trans='log10')+
+#   scale_fill_distiller(palette=4, direction=-1) 
+# 
+# ggMarginal(p,type="density")
+# p <-ggMarginal(p,type="density")
+# min(p_3d$Pion.Efficiency)
 
 
+# pi_eff_by_num_convolutional_layers <- unique(pi_eff_by_num_convolutional_layers)
+# p_3d <- unique(p_3d)
+
+p_3d$Learning.Rate <- as.character(p_3d$Learning.Rate)
+
+    
+
+# particle_names = list("0.01" = TeX("10^{-1}"),"1e-05"=TeX("10^{-5}"), "1e-07"= TeX("10^{-7}"),"1e-06"=TeX("10^{-6}"))
+# 
+# particle_labeler <- function(variable,value){
+#   return(particle_names[value])
+# }
+
+p_3d$Learning.Rate <- as.factor(p_3d$Learning.Rate)
+
+# levels(p_3d$Learning.Rate) <- c("0.01" = TeX("$\\eta=10^{-1}$"),"1e-05"=TeX("$\\eta=10^{-5}$"),"1e-06"= TeX("$\\eta=10^{-6}$"),"1e-07"= TeX("$\\eta=10^{-7}$"))
+
+# levels(p_3d$Learning.Rate) <- c("0.01" = TeX("$\\eta=0.01$"),"1e-05"=TeX("$\\eta=0.000001$"),"1e-06"= TeX("$\\eta=0.0000001$"),"1e-07"= TeX("$\\eta=0.00000001$"))
+
+levels(p_3d$Learning.Rate) <- c("0.01" = "eta==~10^-2","1e-05"="eta==~10^-5","1e-06"= "eta==~10^-6","1e-07"= "eta==~10^-7")
+
+as.character(p_3d$Learning.Rate)
+
+p_3d$Batch.Size <- as.factor(p_3d$Batch.Size)
+names(p_3d)
+p_3d <- p_3d[,-7] %>%
+  unique()
+
+ names(p_3d)[7] <- c("Total number of layers")
+ 
+d <- d %>%
+  group_by(Model.Number) %>%
+  summarise(`Total number of neurons`=sum(Number.of.Dense.Nodes))
+
+d <- data.frame(d)
+
+p_3d <-data.frame(cbind(p_3d,d))
+
+ names(p_3d)[c(7,9)] <- c("Total number of layers","Total number of neurons in model")
+
+ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,color=`Total number of layers`,size=`Total number of neurons in model`,shape=Optimizer))+geom_jitter(alpha=6/10)+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  ylab(expression(epsilon[pi]))+xlab("Epochs")+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  scale_y_continuous(trans="log10",breaks =c(0.001,0.01,0.1*c(0,1,2,5,7,10)),labels = fancy_scientific,limits = c(0.1,1))+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"),
+        legend.background = element_blank(),legend.key = element_blank())+theme(legend.text = 
+                                                             element_text(size=12,  family="serif"),
+                                                           legend.title = element_text(size=12,  family="serif"))+facet_wrap(~factor(Learning.Rate),labeller = label_parsed)
+
+#+scale_y_continuous(trans='log10')
+
+```
+
+```{r}
+d <- read.csv("C:/users/gerhard/documents/msc-thesis/code/statistical_analysis/1Dcnn.csv",sep=";",header=T)
+
+require(plotly)
+
+p_3d <- d %>%
+  dplyr::select(Model.Number,Learning.Rate,Epochs,Pion.Efficiency,Optimizer,Batch.Size,Layer.Number,Convolutional) %>%
+  group_by(Model.Number) %>%
+  mutate(convolutional_layers=length(which(Convolutional))) %>%
+  mutate(`Total N layers`=max(Layer.Number)) %>%
+  unique() %>%
+  na.omit() %>%
+  data.frame()
+
+p_3d <- p_3d[,-c(1,7,8)]
+
+require(stringr)
+
+p_3d <- data.frame(p_3d)
+
+p_3d$Learning.Rate <- as.numeric(str_replace(string=as.character(p_3d$Learning.Rate),pattern = ",","."))
+p_3d$Pion.Efficiency <- as.numeric(str_replace(string=as.character(p_3d$Pion.Efficiency),pattern = ",","."))
+
+p_3d <- unique(p_3d)
+
+# p_3d <- expand.grid(p_3d)
+
+require(ggExtra)
+
+# p <- ggplot(p_3d,aes(x=Epochs,y=Learning.Rate,color=Batch.Size))+geom_jitter()+scale_y_continuous(trans='log10')+
+#   scale_fill_distiller(palette=4, direction=-1) 
+# 
+# ggMarginal(p,type="density")
+# p <-ggMarginal(p,type="density")
+# min(p_3d$Pion.Efficiency)
 
 
+# pi_eff_by_num_convolutional_layers <- unique(pi_eff_by_num_convolutional_layers)
+# p_3d <- unique(p_3d)
+
+p_3d$Learning.Rate <- as.character(p_3d$Learning.Rate)
+
+    
+
+# particle_names = list("0.01" = TeX("10^{-1}"),"1e-05"=TeX("10^{-5}"), "1e-07"= TeX("10^{-7}"),"1e-06"=TeX("10^{-6}"))
+# 
+# particle_labeler <- function(variable,value){
+#   return(particle_names[value])
+# }
+
+p_3d$Learning.Rate <- as.factor(p_3d$Learning.Rate)
+
+# levels(p_3d$Learning.Rate) <- c("0.01" = TeX("$\\eta=10^{-1}$"),"1e-05"=TeX("$\\eta=10^{-5}$"),"1e-06"= TeX("$\\eta=10^{-6}$"),"1e-07"= TeX("$\\eta=10^{-7}$"))
+
+# levels(p_3d$Learning.Rate) <- c("0.01" = TeX("$\\eta=0.01$"),"1e-05"=TeX("$\\eta=0.000001$"),"1e-06"= TeX("$\\eta=0.0000001$"),"1e-07"= TeX("$\\eta=0.00000001$"))
+
+levels(p_3d$Learning.Rate) <- c("0.01" = "eta==~10^-2","1e-05"="eta==~10^-5","1e-06"= "eta==~10^-6","1e-07"= "eta==~10^-7")
+
+as.character(p_3d$Learning.Rate)
+
+p_3d$Batch.Size <- as.factor(p_3d$Batch.Size)
+
+names(p_3d)[c(6,7)] <- c("Number of conv. layers","Total number of layers")
+
+ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,size=`Total number of layers`,shape=Optimizer,color=`Number of conv. layers`))+geom_point(alpha=6/10)+facet_wrap(~factor(Learning.Rate),labeller = label_parsed)+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  ylab(expression(epsilon[pi]))+xlab("Epochs")+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  scale_y_continuous(trans="log10",breaks =c(0.05,0.06,0.07,0.08,0.09,0.1),labels = fancy_scientific,limits = c(0.05,.1))+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"),
+        legend.background = element_blank(),legend.key = element_blank())+theme(legend.text = 
+                                                             element_text(size=12,  family="serif"),
+                                                           legend.title = element_text(size=12,  family="serif"))
+
+#+scale_y_continuous(trans='log10')
+
+```
 
 
+```{r}
+d <- read.csv("C:/users/gerhard/documents/msc-thesis/code/statistical_analysis/lstm.csv",sep=";",header=T)
+
+require(plotly)
+
+p_3d <- d %>%
+  dplyr::select(Model.Number,Learning.Rate,Epochs,Pion.Efficiency,Optimizer,Batch.Size,Layer.Number,LSTM) %>%
+  group_by(Model.Number) %>%
+  mutate(LSTM_layers=length(which(LSTM))) %>%
+  mutate(`Total N layers`=max(Layer.Number)) %>%
+  unique() %>%
+  na.omit() %>%
+  data.frame()
+
+p_3d <- p_3d[,-c(1,7,8)]
+
+require(stringr)
+
+p_3d <- data.frame(p_3d)
+
+p_3d$Learning.Rate <- as.numeric(str_replace(string=as.character(p_3d$Learning.Rate),pattern = ",","."))
+p_3d$Pion.Efficiency <- as.numeric(str_replace(string=as.character(p_3d$Pion.Efficiency),pattern = ",","."))
+
+p_3d <- unique(p_3d)
+
+# p_3d <- expand.grid(p_3d)
+
+require(ggExtra)
+
+# p <- ggplot(p_3d,aes(x=Epochs,y=Learning.Rate,color=Batch.Size))+geom_jitter()+scale_y_continuous(trans='log10')+
+#   scale_fill_distiller(palette=4, direction=-1) 
+# 
+# ggMarginal(p,type="density")
+# p <-ggMarginal(p,type="density")
+# min(p_3d$Pion.Efficiency)
+
+
+# pi_eff_by_num_convolutional_layers <- unique(pi_eff_by_num_convolutional_layers)
+# p_3d <- unique(p_3d)
+
+p_3d$Learning.Rate <- as.character(p_3d$Learning.Rate)
+
+    
+
+# particle_names = list("0.01" = TeX("10^{-1}"),"1e-05"=TeX("10^{-5}"), "1e-07"= TeX("10^{-7}"),"1e-06"=TeX("10^{-6}"))
+# 
+# particle_labeler <- function(variable,value){
+#   return(particle_names[value])
+# }
+
+p_3d$Learning.Rate <- as.factor(p_3d$Learning.Rate)
+
+# levels(p_3d$Learning.Rate) <- c("0.01" = TeX("$\\eta=10^{-1}$"),"1e-05"=TeX("$\\eta=10^{-5}$"),"1e-06"= TeX("$\\eta=10^{-6}$"),"1e-07"= TeX("$\\eta=10^{-7}$"))
+
+# levels(p_3d$Learning.Rate) <- c("0.01" = TeX("$\\eta=0.01$"),"1e-05"=TeX("$\\eta=0.000001$"),"1e-06"= TeX("$\\eta=0.0000001$"),"1e-07"= TeX("$\\eta=0.00000001$"))
+
+levels(p_3d$Learning.Rate) <- c("0.01" = "eta==~10^-2","1e-05"="eta==~10^-5","1e-06"= "eta==~10^-6","1e-07"= "eta==~10^-7")
+
+as.character(p_3d$Learning.Rate)
+
+p_3d$Batch.Size <- as.factor(p_3d$Batch.Size)
+
+names(p_3d)[c(6,7)] <- c("Number of LSTM layers","Total number of layers")
+
+p_3d <- na.omit(p_3d)
+
+ggplot(p_3d,aes(x=Epochs,y=Pion.Efficiency,size=`Total number of layers`,shape=Optimizer,color=`Number of LSTM layers`))+geom_jitter(alpha=6/10)+facet_wrap(~factor(Learning.Rate),labeller = label_parsed)+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  ylab(expression(epsilon[pi]))+xlab("Epochs")+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  scale_y_continuous(trans="log10",breaks =c(0.01,0.02,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.2),labels = fancy_scientific,limits = c(0.05,0.2))+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"),
+        legend.background = element_blank(),legend.key = element_blank())+theme(legend.text = 
+                                                             element_text(size=12,  family="serif"),
+                                                           legend.title = element_text(size=12,  family="serif"))+theme(legend.spacing.y = unit(0.1,"cm"))
+
+#+scale_y_continuous(trans='log10')
+
+```
+
+
+```{r}
+
+require(dplyr)
+
+pi_eff_by_num_dense_layers <- d %>%
+  subset(is.na(LSTM)==T) %>%
+  dplyr::select(Model.Number,Layer.Number,Pion.Efficiency) %>%
+  group_by(Model.Number) %>%
+  mutate(num_layers=n())
+
+head(pi_eff_by_num_dense_layers)
+
+pi_eff_by_num_dense_layers <- unique(pi_eff_by_num_dense_layers)
+
+pi_eff_by_num_dense_layers <- pi_eff_by_num_dense_layers[,-c(1,2)]
+
+#pi_eff_by_num_dense_layers <- pi_eff_by_num_dense_layers[-289,]
+
+pi_eff_by_num_dense_layers$Pion.Efficiency <- as.character(pi_eff_by_num_dense_layers$Pion.Efficiency )
+
+require(stringr)
+
+head(d)
+
+pi_eff_by_num_convolutional_layers <- d %>%
+  subset(LSTM==T) %>%
+  dplyr::select(Model.Number,Layer.Number,Pion.Efficiency) %>%
+  group_by(Model.Number) %>%
+  mutate(num_layers=n())
+
+pi_eff_by_num_convolutional_layers$Pion.Efficiency <- as.numeric(str_replace(string=as.character(pi_eff_by_num_convolutional_layers$Pion.Efficiency),pattern=",",replacement="."))
+
+pi_eff_by_num_convolutional_layers <- unique(pi_eff_by_num_convolutional_layers)
+
+pi_eff_by_num_convolutional_layers <- pi_eff_by_num_convolutional_layers[,-c(1,2)]
+
+#pi_eff_by_num_convolutional_layers <- pi_eff_by_num_convolutional_layers[-289,]
+
+pi_eff_by_num_convolutional_layers$Pion.Efficiency <- as.character(pi_eff_by_num_convolutional_layers$Pion.Efficiency )
+
+require(stringr)
+
+pi_eff_by_num_convolutional_layers$Pion.Efficiency <- as.numeric(str_replace(string=as.character(pi_eff_by_num_convolutional_layers$Pion.Efficiency),pattern=",",replacement="."))
+
+pi_eff_by_num_dense_layers$Pion.Efficiency <- as.numeric(str_replace(string=as.character(pi_eff_by_num_dense_layers$Pion.Efficiency),pattern=",",replacement="."))
+
+pi_eff_by_num_convolutional_layers$layer_type <- as.factor("LSTM")
+pi_eff_by_num_dense_layers$layer_type <- as.factor("Dense")
+
+pi_eff_by_num_dense_layers <- rbind(pi_eff_by_num_dense_layers,pi_eff_by_num_convolutional_layers)
+
+require(ggplot2)
+require(latex2exp)
+
+fancy_scientific <- function(l) {
+     l <- format(l, scientific = TRUE)
+     l <- gsub("^(.*)e", "'\\1'e", l)
+     l <- gsub("e", "%*%10^", l)
+     parse(text=l)
+}
+
+# require(scales)
+
+pi_eff_by_num_dense_layers$Pion.Efficiency <- as.numeric(as.character(pi_eff_by_num_dense_layers$Pion.Efficiency))
+
+# pi_eff_by_num_dense_layers <- as.numeric(as.character(pi_eff_by_num_dense_layers))
+# 
+# pi_eff_by_num_dense_layers <- data.frame(pi_eff_by_num_dense_layers)
+
+names(pi_eff_by_num_dense_layers)[3] <- "Layer Type"
+
+ggplot(pi_eff_by_num_dense_layers,aes(num_layers,Pion.Efficiency,col=`Layer Type`))+ geom_point()+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"))+
+  scale_y_continuous(trans="log10",breaks =c(0.01,0.02,0.05,0.06,0.07,0.08,0.09,0.1,0.11,0.12,0.2),labels = fancy_scientific,limits = c(0.05,0.2))+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  ylab(
+    expression(epsilon[pi])
+  )+
+  xlab(expression(N[layers]))+facet_wrap(~`Layer Type`,scales="free_x")+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"),
+        legend.background = element_blank(),legend.key = element_blank())+theme(legend.position = c(0.89, 0.86),legend.text = 
+                                                             element_text(size=12,  family="serif"),
+                                                           legend.title = element_text(size=12,  family="serif"))+ 
+       theme(strip.text.x = element_text(size = 12, family = "serif"))+theme(legend.title = element_text(size=12,  family="serif"))+ theme(legend.position = "none")
+```
 
 
 
