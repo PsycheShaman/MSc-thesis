@@ -2121,6 +2121,82 @@ ggplot(pi_eff_by_num_dense_layers,aes(num_layers,Pion.Efficiency,col=`Layer Type
 ```
 
 
+```{r}
+rm(list=ls())
+a <-  read.csv("C:/users/gerhard/documents/msc-thesis/code/statistical_analysis/Networks Compared.csv",sep=";",header=T)
+b <-  read.csv("C:/users/gerhard/documents/msc-thesis/code/statistical_analysis/1Dcnn.csv",sep=";",header=T)
+c <-  read.csv("C:/users/gerhard/documents/msc-thesis/code/statistical_analysis/ff.csv",sep=";",header=T)
+d <-  read.csv("C:/users/gerhard/documents/msc-thesis/code/statistical_analysis/lstm.csv",sep=";",header=T)
+
+fix <- function(x){
+  as.numeric(str_replace(string=as.character(x),pattern = ",","."))
+}
+
+a <- unique(fix(a$Pion.Efficiency))
+b <- unique(fix(b$Pion.Efficiency))
+c <- unique(fix(c$Pion.Efficiency))
+d <- unique(fix(d$Pion.Efficiency))
+
+a <- cbind(a,rep("2D Convolutional",length(a)))
+b <- cbind(b,rep("1D Convolutional",length(b)))
+c <- cbind(c,rep("Dense (Fully connected)",length(c)))
+d <- cbind(d,rep("LSTM",length(d)))
+
+a <- setNames(a,c("Pion efficiency","Network Type"))
+b <- setNames(b,c("Pion efficiency","Network Type"))
+c <- setNames(c,c("Pion efficiency","Network Type"))
+d <- setNames(d,c("Pion efficiency","Network Type"))
+
+x <- data.frame(rbind(a,b,c,d))
+
+x[,1] <- as.numeric(as.character(x[,1]))
+
+names(x) <- c("Pion efficiency","Network Type")
+
+x <- na.omit(x)
+
+x <- unique(x)
+
+require(ggplot2)
+
+ggplot(x,aes(x=`Pion efficiency`,color=`Network Type`,fill=`Network Type`))+geom_area(stat="bin",bins=50)+scale_x_continuous(limits=c(0,1))+facet_wrap(~`Network Type`)+
+  xlab(expression(epsilon[pi]))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
