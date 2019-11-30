@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<alien>
+  <collection name="run197153_test">
+    <event name="1">
+      <file name="root_archive.zip" aclId="" broken="0" ctime="2015-07-24 07:16:36" dir="158793912" entryId="158794895" expiretime="" gowner="alidaq" guid="E5A42246-31C2-11E5-8A75-8317E13EDF83" guidtime="11E531C2" jobid="529908146" lfn="/alice/data/2013/LHC13f/000197153/cpass1_pass4/13000197153082.46/root_archive.zip" md5="c94c079cc557ce0a61147bd5f92ade6e" owner="alidaq" perm="755" replicated="0" size="319130787" turl="alien:///alice/data/2013/LHC13f/000197153/cpass1_pass4/13000197153082.46/root_archive.zip" type="f" />
+    </event>
+    <info command="[/alice/cern.ch/user/v/vpacik/]: find -z -x run197153_test /alice/data/2013/LHC13f/000197153/cpass1_pass4/13000197153082.46 root_archive.zip" creator="admin" date="Tue Nov 22 11:10:33 CET 2016" timestamp="1479809433" />
+  </collection>
+</alien>
+

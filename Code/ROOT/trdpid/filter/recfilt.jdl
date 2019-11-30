@@ -1,0 +1,24 @@
+Packages = {
+	 "VO_ALICE@AliPhysics::v5-08-13u-01-cookdedx-1",
+	 "VO_ALICE@APISCONFIG::V1.1x"
+};
+
+Executable = "/alice/cern.ch/user/t/tdietel/trdpid/filter/run_rec_filter.sh";
+
+InputFile = {
+	"LF:/alice/cern.ch/user/t/tdietel/trdpid/filter/AliTRDPIDrawData.cxx",
+	"LF:/alice/cern.ch/user/t/tdietel/trdpid/filter/AliTRDPIDrawData.h",
+	"LF:/alice/cern.ch/user/t/tdietel/trdpid/filter/rec.C",
+	"LF:/alice/cern.ch/user/t/tdietel/trdpid/filter/filter.C"
+};
+
+InputDataListFormat = "xml-single";
+InputDataList = "wn.xml";
+InputDataCollection = { 
+        "LF:/alice/cern.ch/user/t/tdietel/trdpid/filter/run000266437_test.xml,nodownload" 
+}; 
+
+Split = "file";
+
+OutputArchive = { "log_archive.zip:stdout,stderr" }; 
+OutputDir = "/alice/cern.ch/user/t/tdietel/trdpid/filter/output/#alienfilename/.root//#";

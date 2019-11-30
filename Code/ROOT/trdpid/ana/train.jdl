@@ -1,0 +1,31 @@
+Packages = {
+	 "VO_ALICE@AliPhysics::vAN-20161115-1",
+	 "VO_ALICE@AliRoot::v5-08-18c-1",
+	 "VO_ALICE@ROOT::v5-34-30-alice7-1",
+	 "VO_ALICE@APISCONFIG::V1.1x" };
+
+Executable = "/alice/cern.ch/user/a/alienmas/bin/PPQMixexe.sh";
+
+InputFile = {
+	"LF:/alice/cern.ch/user/t/tdietel/trdpid/ana/AliTRDPIDrawData.cxx",
+	"LF:/alice/cern.ch/user/t/tdietel/trdpid/ana/AliTRDPIDrawData.h",
+	"LF:/alice/cern.ch/user/t/tdietel/trdpid/ana/train.C"
+};
+
+InputDataListFormat = "xml-single";
+InputDataList = "wn.xml";
+InputDataCollection = { 
+        "LF:/alice/cern.ch/user/a/alienmas/PPQMix/0001048,nodownload" 
+}; 
+
+MasterResubmitThreshold = "99%";
+
+Split = "se";
+SplitMaxInputFileNumber = "100";
+
+OutputArchive = { "log_archive.zip:stdout,stderr" }; 
+OutputFile = { "output1.root" };
+OutputDir = "/alice/cern.ch/user/a/alienmas/PPQMix/output/003";
+TTL = 30000;
+Validationcommand = "/alice/cern.ch/user/a/alienmas/PPQMix/PPQMixexe_validation.sh“;
+Jobtag = { "comment:My analysis Job" };

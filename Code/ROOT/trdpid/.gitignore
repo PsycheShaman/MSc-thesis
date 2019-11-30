@@ -1,0 +1,10 @@
+*~
+*_C.d
+*_C.so
+*_cxx.d
+*_cxx.so
+.idea
+raw_data/
+datasets/
+.DS_Store
+*.pyc

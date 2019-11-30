@@ -2165,14 +2165,68 @@ ggplot(x,aes(x=`Pion efficiency`,color=`Network Type`,fill=`Network Type`))+geom
 ```
 
 
+```{r}
+rm(list=ls())
+library(RcppCNPy)
+
+gan <- npyLoad("C:/users/gerhard/documents/msc-thesis-data/simulated_datasets/gan_preds.npy")
+```
 
 
+```{r}
+require(reticulate)
+```
+
+```{r}
+py_run_string("import numpy as np")
+
+py_run_string('gan=np.load("C:/users/gerhard/documents/msc-thesis-data/simulated_datasets/gan_preds.npy")')
+
+py_run_string('real=np.load("C:/users/gerhard/documents/msc-thesis-data/simulated_datasets/real_preds.npy")')
+```
+
+```{r}
+gan <- py$gan
+real <- py$real
+```
+
+```{r}
+preds <- data.frame(rbind(gan,real))
+names(preds) <- "P(real)"
+preds$Datatype <- c(rep("GAN",nrow(gan)),rep("Real",nrow(real)))
 
 
+require(ggplot2)
 
+names(preds) <- c("P(real)","Datatype")
 
+preds$`P(real)` <- as.numeric(as.character(preds$`P(real)`))
 
+preds$Datatype <- as.factor(preds$Datatype)
 
+fancy_scientific <- function(l) {
+     l <- format(l, scientific = TRUE)
+     l <- gsub("^(.*)e", "'\\1'e", l)
+     l <- gsub("e", "%*%10^", l)
+     parse(text=l)
+}
+
+require(dplyr)
+
+ggplot(preds,aes(x=preds$`P(real)`,fill=Datatype,colour=Datatype))+geom_bar(stat="bin", position = position_dodge())+
+  xlab("P(real)")+scale_y_continuous(trans="log",labels = fancy_scientific)+
+  theme(panel.background = element_blank())+theme(panel.grid.major = element_line(size = 0.1, linetype = 'solid',colour = "gray90"))+
+  theme(panel.grid.minor = element_line(size = 0.1, linetype = 'dashed',colour = "gray90"))+ theme( axis.line = element_line(colour = "black", 
+                      size = 0.5, linetype = "solid"))+theme(axis.text = element_text(color = "black"))+
+  theme(panel.background = element_rect(fill="white",color="black",size=0.02,linetype = "solid"))+
+  theme( axis.title.x =element_text(size=12,  family="serif"))+
+  theme( axis.title.y =element_text(size=12,  family="serif"))+
+  theme(legend.box.background = element_rect(colour = "black",linetype = "solid"),
+        legend.background = element_blank(),legend.key = element_blank())+theme(legend.text = 
+                                                             element_text(size=12,  family="serif"),
+                                                           legend.title = element_text(size=12,  family="serif"),
+                                                           legend.position = c(0.3,0.85))
+```
 
 
 

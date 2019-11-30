@@ -1,0 +1,5 @@
+/alice/data/2016/LHC16q/000265377/pass1_CENT_wSDD/16000265377019.100/root_archive.zip
+/alice/data/2016/LHC16q/000265377/pass1_CENT_wSDD/16000265377019.101/root_archive.zip
+/alice/data/2016/LHC16q/000265377/pass1_CENT_wSDD/16000265377019.102/root_archive.zip
+/alice/data/2016/LHC16q/000265377/pass1_CENT_wSDD/16000265377019.103/root_archive.zip
+/alice/data/2016/LHC16q/000265377/pass1_CENT_wSDD/16000265377019.104/root_archive.zip
