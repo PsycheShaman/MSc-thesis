@@ -36,7 +36,7 @@ def load_real_data():
 #    geant = pickle.load(x_file)
 #    
 #geant.shape = (geant.shape[0],17,24,1)
-gan = np.load("C:/Users/Gerhard/documents/msc-thesis-data/simulated_datasets/simulated_data_gan_16/1million_after200000epochs.npy")
+gan = np.load("C:/Users/Gerhard/documents/msc-thesis-data/simulated_datasets/simulated_data_aae12/sim.npy")
         
 real = load_real_data()
 
@@ -75,7 +75,7 @@ batch_size=32
 epochs=5
 
 x = np.concatenate((gan,real[0:gan.shape[0],:,:,:]),axis=0)
-y = np.concatenate((np.zeros(gan.shape),np.ones(real.shape)))
+y = np.concatenate((np.zeros(gan.shape[0]),np.ones(real.shape[0])))
     
 history=model.fit(x, y,
               batch_size=batch_size,
@@ -107,26 +107,74 @@ gan_preds = model.predict(gan)
 real_preds = model.predict(real)
 
 
-np.savetxt('C:/Users/gerhard/Documents/MSc-thesis-data/gan_preds.csv',gan_preds)
-np.savetxt('C:/Users/gerhard/Documents/MSc-thesis-data/real_preds_v_gan.csv',real_preds)
+np.savetxt('C:/Users/gerhard/Documents/MSc-thesis-data/aae_preds.csv',gan_preds)
+np.savetxt('C:/Users/gerhard/Documents/MSc-thesis-data/real_preds_v_aae.csv',real_preds)
 
-real = scale(real,(mn,mx))
-gan = scale(gan,(mn,mx))
-
-
-#i = np.where((gan_preds>0.63) & (gan_preds<=.64))[0][0]
-i = np.where(gan_preds==np.max(gan_preds))[0][0]
-p_real = gan_preds[i][0]
-plt.imshow(gan[i,:,:,0],cmap='gray')
-plt.colorbar()
-plt.title("P(real)= "+str(p_real))
-
-
-
-
-
-
-
-
-
-
+#real = scale(real,(mn,mx))
+#gan = scale(gan,(mn,mx))
+#
+#i = np.where(gan_preds==np.max(gan_preds))[0][0]
+#p_real = gan_preds[i][0]
+#plt.imshow(gan[i,:,:,0],cmap='gray')
+#plt.colorbar()
+#plt.title("P(real)= "+str(p_real))
+#
+#for(j,k) in zip((0,0.1,0.2,0.3,0.4,0.48,0.6,0.7,0.85,0.9),(0.1,0.2,0.3,0.4,0.49,0.6,0.7,0.8,0.86,1)):
+#    i = np.where((gan_preds>j) & (gan_preds<=k))[0][0]
+##    i = np.where(gan_preds==np.max(gan_preds))[0][0]
+#    p_real = gan_preds[i][0]
+#    plt.imshow(gan[i,:,:,0],cmap='gray')
+#    plt.colorbar()
+#    plt.title("P(real)= "+str(p_real))
+#    plt.show()
+#    plt.close()
+#
+#
+#for(j,k) in zip((0.9,0.91,0.92,0.93,0.94,0.95),(0.91,0.92,0.93,0.94,0.95,0.96)):
+#    m = np.where((gan_preds>j) & (gan_preds<=k))[0]
+##    i = np.where(gan_preds==np.max(gan_preds))[0][0]
+#    for i in m:
+#        p_real = gan_preds[i]
+#        plt.imshow(gan[i,:,:,0],cmap='gray')
+#        plt.colorbar()
+#        plt.title("P(real)= "+str(p_real[0]))
+#        plt.show()
+#        plt.close()
+#
+#
+#for(j,k) in zip((0.8,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89),(0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.9)):
+#    i = np.where((gan_preds>j) & (gan_preds<=k))[0][0]
+##    i = np.where(gan_preds==np.max(gan_preds))[0][0]
+#    p_real = gan_preds[i][0]
+#    plt.imshow(gan[i,:,:,0],cmap='gray')
+#    plt.colorbar()
+#    plt.title("P(real)= "+str(p_real))
+#    plt.show()
+#    plt.close()
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#    
+#
+#
+#
+#
+#
+#
