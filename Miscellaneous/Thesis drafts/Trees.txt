@@ -1,0 +1,18 @@
+#The Tree Object:
+
+The TTree Class was specifically designed to optimize storage (i.e. in a more compressed format, and allowing faster access) of a large amount of objects of the same class.
+
+root [0] TFile f("AliESDs.root");
+root [1] TTree *esdTree = (TTree*)f.Get("esdTree");
+root [2] new TBrowser
+(TBrowser *) 0x8b949d0
+root [3] (TFile *) 0x20fede0
+
+//Number of Entries:
+
+root [8] int n_event = tracks->GetEntries()
+(int) 1147
+root [9] n_event
+(int) 1147
+
+

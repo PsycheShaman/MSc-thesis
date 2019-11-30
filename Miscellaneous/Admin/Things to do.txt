@@ -1,0 +1,7 @@
+Things to do:
+
+Abstract and Introduction is horseshit
+
+Bit of rambling nonsense in the Quantum Theory section
+
+Write something about Tensorflow and Keras
