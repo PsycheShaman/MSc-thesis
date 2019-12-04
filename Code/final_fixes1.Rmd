@@ -2230,6 +2230,265 @@ ggplot(preds,aes(x=preds$`P(real)`,fill=Datatype,colour=Datatype))+geom_bar(stat
                                                            legend.position = c(0.5,0.85))
 ```
 
+```{r}
+rm(list=ls())
+
+load("c:/Users/gerhard/Documents/msc-thesis-data/x.rdata")
+load("c:/Users/gerhard/Documents/msc-thesis-data/y.rdata")
+load("c:/Users/gerhard/Documents/msc-thesis-data/aux_.rdata")
+```
+
+```{r}
+k <- x
+ky <- y
+
+```
+
+```{r}
+
+x <- k[1:1000000,]
+y <- ky[1:1000000]
+#add 1 to all pixel values to prevent NaNs in log terms of KL divergence
+# x <- x+1
+
+#Sclae each row by its rowSum, in order to arriv
+# x <- x/ rowSums(x)
+
+# x <- scale(x)
+
+# x <- scale(x)
+e <- which(y==1)
+
+pi <- which(y!=1)
+
+pi <- pi[1:length(e)]
+
+e <- x[e,]
+pi <- x[pi,]
+
+X = e
+Cov0  <- covML(X)
+mean0 <- colMeans(X)
+
+X = pi
+Cov1  <- covML(X)
+mean1 <- colMeans(X)
+
+## Regularize singular Cov1
+P <- ridgeP(Cov1, 10)
+CovR <- solve(P)
+
+## Obtain KL divergence
+rags2ridges::KLdiv(mean1, mean0, CovR, Cov0)
+```
+
+```{r}
+require(keras)
+
+ef <- keras::k_ones_like(e)
+pf <- keras::k_ones_like(pi)
+
+ef <- ef*e
+pf <- pf*pi
+
+ce <- keras::loss_categorical_crossentropy(e,pi)
+k_get_value(ce)
+
+# as.numeric(keras::loss_kullback_leibler_divergence(1.0,1.0))
+```
+
+
+
+```{r}
+
+e <- colMeans(e)
+pi <- colMeans(pi)
+
+test <- cbind(e,pi)
+
+test <- test/colSums(test)
+
+require(philentropy)
+
+d <-distance(test,"kullback-leibler")
+
+image(d)
+
+mean(d)
+```
+
+```{r}
+# require(philentropy)
+# ?philentropy::distance
+```
+
+```{r}
+# em <- colMeans(e)
+# pm <- colMeans(pi)
+
+```
+
+```{r}
+# e <- cov(e)
+# pi <- cov(pi)
+```
+
+
+```{r}
+# KL <- KLdiv(em,pm,e, pi, symmetric = T)
+
+# ?flexmix::KLdiv
+# 
+# showMethods("KLdiv")
+# 
+# require(modeltools)
+# 
+# ?modeltools::KLdiv
+```
+
+```{r}
+require(flexmix)
+```
+
+```{r}
+names(aux)
+
+PT <- aux$PT[1:10000]
+
+# any(is.na(PT))
+# any(is.na(x))
+# any(is.na(y))
+
+PT <- as.numeric(as.character(unlist(PT)))
+
+PT_2 <- which(PT<=2)
+PT_3 <- which(PT<=3&PT>2)
+PT_4 <- which(PT<=4&PT>3)
+PT_5 <- which(PT<=5&PT>4)
+PT_6 <- which(PT<=6&PT>5)
+# PT_7 <- which(PT>6)
+# rm(PT_7)
+
+e <- which(y==1)
+pi <- which(y!=1)
+
+e_PT2 <- which(e %in% PT_2)
+e_PT3 <- which(e %in% PT_3)
+e_PT4 <- which(e %in% PT_4)
+e_PT5 <- which(e %in% PT_5)
+e_PT6 <- which(e %in% PT_6)
+
+p_PT2 <- which(pi %in% PT_2)
+p_PT3 <- which(pi %in% PT_3)
+p_PT4 <- which(pi %in% PT_4)
+p_PT5 <- which(pi %in% PT_5)
+p_PT6 <- which(pi %in% PT_6)
+
+
+```
+
+```{r}
+e_PT2 <- x[e_PT2,]
+e_PT3 <- x[e_PT3,]
+e_PT4 <- x[e_PT4,]
+e_PT5 <- x[e_PT5,]
+e_PT6 <- x[e_PT6,]
+
+p_PT2 <- x[p_PT2,]
+p_PT3 <- x[p_PT3,]
+p_PT4 <- x[p_PT4,]
+p_PT5 <- x[p_PT5,]
+p_PT6 <- x[p_PT6,]
+
+e <- x[e,]
+p <- x[pi,]
+
+```
+
+# Compute th eKL-divergence between e an pi in the 2 GeV range
+
+```{r}
+# require(rags2ridges)
+
+# X = e
+# # X <- scale(X)
+# # x = X/rowSums(X)
+# Cov0  <- covML(X)
+# mean0 <- colMeans(X)
+# 
+# det(Cov0)
+
+# X = p_PT2+1
+# X <- scale(X)
+# # X = X/rowSums(X)
+# Cov1  <- covML(X)
+# mean1 <- colMeans(X)
+# 
+# P <- ridgeP(Cov1, 10)
+# CovR <- solve(P)
+# 
+# # e_PT2==p_PT2
+# 
+# any(Cov1==Cov0)
+# any(mean1==mean0)
+# 
+# det(Cov0)
+# det(Cov1)
+# 
+# 
+# KL_e_PT_2 <- rags2ridges::KLdiv(mean1, mean0, Cov0, Cov1,symmetric = T)
+# 
+# # dim(Cov0)
+# # 
+# # image(Cov0)
+# # image(Cov1)
+# 
+# image(X)
+# 
+# image(Cov1)
+# image(Cov0)
+
+```
+
+
+```{r}
+require(philentropy)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
